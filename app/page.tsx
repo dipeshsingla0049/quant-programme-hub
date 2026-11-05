@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ActivityCard } from "@/components/ActivityCard";
 import { BulletinCard } from "@/components/BulletinCard";
 import { Countdown } from "@/components/Countdown";
 import { ArrowRight, Calendar, Star, Trophy, Wallet } from "@/components/icons";
@@ -7,7 +6,6 @@ import { LeaderboardTable } from "@/components/LeaderboardTable";
 import { RelativeTime } from "@/components/RelativeTime";
 import { SectionHeading } from "@/components/SectionHeading";
 import {
-  getActivities,
   getBulletins,
   getCurrentMilestone,
   getLeaderboard,
@@ -16,12 +14,11 @@ import {
 } from "@/lib/data";
 
 export default async function HomePage() {
-  const [milestone, bulletins, leaders, programme, activities, report] = await Promise.all([
+  const [milestone, bulletins, leaders, programme, report] = await Promise.all([
     getCurrentMilestone(),
     getBulletins(3),
     getLeaders(5),
     getRewardsProgramme(),
-    getActivities({ limit: 4 }),
     getLeaderboard(),
   ]);
   const { milestoneIncentive: mi, stipends } = programme;
@@ -160,26 +157,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Activities */}
-      <section>
-        <SectionHeading
-          title="Upcoming Activities & Sprints"
-          subtitle="Chronological schedule of masterclasses, guest sessions, and submission deadlines."
-          aside={
-            <a
-              href="/activities/calendar.ics"
-              className="inline-flex min-h-11 items-center gap-2 text-sm text-muted transition hover:text-fg"
-            >
-              <Calendar size={14} /> Sync iCal
-            </a>
-          }
-        />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {activities.map((a) => (
-            <ActivityCard key={a.id} activity={a} />
-          ))}
-        </div>
-      </section>
     </>
   );
 }

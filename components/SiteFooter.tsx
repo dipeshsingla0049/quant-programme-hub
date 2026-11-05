@@ -10,7 +10,6 @@ export function SiteFooter() {
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-6 text-sm text-muted">
           <Link href="/announcements" className="hover:text-fg">Bulletins</Link>
-          <Link href="/activities" className="hover:text-fg">Calendar</Link>
           <a href="https://platform.worldquantbrain.com" className="hover:text-fg" target="_blank" rel="noreferrer">
             BRAIN Platform
           </a>
