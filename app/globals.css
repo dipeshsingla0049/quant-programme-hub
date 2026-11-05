@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+/* Design tokens — every color/font in the UI comes from here. */
+@theme {
+  --color-ink: #0a101d;
+  --color-panel: #0f1729;
+  --color-panel-2: #131d33;
+  --color-line: #1d2740;
+  --color-line-2: #2a3654;
+
+  --color-fg: #e6e9f2;
+  --color-muted: #8e97ad;
+  --color-dim: #626b82;
+
+  --color-gold: #f5c26b;
+  --color-gold-deep: #c8923f;
+  --color-teal: #4fd1c5;
+  --color-rose: #f48b8b;
+  --color-violet: #b39dfb;
+  --color-sky: #7fa8ff;
+}
+
+@theme inline {
+  --font-serif: var(--font-playfair), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgb(245 194 107 / 0.05), transparent 60%),
+    var(--color-ink);
+  color: var(--color-fg);
+}
+
+::selection {
+  background: rgb(245 194 107 / 0.3);
+}
