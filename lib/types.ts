@@ -18,6 +18,9 @@ export interface Participant {
   rank: number;
   alias: string;
   tier: UserTier;
+  firstName: string;
+  lastName: string;
+  /** First + last name exactly as published. */
   name: string;
   university: string;
   totalSimulations: number;

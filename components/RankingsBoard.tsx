@@ -4,34 +4,21 @@ import { useMemo, useState } from "react";
 import { formatInt, formatMetric } from "@/lib/format";
 import type { Participant, UserTier } from "@/lib/types";
 import { Avatar } from "./Avatar";
-import { LeaderboardTable } from "./LeaderboardTable";
+import { REPORT_COLUMNS, compareCells } from "@/lib/reportColumns";
+import { FullReportTable, type SortState } from "./LeaderboardTable";
 import { TierBadge } from "./TierBadge";
 
 const PAGE_SIZE = 25;
 
-type SortKey = "rank" | "submissions" | "sharpe" | "prodCorr";
+const COLUMN_BY_ID = new Map(REPORT_COLUMNS.map((c) => [c.id, c]));
 
-const SORTS: { id: SortKey; label: string }[] = [
-  { id: "rank", label: "Official rank (simulations)" },
-  { id: "submissions", label: "Most submissions" },
-  { id: "sharpe", label: "Highest avg Sharpe" },
-  { id: "prodCorr", label: "Lowest avg prod correlation" },
-];
-
-/** Nulls (no submitted alphas) always sort last. */
-function byNullable(a: number | null, b: number | null, dir: 1 | -1) {
-  if (a === null && b === null) return 0;
-  if (a === null) return 1;
-  if (b === null) return -1;
-  return (a - b) * dir;
+function compareBy(sort: SortState) {
+  const dir = sort.dir === "asc" ? 1 : -1;
+  // Array.prototype.sort is stable, so ties keep the report's order.
+  if (sort.col === "rank") return (a: Participant, b: Participant) => (a.rank - b.rank) * dir;
+  const col = COLUMN_BY_ID.get(sort.col)!;
+  return (a: Participant, b: Participant) => compareCells(col.get(a), col.get(b), dir) || a.rank - b.rank;
 }
-
-const COMPARATORS: Record<SortKey, (a: Participant, b: Participant) => number> = {
-  rank: (a, b) => a.rank - b.rank,
-  submissions: (a, b) => b.totalSubmissions - a.totalSubmissions || a.rank - b.rank,
-  sharpe: (a, b) => byNullable(a.avgSharpe, b.avgSharpe, -1) || a.rank - b.rank,
-  prodCorr: (a, b) => byNullable(a.avgProdCorr, b.avgProdCorr, 1) || a.rank - b.rank,
-};
 
 function Podium({ top }: { top: Participant[] }) {
   // Visual order 2 · 1 · 3 on wide screens, 1 · 2 · 3 when stacked.
@@ -102,7 +89,7 @@ export function RankingsBoard({ participants, universities }: { participants: Pa
   const [query, setQuery] = useState("");
   const [university, setUniversity] = useState("all");
   const [tier, setTier] = useState<"all" | UserTier>("all");
-  const [sort, setSort] = useState<SortKey>("rank");
+  const [sort, setSort] = useState<SortState>({ col: "rank", dir: "asc" });
   const [activeOnly, setActiveOnly] = useState(false);
   const [page, setPage] = useState(0);
 
@@ -113,12 +100,23 @@ export function RankingsBoard({ participants, universities }: { participants: Pa
       .filter((p) => tier === "all" || p.tier === tier)
       .filter((p) => !activeOnly || p.totalSimulations > 0)
       .filter((p) => !q || p.name.toLowerCase().includes(q) || p.alias.toLowerCase().includes(q))
-      .sort(COMPARATORS[sort]);
+      .sort(compareBy(sort));
   }, [participants, query, university, tier, sort, activeOnly]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, pages - 1);
   const rows = filtered.slice(current * PAGE_SIZE, (current + 1) * PAGE_SIZE);
+
+  // Click a header to sort by it; click again to flip direction.
+  // Text and rank start ascending, numbers start with the highest first.
+  const onSort = (col: string) => {
+    setSort((prev) => {
+      if (prev.col === col) return { col, dir: prev.dir === "asc" ? "desc" : "asc" };
+      const text = col === "rank" || COLUMN_BY_ID.get(col)?.text;
+      return { col, dir: text ? "asc" : "desc" };
+    });
+    setPage(0);
+  };
 
   // Any filter change goes back to the first page.
   const reset = <T,>(set: (v: T) => void) => (v: T) => {
@@ -141,18 +139,6 @@ export function RankingsBoard({ participants, universities }: { participants: Pa
               placeholder="Search name or alias"
               className="min-h-11 w-full rounded-lg border border-line-2 bg-ink px-4 text-sm text-fg placeholder:text-dim focus:border-gold/60 focus:outline-none"
             />
-          </label>
-          <label className="flex items-center gap-2 text-sm text-muted">
-            <span>Sort</span>
-            <select
-              value={sort}
-              onChange={(e) => reset(setSort)(e.target.value as SortKey)}
-              className="min-h-11 rounded-lg border border-line-2 bg-ink px-3 text-sm text-fg focus:border-gold/60 focus:outline-none"
-            >
-              {SORTS.map((s) => (
-                <option key={s.id} value={s.id}>{s.label}</option>
-              ))}
-            </select>
           </label>
           <label className="flex min-h-11 items-center gap-2 text-sm text-muted">
             <input
@@ -178,7 +164,8 @@ export function RankingsBoard({ participants, universities }: { participants: Pa
         </div>
       </div>
 
-      <LeaderboardTable rows={rows} detailed />
+      <p className="-mb-4 text-xs text-dim">Click any column header to sort.</p>
+      <FullReportTable rows={rows} sort={sort} onSort={onSort} />
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted">
         <span className="font-mono text-xs">

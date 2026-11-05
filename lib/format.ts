@@ -50,7 +50,7 @@ export function formatMetric(n: number | null, digits = 2): string {
 export function initials(name: string): string {
   return name
     .split(/\s+/)
-    .filter(Boolean)
+    .filter((p) => /[a-z]/i.test(p))
     .slice(0, 2)
     .map((p) => p[0]!.toUpperCase())
     .join("");

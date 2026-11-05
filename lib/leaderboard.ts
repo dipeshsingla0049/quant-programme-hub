@@ -16,18 +16,9 @@ interface RawReport {
   rows: Cell[][];
 }
 
-function tidyWord(w: string): string {
-  // Only fix casing that is clearly accidental (all lower or ALL UPPER).
-  if (w === w.toLowerCase() || w === w.toUpperCase()) {
-    return w.length <= 1 ? w.toUpperCase() : w[0]!.toUpperCase() + w.slice(1).toLowerCase();
-  }
-  return w;
-}
-
+/** Names are shown exactly as published in the report. */
 export function displayName(first: string, last: string): string {
-  const parts = [first, last].map((p) => p.trim()).filter((p) => p && p !== ".");
-  if (parts.length === 2 && parts[0]!.toLowerCase() === parts[1]!.toLowerCase()) parts.pop();
-  return parts.join(" ").split(/\s+/).map(tidyWord).join(" ");
+  return `${first} ${last}`.trim();
 }
 
 function parse(report: RawReport): LeaderboardReport {
@@ -48,6 +39,8 @@ function parse(report: RawReport): LeaderboardReport {
     rank: int(r, "Rank"),
     alias: str(r, "UserAlias"),
     tier: str(r, "UserTypeLabel") as UserTier,
+    firstName: str(r, "FirstName"),
+    lastName: str(r, "LastName"),
     name: displayName(str(r, "FirstName"), str(r, "LastName")),
     university: str(r, "UniversityName"),
     totalSimulations: int(r, "TotalSimulations"),
@@ -74,7 +67,8 @@ function parse(report: RawReport): LeaderboardReport {
     datafieldsPerAlpha: num(r, "DatafieldsPerAlpha"),
   }));
 
-  participants.sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name));
+  // Stable sort: participants who share a rank keep the report's own order.
+  participants.sort((a, b) => a.rank - b.rank);
 
   return {
     title: report.title,
