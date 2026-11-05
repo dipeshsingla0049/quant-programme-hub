@@ -58,9 +58,17 @@ export interface MilestoneStage {
   prestige: boolean;
 }
 
+export interface EligibilityRule {
+  /** Shown big, e.g. "≥ 1,500". */
+  value: string;
+  /** What the value counts, e.g. "simulations per week". */
+  label: string;
+}
+
 export interface CurrentMilestone {
   title: string;
   description: string;
+  eligibility: EligibilityRule[];
   closesAt: string; // ISO 8601
   actionLabel: string;
   actionHref: string;

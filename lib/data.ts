@@ -99,6 +99,12 @@ const currentMilestone: CurrentMilestone = {
   title: "Minimum Average Production Correlation",
   description:
     "Production correlation measures how similar your alphas are to ones already in BRAIN production. Lower is better: it means your ideas are new. This milestone rewards the lowest average production correlation across your submitted alphas.",
+  eligibility: [
+    { value: "≥ 1,500", label: "alphas simulated per week" },
+    { value: "≥ 4", label: "different days with a submission each week" },
+    { value: "≤ 3", label: "average data fields used per alpha" },
+    { value: "≤ 8", label: "operators used per alpha" },
+  ],
   closesAt: "2026-11-08T00:00:00+05:30",
   actionLabel: "Simulate",
   actionHref: "https://platform.worldquantbrain.com",

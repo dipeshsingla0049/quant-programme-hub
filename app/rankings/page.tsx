@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { RankingsBoard } from "@/components/RankingsBoard";
-import { getLeaderboard, getLeaderboardStats, getUniversities } from "@/lib/data";
+import { getCurrentMilestone, getLeaderboard, getLeaderboardStats, getUniversities } from "@/lib/data";
 import { formatInt } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Rankings" };
 
 export default async function RankingsPage() {
-  const [report, stats, universities] = await Promise.all([
+  const [report, stats, universities, milestone] = await Promise.all([
     getLeaderboard(),
     getLeaderboardStats(),
     getUniversities(),
+    getCurrentMilestone(),
   ]);
 
   const tiles = [
@@ -39,19 +40,17 @@ export default async function RankingsPage() {
 
       <RankingsBoard participants={report.participants} universities={universities} />
 
-      <section className="mt-12 rounded-xl border border-line bg-panel/60 p-6">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-dim">How ranking works</h2>
-        <ul className="mt-4 grid gap-x-8 gap-y-3 text-sm leading-relaxed text-muted md:grid-cols-2">
-          <li>
-            Official rank is by <span className="text-fg">total simulations</span> on WorldQuant BRAIN, taken from the
-            partnership report.
-          </li>
-          <li>Participants with the same total share a rank.</li>
-          <li>
-            <span className="text-fg">Avg Sharpe</span> and <span className="text-fg">prod correlation</span> are
-            averaged over submitted alphas; “—” means no submissions yet.
-          </li>
-          <li>Use Sort to view by submissions, Sharpe or correlation. Ranks shown stay official.</li>
+      <section aria-labelledby="eligibility" className="mt-12 rounded-xl border border-line bg-panel/60 p-6 sm:p-8">
+        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-gold">Eligibility criteria</p>
+        <h2 id="eligibility" className="mt-2 font-serif text-2xl text-fg sm:text-3xl">{milestone.title}</h2>
+        <p className="mt-2 text-sm text-muted">Meet all of these to be eligible for this milestone.</p>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {milestone.eligibility.map((rule) => (
+            <li key={rule.label} className="rounded-lg border border-line-2 bg-ink/60 p-5">
+              <p className="whitespace-nowrap font-mono text-3xl tabular-nums text-gold">{rule.value}</p>
+              <p className="mt-2 text-sm leading-snug text-fg">{rule.label}</p>
+            </li>
+          ))}
         </ul>
       </section>
     </>
