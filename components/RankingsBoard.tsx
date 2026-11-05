@@ -145,7 +145,7 @@ export function RankingsBoard({ participants, universities }: { participants: Pa
               type="checkbox"
               checked={activeOnly}
               onChange={(e) => reset(setActiveOnly)(e.target.checked)}
-              className="size-4 accent-[#f5c26b]"
+              className="size-4 accent-gold"
             />
             Hide 0 simulations
           </label>

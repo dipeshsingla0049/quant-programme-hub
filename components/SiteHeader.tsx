@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Terminal } from "./icons";
+import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
   { href: "/", label: "Home" },
@@ -38,21 +39,22 @@ export function SiteHeader({ unread }: { unread: number }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-ink/85 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex min-h-11 items-center gap-3">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex min-h-11 shrink-0 items-center gap-3">
           <span className="inline-flex size-8 items-center justify-center rounded-md border border-line-2 bg-panel-2 text-gold">
             <Terminal size={16} />
           </span>
-          <span className="rounded border border-gold/30 bg-gold/10 px-2 py-0.5 font-mono text-[11px] text-gold">
+          <span className="whitespace-nowrap rounded border border-gold/30 bg-gold/10 px-2 py-0.5 font-mono text-[11px] text-gold">
             Quant Research Hub
           </span>
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-6 md:flex">
+        <nav aria-label="Main" className="hidden items-center gap-4 md:flex lg:gap-6">
           {links}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
           <Link
             href="/announcements"
             aria-label={`Announcements, ${unread} new`}

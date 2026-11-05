@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { themeInitScript } from "@/components/ThemeToggle";
 import { getBulletins } from "@/lib/data";
 import "./globals.css";
 
@@ -26,7 +27,17 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const bulletins = await getBulletins();
   return (
-    <html lang="en" className={`${playfair.variable} ${inter.variable} ${jetbrains.variable}`}>
+    // data-theme is set before paint by themeInitScript, so React must not
+    // complain that the server-rendered value differs.
+    <html
+      lang="en"
+      data-theme="light"
+      suppressHydrationWarning
+      className={`${playfair.variable} ${inter.variable} ${jetbrains.variable}`}
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-screen font-sans antialiased">
         <SiteHeader unread={bulletins.length} />
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</main>
