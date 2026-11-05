@@ -66,16 +66,6 @@ export interface CurrentMilestone {
   actionHref: string;
 }
 
-export interface Reward {
-  id: string;
-  title: string;
-  badge: string;
-  period: string;
-  description: string;
-  perks: string[];
-  featured: boolean;
-}
-
 export interface RewardsProgramme {
   milestoneIncentive: { perResearcherUsd: number; winners: number };
   stipends: {

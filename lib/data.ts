@@ -18,7 +18,6 @@ import type {
   LeaderboardReport,
   MilestoneStage,
   Participant,
-  Reward,
   RewardsProgramme,
 } from "./types";
 
@@ -104,37 +103,6 @@ const currentMilestone: CurrentMilestone = {
   actionLabel: "Simulate",
   actionHref: "https://platform.worldquantbrain.com",
 };
-
-const rewards: Reward[] = [
-  {
-    id: "goa",
-    title: "The Annual Goa Quant Leadership Retreat 2027",
-    badge: "Grandmaster & Top 3 Summit",
-    period: "Q1 2027 Residency",
-    description:
-      "An all-expenses-paid 4-day residency in Goa with senior WorldQuant quantitative researchers, keynotes and industry leaders.",
-    perks: ["Full travel & stay sponsored", "1:1 strategy advisories", "Fast-track researcher contracts"],
-    featured: true,
-  },
-  {
-    id: "fellowship",
-    title: "Global Research Fellowship & Stipend",
-    badge: "Master & above",
-    period: "Per semester",
-    description: "Paid research grants for high-Sharpe factor engineering, with a semester stipend and compute allocation.",
-    perks: ["Semester stipend", "Extra compute allocation", "Faculty research supervisor"],
-    featured: false,
-  },
-  {
-    id: "alpha-cup",
-    title: "Monthly Alpha Cup",
-    badge: "All ranked participants",
-    period: "Monthly",
-    description: "Top 10 on the monthly leaderboard receive BRAIN compute credits and a feature in the bulletin.",
-    perks: ["Compute credits", "Bulletin feature"],
-    featured: false,
-  },
-];
 
 const rewardsProgramme: RewardsProgramme = {
   milestoneIncentive: { perResearcherUsd: 50, winners: 10 },
@@ -278,10 +246,6 @@ export async function getProdCorrStandings(limit = 5): Promise<{
 
 export async function getCurrentMilestone(): Promise<CurrentMilestone> {
   return currentMilestone;
-}
-
-export async function getRewards(): Promise<Reward[]> {
-  return rewards;
 }
 
 export async function getRewardsProgramme(): Promise<RewardsProgramme> {

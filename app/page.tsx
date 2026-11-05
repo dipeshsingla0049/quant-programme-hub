@@ -2,10 +2,9 @@ import Link from "next/link";
 import { ActivityCard } from "@/components/ActivityCard";
 import { BulletinCard } from "@/components/BulletinCard";
 import { Countdown } from "@/components/Countdown";
-import { ArrowRight, Calendar, Target } from "@/components/icons";
+import { ArrowRight, Calendar, Star, Trophy, Wallet } from "@/components/icons";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
 import { RelativeTime } from "@/components/RelativeTime";
-import { FeaturedReward, RewardCard } from "@/components/RewardCards";
 import { SectionHeading } from "@/components/SectionHeading";
 import {
   getActivities,
@@ -13,31 +12,27 @@ import {
   getCurrentMilestone,
   getLeaderboard,
   getLeaders,
-  getRewards,
+  getRewardsProgramme,
 } from "@/lib/data";
 
 export default async function HomePage() {
-  const [milestone, bulletins, leaders, rewards, activities, report] = await Promise.all([
+  const [milestone, bulletins, leaders, programme, activities, report] = await Promise.all([
     getCurrentMilestone(),
     getBulletins(3),
     getLeaders(5),
-    getRewards(),
+    getRewardsProgramme(),
     getActivities({ limit: 4 }),
     getLeaderboard(),
   ]);
-  const featured = rewards.find((r) => r.featured);
-  const secondary = rewards.find((r) => !r.featured);
+  const { milestoneIncentive: mi, stipends } = programme;
+  const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
   return (
     <>
       {/* Hero */}
       <section className="grid gap-10 pb-20 pt-14 sm:pt-20 lg:grid-cols-[1.4fr_1fr] lg:items-center">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-md border border-line-2 bg-panel/60 px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.12em] text-gold">
-            <Target size={12} />
-            Academic Research × Institutional Alpha
-          </span>
-          <h1 className="mt-6 font-serif text-5xl leading-[1.02] tracking-tight text-fg sm:text-6xl lg:text-7xl">
+          <h1 className="font-serif text-5xl leading-[1.02] tracking-tight text-fg sm:text-6xl lg:text-7xl">
             Track Every Alpha.
             <br />
             <em className="text-gold">Master Every Dimension.</em>
@@ -114,13 +109,54 @@ export default async function HomePage() {
       {/* Rewards */}
       <section className="border-t border-line pb-20 pt-20">
         <SectionHeading
-          title="Institutional Rewards & Pathways"
-          subtitle="Career pathways and sponsorships for leading NST researchers."
+          title="Rewards"
+          subtitle="Milestone prizes from the programme, plus BRAIN's own stipends."
           action={{ href: "/rewards", label: "All Rewards" }}
         />
-        <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-          {featured && <FeaturedReward reward={featured} />}
-          {secondary && <RewardCard reward={secondary} />}
+        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr_1fr]">
+          <Link
+            href="/rewards"
+            className="relative flex flex-col overflow-hidden rounded-xl border border-gold/40 bg-gold/[0.05] p-6 transition hover:border-gold/70 sm:p-8"
+          >
+            <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-gold/10 blur-3xl" />
+            <span className="relative inline-flex items-center gap-2 self-start rounded-md border border-gold/30 bg-gold/10 px-2.5 py-1 font-mono text-[11px] text-gold">
+              <Trophy size={12} /> Milestone incentives
+            </span>
+            <p className="relative mt-6 font-serif text-6xl leading-none text-gold">{usd(mi.perResearcherUsd)}</p>
+            <p className="relative mt-3 text-[15px] text-fg">
+              each for the <span className="text-gold">top {mi.winners} researchers</span> on every milestone.
+            </p>
+            <div className="min-h-4 flex-1" />
+            <p className="relative mt-4 font-mono text-xs text-dim">
+              {usd(mi.perResearcherUsd * mi.winners)} prize pool per milestone
+            </p>
+          </Link>
+
+          <div className="flex flex-col rounded-xl border border-line bg-panel/60 p-6">
+            <span className="inline-flex size-10 items-center justify-center rounded-lg border border-teal/30 bg-teal/10 text-teal">
+              <Wallet size={18} />
+            </span>
+            <h3 className="mt-5 font-mono text-xs uppercase tracking-[0.12em] text-dim">BRAIN daily payouts</h3>
+            <p className="mt-2 whitespace-nowrap font-serif text-4xl text-fg">
+              {usd(stipends.daily.minUsd)}–{usd(stipends.daily.maxUsd)}
+            </p>
+            <p className="mt-1 text-sm text-muted">per day</p>
+          </div>
+
+          <div className="flex flex-col rounded-xl border border-line bg-panel/60 p-6">
+            <span className="inline-flex size-10 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 text-gold">
+              <Star size={18} />
+            </span>
+            <h3 className="mt-5 font-mono text-xs uppercase tracking-[0.12em] text-dim">BRAIN quarterly stipends</h3>
+            <p className="mt-2 whitespace-nowrap font-serif text-4xl text-fg">
+              {usd(stipends.quarterly.minUsd)}–{usd(stipends.quarterly.maxUsd)}
+            </p>
+            <p className="mt-1 text-sm text-muted">per quarter</p>
+            <div className="min-h-4 flex-1" />
+            <p className="mt-4 flex items-center gap-2 text-xs text-teal">
+              <Calendar size={14} /> Min {stipends.minSubmissionDaysPerQuarter} submission days per quarter
+            </p>
+          </div>
         </div>
       </section>
 
