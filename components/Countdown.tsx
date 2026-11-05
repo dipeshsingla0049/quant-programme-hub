@@ -39,7 +39,7 @@ export function Countdown({ target }: { target: string }) {
   ];
 
   return (
-    <div className="flex items-baseline gap-3 font-mono" role="timer" aria-live="off">
+    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono" role="timer" aria-live="off">
       {units.map(([key, label], i) => (
         <span key={key} className="flex items-baseline gap-3">
           <span>

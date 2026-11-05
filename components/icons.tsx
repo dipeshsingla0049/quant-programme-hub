@@ -59,3 +59,6 @@ export const Globe = (p: IconProps) => (
 export const Trophy = (p: IconProps) => (
   <svg {...base(p)}><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z" /><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4" /></svg>
 );
+export const Lock = (p: IconProps) => (
+  <svg {...base(p)}><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+);

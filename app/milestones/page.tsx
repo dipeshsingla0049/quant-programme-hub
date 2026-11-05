@@ -1,14 +1,26 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight } from "@/components/icons";
+import { Avatar } from "@/components/Avatar";
+import { Countdown } from "@/components/Countdown";
+import { ArrowRight, Lock } from "@/components/icons";
 import { PageHeader } from "@/components/PageHeader";
-import { Tag } from "@/components/Tag";
-import { getMilestones, getStageCounts } from "@/lib/data";
+import {
+  PROD_CORR_MIN_SUBMISSIONS,
+  getCurrentMilestone,
+  getLeaderboard,
+  getMilestones,
+  getProdCorrStandings,
+} from "@/lib/data";
+import { formatEventStamp, formatMetric } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Milestones" };
 
 export default async function MilestonesPage() {
-  const [stages, counts] = await Promise.all([getMilestones(), getStageCounts()]);
+  const [current, standings, report, stages] = await Promise.all([
+    getCurrentMilestone(),
+    getProdCorrStandings(5),
+    getLeaderboard(),
+    getMilestones(),
+  ]);
 
   return (
     <>
@@ -19,79 +31,105 @@ export default async function MilestonesPage() {
             The path to <em className="text-gold">Master</em> and <em className="text-gold">Grandmaster</em>
           </>
         }
-        description="Each stage unlocks something new. Here is what it takes to reach it and what it gets you."
+        description="See what's live right now, and what each stage of the programme takes and unlocks."
       />
 
-      <ol className="relative border-l border-line pl-8 sm:pl-12">
-        {stages.map((s) => (
-          <li key={s.id} className="relative pb-12 last:pb-0">
-            <span
-              aria-hidden
-              className={`absolute -left-[41px] top-1 inline-flex size-[18px] items-center justify-center rounded-full border sm:-left-[57px] ${
-                s.prestige ? "border-gold bg-gold/20" : "border-line-2 bg-panel-2"
-              }`}
-            >
-              <span className={`size-1.5 rounded-full ${s.prestige ? "bg-gold" : "bg-muted"}`} />
-            </span>
-            <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-              <div>
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-xs uppercase tracking-[0.12em] text-dim">Stage {s.order}</span>
-                  {s.prestige && <Tag kind="Prestige">Prestige tier</Tag>}
-                </div>
-                <h2 className={`mt-2 font-serif text-4xl ${s.prestige ? "text-gold" : "text-fg"}`}>{s.name}</h2>
-                <p className="mt-3 max-w-md text-[15px] leading-relaxed text-muted">{s.summary}</p>
-              </div>
-              <div
-                className={`grid gap-5 rounded-xl border p-6 sm:grid-cols-2 ${
-                  s.prestige ? "border-gold/40 bg-gold/[0.05]" : "border-line bg-panel/60"
-                }`}
-              >
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-dim">To reach it</p>
-                  <p className="mt-2 text-sm leading-relaxed text-fg">{s.requirement}</p>
-                </div>
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-dim">What you unlock</p>
-                  <p className="mt-2 text-sm leading-relaxed text-fg">{s.unlocks}</p>
-                </div>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ol>
+      {/* Current milestone */}
+      <section aria-labelledby="current-milestone" className="mb-20">
+        <h2 id="current-milestone" className="mb-6 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-gold">
+          <span className="size-2 rounded-full bg-gold" aria-hidden />
+          Current milestone
+        </h2>
 
-      <section className="mt-20">
-        <h2 className="mb-6 font-serif text-2xl text-fg sm:text-[28px]">Where the cohort stands</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stages.map((s) => (
-            <div key={s.id} className="rounded-xl border border-line bg-panel/60 p-6">
-              <p className="text-sm text-muted">{s.name}</p>
-              <p className={`mt-3 font-mono text-4xl tabular-nums ${s.prestige ? "text-gold" : "text-fg"}`}>
-                {counts[s.id] ?? "—"}
-              </p>
-              <p className="mt-1 text-xs text-dim">
-                {counts[s.id] === null ? "not in the report yet" : "participants at this stage"}
-              </p>
+        <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+          <div className="flex min-w-0 flex-col rounded-2xl border border-gold/40 bg-gold/[0.05] p-6 sm:p-8">
+            <h3 className="font-serif text-3xl leading-tight text-fg sm:text-4xl">{current.title}</h3>
+            <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted">{current.description}</p>
+
+            <div className="mt-6 rounded-lg border border-line bg-ink/80 p-4">
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-dim">Window closes in:</p>
+              <Countdown target={current.closesAt} />
+              <p className="mt-2 font-mono text-xs text-dim">Closes {formatEventStamp(current.closesAt)}</p>
             </div>
-          ))}
+
+            <dl className="mt-6 grid grid-cols-2 gap-4">
+              <div>
+                <dt className="text-xs text-muted">Programme avg prod corr</dt>
+                <dd className="mt-1 font-mono text-2xl tabular-nums text-fg">
+                  {formatMetric(standings.programmeAverage, 3)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted">Eligible participants</dt>
+                <dd className="mt-1 font-mono text-2xl tabular-nums text-fg">{standings.eligible}</dd>
+              </div>
+            </dl>
+
+            <div className="min-h-6 flex-1" />
+            <a
+              href={current.actionHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-12 items-center justify-center gap-2 self-start rounded-lg bg-gold px-6 text-sm font-semibold text-ink transition hover:bg-gold/90"
+            >
+              {current.actionLabel} on BRAIN <ArrowRight size={16} />
+            </a>
+          </div>
+
+          <div className="min-w-0 rounded-2xl border border-line bg-panel/60 p-6">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+              <h3 className="font-serif text-2xl text-fg">Leading right now</h3>
+              <span className="font-mono text-[11px] text-dim">lowest avg prod corr</span>
+            </div>
+            <ol className="mt-5 divide-y divide-line">
+              {standings.leaders.map((p, i) => (
+                <li key={p.alias} className="flex items-center gap-3 py-3">
+                  <span className={`w-6 font-mono text-sm ${i === 0 ? "text-gold" : "text-dim"}`}>{i + 1}</span>
+                  <Avatar name={p.name} rank={i + 1} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm text-fg">{p.name}</div>
+                    <div className="font-mono text-[11px] text-dim">{p.totalSubmissions} alphas submitted</div>
+                  </div>
+                  <span className={`font-mono text-base tabular-nums ${i === 0 ? "text-gold" : "text-fg"}`}>
+                    {formatMetric(p.avgProdCorr, 3)}
+                  </span>
+                </li>
+              ))}
+              {standings.leaders.length === 0 && <li className="py-6 text-sm text-muted">No eligible participants yet.</li>}
+            </ol>
+            <p className="mt-4 text-xs leading-relaxed text-dim">
+              Counts participants with at least {PROD_CORR_MIN_SUBMISSIONS} submitted alphas. From the partnership report
+              updated {report.updated}.
+            </p>
+          </div>
         </div>
       </section>
 
-      <section className="mt-20 flex flex-wrap items-center justify-between gap-6 rounded-2xl border border-gold/40 bg-gold/[0.06] p-8 sm:p-10">
-        <div className="max-w-xl">
-          <h2 className="font-serif text-3xl leading-tight text-fg sm:text-4xl">Grandmasters earn the Goa retreat</h2>
-          <p className="mt-3 text-[15px] leading-relaxed text-muted">
-            Reaching Grandmaster and finishing in the top ranks qualifies you for the programme&apos;s flagship reward.
+      {/* Upcoming milestones */}
+      <section aria-labelledby="upcoming-milestones">
+        <div className="mb-10">
+          <h2 id="upcoming-milestones" className="font-serif text-3xl text-fg sm:text-4xl">Upcoming milestones</h2>
+          <p className="mt-3 font-serif text-xl italic text-gold sm:text-2xl">
+            Conquer the current milestone to break the next seal.
           </p>
         </div>
-        <Link
-          href="/rankings"
-          className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-gold px-6 text-sm font-semibold text-ink transition hover:bg-gold/90"
-        >
-          Check the leaderboard <ArrowRight size={16} />
-        </Link>
+
+        <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {stages.map((s) => (
+            <li
+              key={s.id}
+              aria-label="Locked milestone"
+              className="flex aspect-square items-center justify-center rounded-xl border border-dashed border-line-2 bg-panel/40 sm:aspect-[4/3]"
+            >
+              <span className="inline-flex size-14 items-center justify-center rounded-full border border-line-2 text-dim">
+                <Lock size={22} />
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
+
+
     </>
   );
 }

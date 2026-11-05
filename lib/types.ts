@@ -60,6 +60,7 @@ export interface MilestoneStage {
 
 export interface CurrentMilestone {
   title: string;
+  description: string;
   closesAt: string; // ISO 8601
   actionLabel: string;
   actionHref: string;

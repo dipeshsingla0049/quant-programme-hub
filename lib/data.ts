@@ -97,6 +97,8 @@ const milestones: MilestoneStage[] = [
 
 const currentMilestone: CurrentMilestone = {
   title: "Minimum Average Production Correlation",
+  description:
+    "Production correlation measures how similar your alphas are to ones already in BRAIN production. Lower is better: it means your ideas are new. This milestone rewards the lowest average production correlation across your submitted alphas.",
   closesAt: "2026-11-08T00:00:00+05:30",
   actionLabel: "Simulate",
   actionHref: "https://platform.worldquantbrain.com",
@@ -231,18 +233,27 @@ export async function getMilestones(): Promise<MilestoneStage[]> {
   return [...milestones].sort((a, b) => a.order - b.order);
 }
 
+/** Minimum submitted alphas for an average to count toward the current milestone. */
+export const PROD_CORR_MIN_SUBMISSIONS = 3;
+
 /**
- * Participants per milestone, derived from the report where the report can
- * tell us. Master / Grandmaster aren't in the report yet, so they are null.
+ * Standings for the current milestone: lowest average production correlation.
+ * A value of exactly 0 means the report had no correlation for those alphas,
+ * so it's left out rather than counted as a perfect score.
  */
-export async function getStageCounts(): Promise<Record<MilestoneStage["id"], number | null>> {
-  const ps = leaderboard.participants;
-  return {
-    enrolled: ps.length,
-    "first-alpha": ps.filter((p) => p.totalSubmissions > 0).length,
-    master: null,
-    grandmaster: null,
-  };
+export async function getProdCorrStandings(limit = 5): Promise<{
+  leaders: Participant[];
+  eligible: number;
+  programmeAverage: number | null;
+}> {
+  const eligible = leaderboard.participants.filter(
+    (p) => p.totalSubmissions >= PROD_CORR_MIN_SUBMISSIONS && p.avgProdCorr !== null && p.avgProdCorr > 0,
+  );
+  const sorted = [...eligible].sort((a, b) => a.avgProdCorr! - b.avgProdCorr! || a.rank - b.rank);
+  const programmeAverage = eligible.length
+    ? eligible.reduce((n, p) => n + p.avgProdCorr!, 0) / eligible.length
+    : null;
+  return { leaders: sorted.slice(0, limit), eligible: eligible.length, programmeAverage };
 }
 
 export async function getCurrentMilestone(): Promise<CurrentMilestone> {
