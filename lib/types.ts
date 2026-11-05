@@ -76,6 +76,16 @@ export interface Reward {
   featured: boolean;
 }
 
+export interface RewardsProgramme {
+  milestoneIncentive: { perResearcherUsd: number; winners: number };
+  stipends: {
+    daily: { minUsd: number; maxUsd: number };
+    quarterly: { minUsd: number; maxUsd: number };
+    minSubmissionDaysPerQuarter: number;
+  };
+  tips: { title: string; body: string }[];
+}
+
 export type LocationType = "venue" | "virtual" | "portal";
 
 export interface Activity {

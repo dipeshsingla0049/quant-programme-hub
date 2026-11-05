@@ -19,6 +19,7 @@ import type {
   MilestoneStage,
   Participant,
   Reward,
+  RewardsProgramme,
 } from "./types";
 
 const bulletins: Bulletin[] = [
@@ -134,6 +135,25 @@ const rewards: Reward[] = [
     featured: false,
   },
 ];
+
+const rewardsProgramme: RewardsProgramme = {
+  milestoneIncentive: { perResearcherUsd: 50, winners: 10 },
+  stipends: {
+    daily: { minUsd: 1, maxUsd: 60 },
+    quarterly: { minUsd: 100, maxUsd: 25000 },
+    minSubmissionDaysPerQuarter: 20,
+  },
+  tips: [
+    {
+      title: "Quality over overfitting",
+      body: "An alpha tuned until it looks perfect in-sample usually falls apart out-of-sample. Keep ideas simple, check that they hold across periods and regions, and submit fewer, stronger alphas.",
+    },
+    {
+      title: "Aim for Master and Grandmaster",
+      body: "Higher BRAIN levels unlock higher payouts. Treat Master and Grandmaster as your targets and build a steady record of quality submissions to get there.",
+    },
+  ],
+};
 
 const activities: Activity[] = [
   {
@@ -262,6 +282,10 @@ export async function getCurrentMilestone(): Promise<CurrentMilestone> {
 
 export async function getRewards(): Promise<Reward[]> {
   return rewards;
+}
+
+export async function getRewardsProgramme(): Promise<RewardsProgramme> {
+  return rewardsProgramme;
 }
 
 export async function getActivities(opts: { limit?: number } = {}): Promise<Activity[]> {
