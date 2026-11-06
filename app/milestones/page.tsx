@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { Countdown } from "@/components/Countdown";
 import { ArrowRight, Lock } from "@/components/icons";
@@ -101,6 +102,12 @@ export default async function MilestonesPage() {
               Counts participants with at least {PROD_CORR_MIN_SUBMISSIONS} submitted alphas. From the partnership report
               updated {report.updated}.
             </p>
+            <Link
+              href="/rankings"
+              className="mt-5 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-gold transition hover:text-fg"
+            >
+              View full leaderboard <ArrowRight size={14} />
+            </Link>
           </div>
         </div>
       </section>
