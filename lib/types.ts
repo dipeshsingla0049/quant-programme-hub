@@ -68,6 +68,15 @@ export interface EligibilityRule {
   label: string;
 }
 
+/** One tab on the Rankings page: a leaderboard plus its eligibility rules. */
+export interface RankingTab {
+  /** Used in the URL: /rankings?tab=<id>. */
+  id: string;
+  label: string;
+  title: string;
+  eligibility: EligibilityRule[];
+}
+
 export interface CurrentMilestone {
   title: string;
   description: string;

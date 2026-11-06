@@ -18,6 +18,7 @@ import type {
   LeaderboardReport,
   MilestoneStage,
   Participant,
+  RankingTab,
   RewardsProgramme,
 } from "./types";
 
@@ -248,6 +249,27 @@ export async function getProdCorrStandings(limit = 5): Promise<{
     ? eligible.reduce((n, p) => n + p.avgProdCorr!, 0) / eligible.length
     : null;
   return { leaders: sorted.slice(0, limit), eligible: eligible.length, programmeAverage };
+}
+
+/**
+ * Rankings page tabs. Both use the same partnership-report leaderboard for
+ * now; each tab has its own eligibility rules.
+ */
+export async function getRankingTabs(): Promise<RankingTab[]> {
+  return [
+    {
+      id: "prod-corr",
+      label: "Avg Production Correlation",
+      title: currentMilestone.title,
+      eligibility: currentMilestone.eligibility,
+    },
+    {
+      id: "qcap",
+      label: "QCAP $120",
+      title: "QCAP $120",
+      eligibility: [{ value: "≥ 20", label: "different days with a submission in the quarter" }],
+    },
+  ];
 }
 
 export async function getCurrentMilestone(): Promise<CurrentMilestone> {
