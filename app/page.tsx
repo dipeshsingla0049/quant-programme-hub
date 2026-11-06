@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { BulletinCard } from "@/components/BulletinCard";
 import { Countdown } from "@/components/Countdown";
-import { ArrowRight, Calendar, Star, Trophy, Wallet } from "@/components/icons";
+import { ArrowRight, Briefcase, MapPin, Star, Trophy } from "@/components/icons";
+import type { Opportunity } from "@/lib/types";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
 import { RelativeTime } from "@/components/RelativeTime";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -13,6 +14,12 @@ import {
   getRewardsProgramme,
 } from "@/lib/data";
 
+const OPPORTUNITY_ICON: Record<Opportunity["id"], typeof Star> = {
+  "goa-trip": MapPin,
+  master: Star,
+  "qrap-internship": Briefcase,
+};
+
 export default async function HomePage() {
   const [milestone, bulletins, leaders, programme, report] = await Promise.all([
     getCurrentMilestone(),
@@ -21,7 +28,7 @@ export default async function HomePage() {
     getRewardsProgramme(),
     getLeaderboard(),
   ]);
-  const { milestoneIncentive: mi, stipends } = programme;
+  const { milestoneIncentive: mi } = programme;
   const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
   return (
@@ -96,7 +103,7 @@ export default async function HomePage() {
       {/* Leaders */}
       <section className="pb-20">
         <SectionHeading
-          title="Current Cohort Leaders"
+          title="Avg Production Correlation Leaderboard"
           subtitle={`Ranked by total simulations · report updated ${report.updated}`}
           action={{ href: "/rankings", label: "View Full Leaderboard" }}
         />
@@ -107,10 +114,10 @@ export default async function HomePage() {
       <section className="border-t border-line pb-20 pt-20">
         <SectionHeading
           title="Rewards"
-          subtitle="Milestone prizes from the programme, plus BRAIN's own stipends."
+          subtitle="Milestone prizes and opportunities for top performers."
           action={{ href: "/rewards", label: "All Rewards" }}
         />
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr_1fr]">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr]">
           <Link
             href="/rewards"
             className="relative flex flex-col overflow-hidden rounded-xl border border-gold/40 bg-gold/[0.05] p-6 transition hover:border-gold/70 sm:p-8"
@@ -129,31 +136,27 @@ export default async function HomePage() {
             </p>
           </Link>
 
-          <div className="flex flex-col rounded-xl border border-line bg-panel/60 p-6">
-            <span className="inline-flex size-10 items-center justify-center rounded-lg border border-teal/30 bg-teal/10 text-teal">
-              <Wallet size={18} />
-            </span>
-            <h3 className="mt-5 tabular-nums text-xs uppercase tracking-[0.12em] text-dim">BRAIN daily payouts</h3>
-            <p className="mt-2 whitespace-nowrap font-semibold tracking-tight text-4xl text-fg">
-              {usd(stipends.daily.minUsd)}–{usd(stipends.daily.maxUsd)}
-            </p>
-            <p className="mt-1 text-sm text-muted">per day</p>
-          </div>
-
-          <div className="flex flex-col rounded-xl border border-line bg-panel/60 p-6">
-            <span className="inline-flex size-10 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 text-gold">
-              <Star size={18} />
-            </span>
-            <h3 className="mt-5 tabular-nums text-xs uppercase tracking-[0.12em] text-dim">BRAIN quarterly stipends</h3>
-            <p className="mt-2 whitespace-nowrap font-semibold tracking-tight text-4xl text-fg">
-              {usd(stipends.quarterly.minUsd)}–{usd(stipends.quarterly.maxUsd)}
-            </p>
-            <p className="mt-1 text-sm text-muted">per quarter</p>
-            <div className="min-h-4 flex-1" />
-            <p className="mt-4 flex items-center gap-2 text-xs text-teal">
-              <Calendar size={14} /> Min {stipends.minSubmissionDaysPerQuarter} submission days per quarter
-            </p>
-          </div>
+          {programme.opportunities.map((o) => {
+            const Icon = OPPORTUNITY_ICON[o.id];
+            return (
+              <Link
+                key={o.id}
+                href={`/rewards#${o.id}`}
+                className="group flex flex-col rounded-xl border border-line bg-panel/60 p-6 transition hover:border-gold/50"
+              >
+                <span className="inline-flex size-10 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 text-gold">
+                  <Icon size={18} />
+                </span>
+                <h3 className="mt-5 text-lg font-semibold tracking-tight text-fg">{o.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{o.summary}</p>
+                <div className="min-h-4 flex-1" />
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-gold">
+                  {o.criteria.length ? "See criteria" : "Criteria coming soon"}
+                  <ArrowRight size={14} className="transition group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 

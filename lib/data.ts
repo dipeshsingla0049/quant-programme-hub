@@ -113,6 +113,28 @@ const currentMilestone: CurrentMilestone = {
 
 const rewardsProgramme: RewardsProgramme = {
   milestoneIncentive: { perResearcherUsd: 50, winners: 10 },
+  // TODO(programme team): fill in each criteria list; the UI shows
+  // "Criteria coming soon" while a list is empty.
+  opportunities: [
+    {
+      id: "goa-trip",
+      title: "Goa Trip",
+      summary: "A trip to Goa for the programme's top performers.",
+      criteria: [],
+    },
+    {
+      id: "master",
+      title: "Master Criteria",
+      summary: "What it takes to reach Master level on BRAIN and unlock higher payouts.",
+      criteria: [],
+    },
+    {
+      id: "qrap-internship",
+      title: "QRAP Internship",
+      summary: "An internship opportunity for leading researchers.",
+      criteria: [],
+    },
+  ],
   stipends: {
     daily: { minUsd: 1, maxUsd: 60 },
     quarterly: { minUsd: 100, maxUsd: 25000 },

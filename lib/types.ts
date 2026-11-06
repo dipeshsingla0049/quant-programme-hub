@@ -86,8 +86,18 @@ export interface CurrentMilestone {
   actionHref: string;
 }
 
+export interface Opportunity {
+  /** Anchor on the Rewards page: /rewards#<id>. */
+  id: "goa-trip" | "master" | "qrap-internship";
+  title: string;
+  summary: string;
+  /** Empty until the programme team publishes the criteria. */
+  criteria: string[];
+}
+
 export interface RewardsProgramme {
   milestoneIncentive: { perResearcherUsd: number; winners: number };
+  opportunities: Opportunity[];
   stipends: {
     daily: { minUsd: number; maxUsd: number };
     quarterly: { minUsd: number; maxUsd: number };

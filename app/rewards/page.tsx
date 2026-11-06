@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Calendar, CheckCircle, Star, Target, Trophy, Wallet } from "@/components/icons";
+import { ArrowRight, Briefcase, Calendar, CheckCircle, MapPin, Star, Target, Trophy, Wallet } from "@/components/icons";
+import type { Opportunity } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { getRewardsProgramme } from "@/lib/data";
 
@@ -8,8 +9,14 @@ export const metadata: Metadata = { title: "Rewards" };
 
 const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
+const OPPORTUNITY_ICON: Record<Opportunity["id"], typeof Star> = {
+  "goa-trip": MapPin,
+  master: Star,
+  "qrap-internship": Briefcase,
+};
+
 export default async function RewardsPage() {
-  const { milestoneIncentive: mi, stipends, tips } = await getRewardsProgramme();
+  const { milestoneIncentive: mi, opportunities, stipends, tips } = await getRewardsProgramme();
 
   return (
     <>
@@ -51,8 +58,54 @@ export default async function RewardsPage() {
               >
                 See the current milestone <ArrowRight size={16} />
               </Link>
+              <Link
+                href="/rankings"
+                className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-gold transition hover:text-fg"
+              >
+                View leaderboard <ArrowRight size={14} />
+              </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Opportunities */}
+      <section aria-labelledby="opportunities" className="mb-20">
+        <h2 id="opportunities" className="mb-6 text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
+          Opportunities for top performers
+        </h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          {opportunities.map((o) => {
+            const Icon = OPPORTUNITY_ICON[o.id];
+            return (
+              <article
+                key={o.id}
+                id={o.id}
+                className="flex scroll-mt-40 flex-col md:scroll-mt-24 rounded-2xl border border-line bg-panel/60 p-6 target:border-gold/60 target:bg-gold/[0.05] sm:p-8"
+              >
+                <span className="inline-flex size-10 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 text-gold">
+                  <Icon size={18} />
+                </span>
+                <h3 className="mt-5 text-2xl font-semibold tracking-tight text-fg">{o.title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-muted">{o.summary}</p>
+                <h4 className="mt-6 text-[11px] uppercase tracking-[0.12em] text-dim">Criteria</h4>
+                {o.criteria.length ? (
+                  <ul className="mt-3 space-y-2 text-sm text-fg">
+                    {o.criteria.map((c) => (
+                      <li key={c} className="flex gap-2">
+                        <CheckCircle size={16} className="mt-0.5 shrink-0 text-teal" />
+                        {c}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-3 rounded-lg border border-dashed border-line-2 px-4 py-3 text-sm text-muted">
+                    Criteria coming soon.
+                  </p>
+                )}
+              </article>
+            );
+          })}
         </div>
       </section>
 
