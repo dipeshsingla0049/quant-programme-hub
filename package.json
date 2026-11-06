@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "import:leaderboard": "node scripts/import-leaderboard.mjs"
+    "import:report": "node scripts/import-report.mjs"
   },
   "dependencies": {
     "next": "^15.5.0",

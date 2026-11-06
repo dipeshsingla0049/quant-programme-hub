@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { BulletinCard } from "@/components/BulletinCard";
 import { ArrowRight, Briefcase, MapPin, Star, Trophy } from "@/components/icons";
+import { MilestoneCards, MilestoneTimeline } from "@/components/MilestoneOverview";
 import type { Opportunity } from "@/lib/types";
 import { RelativeTime } from "@/components/RelativeTime";
 import { SectionHeading } from "@/components/SectionHeading";
-import {
-  getBulletins,
-  getRewardsProgramme,
-} from "@/lib/data";
+import { getBulletins, getRewardsProgramme } from "@/lib/data";
+import { formatDay } from "@/lib/format";
+import { latestReportDate } from "@/lib/standings";
 
 const OPPORTUNITY_ICON: Record<Opportunity["id"], typeof Star> = {
   "goa-trip": MapPin,
@@ -17,16 +17,34 @@ const OPPORTUNITY_ICON: Record<Opportunity["id"], typeof Star> = {
 
 export default async function HomePage() {
   const [bulletins, programme] = await Promise.all([getBulletins(3), getRewardsProgramme()]);
-  const { milestoneIncentive: mi } = programme;
-  const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
   return (
     <>
-      {/* The page opens on announcements; this heading names the page for screen readers. */}
-      <h1 className="sr-only">Quant Research Hub</h1>
+      {/* November milestones: what to do, by when, for what */}
+      <section aria-labelledby="milestones-title" className="pb-20 pt-14 sm:pt-20">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-gold">Quant Research Hub</p>
+        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 id="milestones-title" className="text-4xl font-semibold tracking-tight text-fg sm:text-5xl">
+              November milestones
+            </h1>
+            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted">
+              Three milestones run from 7 November. Each has its own window, rules and reward. Standings update
+              daily from the BRAIN partnership report.
+            </p>
+          </div>
+          <span className="rounded border border-line-2 bg-panel-2 px-2 py-0.5 text-[11px] tabular-nums text-muted">
+            {latestReportDate ? `Data as of ${formatDay(latestReportDate, true)}` : "First report: Nov 7"}
+          </span>
+        </div>
+        <div className="mt-8 space-y-4">
+          <MilestoneCards />
+          <MilestoneTimeline />
+        </div>
+      </section>
 
       {/* Bulletins */}
-      <section className="pb-20 pt-14 sm:pt-20">
+      <section className="border-t border-line pb-20 pt-20">
         <SectionHeading
           title="Announcements"
           badge={
@@ -46,28 +64,10 @@ export default async function HomePage() {
       {/* Rewards */}
       <section className="border-t border-line pb-20 pt-20">
         <SectionHeading
-          title="Rewards"
-          subtitle="Milestone prizes and opportunities for top performers."
+          title="More opportunities"
+          subtitle="Beyond the November milestones."
         />
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr]">
-          <Link
-            href="/avg-prod-corr"
-            className="relative flex flex-col overflow-hidden rounded-xl border border-gold/40 bg-gold/[0.05] p-6 transition hover:border-gold/70 sm:p-8"
-          >
-            <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-gold/10 blur-3xl" />
-            <span className="relative inline-flex items-center gap-2 self-start rounded-md border border-gold/30 bg-gold/10 px-2.5 py-1 tabular-nums text-[11px] text-gold">
-              <Trophy size={12} /> Milestone incentives
-            </span>
-            <p className="relative mt-6 font-semibold tracking-tight text-6xl leading-none text-gold">{usd(mi.perResearcherUsd)}</p>
-            <p className="relative mt-3 text-[15px] text-fg">
-              each for the <span className="text-gold">top {mi.winners} researchers</span> on every milestone.
-            </p>
-            <div className="min-h-4 flex-1" />
-            <p className="relative mt-4 tabular-nums text-xs text-dim">
-              {usd(mi.perResearcherUsd * mi.winners)} prize pool per milestone
-            </p>
-          </Link>
-
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {programme.opportunities.map((o) => {
             const Icon = OPPORTUNITY_ICON[o.id];
             return (

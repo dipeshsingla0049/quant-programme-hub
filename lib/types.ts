@@ -15,42 +15,20 @@ export interface Bulletin {
 
 export type UserTier = "CONSULTANT" | "CONDITIONALCONSULTANT";
 
-/** One row of the WorldQuant BRAIN partnership report. Null = no submitted alphas to average. */
-export interface Participant {
-  rank: number;
+/** One researcher in one daily partnership report. Totals are cumulative since 7 Nov 2026. */
+export interface ReportRow {
   alias: string;
   tier: UserTier;
-  firstName: string;
-  lastName: string;
-  /** First + last name exactly as published. */
+  /** First + last name as published. */
   name: string;
   university: string;
-  totalSimulations: number;
-  totalSubmissions: number;
-  alphasByRegion: { usa: number; eur: number; asi: number; glb: number; other: number };
+  simulations: number;
+  submissions: number;
+  /** Null when there are no submitted alphas to average. */
   avgProdCorr: number | null;
   avgSelfCorr: number | null;
-  lowestProdCorr: number | null;
-  highestProdCorr: number | null;
-  avgSharpe: number | null;
-  avgTurnover: number | null;
-  avgReturns: number | null;
-  avgDrawdown: number | null;
-  avgMargin: number | null;
-  totalOperatorsUsed: number;
   operatorsPerAlpha: number | null;
-  totalDatafieldsUsed: number;
   datafieldsPerAlpha: number | null;
-}
-
-export interface LeaderboardReport {
-  title: string;
-  /** As printed by the source, e.g. "Nov 5, 2026, 5:23 PM". */
-  updated: string;
-  source: string;
-  /** Column the source ranks by. */
-  scoreLabel: string;
-  participants: Participant[];
 }
 
 export interface EligibilityRule {
@@ -58,15 +36,8 @@ export interface EligibilityRule {
   value: string;
   /** What the value counts, e.g. "simulations per week". */
   label: string;
-}
-
-export interface CurrentMilestone {
-  title: string;
-  description: string;
-  eligibility: EligibilityRule[];
-  closesAt: string; // ISO 8601
-  actionLabel: string;
-  actionHref: string;
+  /** Small print under the label, e.g. how the report measures it. */
+  note?: string;
 }
 
 export interface CriteriaItem {
@@ -95,7 +66,6 @@ export interface Opportunity {
 }
 
 export interface RewardsProgramme {
-  milestoneIncentive: { perResearcherUsd: number; winners: number };
   opportunities: Opportunity[];
 }
 

@@ -4,55 +4,30 @@
  * Every page reads through these async functions, so moving to a real backend
  * (Supabase, a CMS, or a BRAIN API sync job) means changing only this file.
  *
- * Rankings come from the real WorldQuant BRAIN partnership report in
- * data/leaderboard (see lib/leaderboard.ts).
+ * Milestone rules live in lib/milestones.ts and the standings are computed
+ * from the daily reports by lib/standings.ts.
  *
- * Everything else below (bulletins, milestones, rewards, activities) is
- * SAMPLE DATA. Replace it with real programme content.
+ * Activities below are still SAMPLE DATA. Replace them with real programme content.
  */
-import { leaderboard } from "./leaderboard";
-import type {
-  Activity,
-  Bulletin,
-  CurrentMilestone,
-  LeaderboardReport,
-  Opportunity,
-  Participant,
-  RewardsProgramme,
-} from "./types";
+import type { Activity, Bulletin, Opportunity, RewardsProgramme } from "./types";
 
 const bulletins: Bulletin[] = [
   {
-    id: "avg-prod-corr-leaderboard-updated",
+    id: "november-milestones",
     tag: "Announcement",
-    title: "Average Production Correlation leaderboard updated",
-    body: `The leaderboard now reflects the latest partnership report (${leaderboard.updated}). See where you stand, then check the milestone's eligibility criteria before the window closes.`,
-    publishedAt: "2026-11-06T11:53:00+05:30",
+    title: "November milestones are here",
+    body: "Three milestones start on 7 November. The Weekly Baseline is the minimum to keep your account. The 20-Day Challenge pays $120 for submitting on 20 different days by 31 December. The Low-Corr Sprint pays $50 each to the 10 researchers with the lowest average production correlation from 7 to 21 November. Standings update daily.",
+    publishedAt: "2026-11-06T18:00:00+05:30",
     author: "Programme team",
     links: [
-      { href: "/avg-prod-corr", label: "View milestone" },
-      { href: "/avg-prod-corr#leaderboard", label: "View leaderboard" },
+      { href: "/weekly-baseline", label: "Weekly Baseline" },
+      { href: "/20-day-challenge", label: "20-Day Challenge" },
+      { href: "/low-corr-sprint", label: "Low-Corr Sprint" },
     ],
   },
 ];
 
-const currentMilestone: CurrentMilestone = {
-  title: "Minimum Average Production Correlation",
-  description:
-    "Production correlation measures how similar your alphas are to ones already in BRAIN production. Lower is better: it means your ideas are new. This milestone rewards the lowest average production correlation across your submitted alphas.",
-  eligibility: [
-    { value: "≥ 1,500", label: "alphas simulated per week" },
-    { value: "≥ 4", label: "different days with a submission each week" },
-    { value: "≤ 3", label: "average data fields used per alpha" },
-    { value: "≤ 8", label: "operators used per alpha" },
-  ],
-  closesAt: "2026-11-08T00:00:00+05:30",
-  actionLabel: "Simulate",
-  actionHref: "https://platform.worldquantbrain.com",
-};
-
 const rewardsProgramme: RewardsProgramme = {
-  milestoneIncentive: { perResearcherUsd: 50, winners: 10 },
   // TODO(programme team): fill in each criteria list; the UI shows
   // "Criteria coming soon" while a list is empty.
   opportunities: [
@@ -152,64 +127,6 @@ const activities: Activity[] = [
 export async function getBulletins(limit?: number): Promise<Bulletin[]> {
   const sorted = [...bulletins].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
   return limit ? sorted.slice(0, limit) : sorted;
-}
-
-export async function getLeaderboard(): Promise<LeaderboardReport> {
-  return leaderboard;
-}
-
-export async function getParticipants(): Promise<Participant[]> {
-  return leaderboard.participants;
-}
-
-export async function getUniversities(): Promise<string[]> {
-  return [...new Set(leaderboard.participants.map((p) => p.university))].sort();
-}
-
-export interface LeaderboardStats {
-  participants: number;
-  active: number;
-  totalSimulations: number;
-  totalSubmissions: number;
-  consultants: number;
-}
-
-export async function getLeaderboardStats(): Promise<LeaderboardStats> {
-  const ps = leaderboard.participants;
-  return {
-    participants: ps.length,
-    active: ps.filter((p) => p.totalSimulations > 0).length,
-    totalSimulations: ps.reduce((n, p) => n + p.totalSimulations, 0),
-    totalSubmissions: ps.reduce((n, p) => n + p.totalSubmissions, 0),
-    consultants: ps.filter((p) => p.tier === "CONSULTANT").length,
-  };
-}
-
-/** Minimum submitted alphas for an average to count toward the current milestone. */
-export const PROD_CORR_MIN_SUBMISSIONS = 3;
-
-/**
- * Standings for the current milestone: lowest average production correlation.
- * A value of exactly 0 means the report had no correlation for those alphas,
- * so it's left out rather than counted as a perfect score.
- */
-export async function getProdCorrStandings(limit = 5): Promise<{
-  leaders: Participant[];
-  eligible: number;
-  programmeAverage: number | null;
-}> {
-  const eligible = leaderboard.participants.filter(
-    (p) => p.totalSubmissions >= PROD_CORR_MIN_SUBMISSIONS && p.avgProdCorr !== null && p.avgProdCorr > 0,
-  );
-  const sorted = [...eligible].sort((a, b) => a.avgProdCorr! - b.avgProdCorr! || a.rank - b.rank);
-  const programmeAverage = eligible.length
-    ? eligible.reduce((n, p) => n + p.avgProdCorr!, 0) / eligible.length
-    : null;
-  return { leaders: sorted.slice(0, limit), eligible: eligible.length, programmeAverage };
-}
-
-export async function getCurrentMilestone(): Promise<CurrentMilestone> {
-  return currentMilestone;
 }
 
 export async function getRewardsProgramme(): Promise<RewardsProgramme> {
