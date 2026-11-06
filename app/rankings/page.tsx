@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { EligibilityCriteria } from "@/components/EligibilityCriteria";
 import { Clock } from "@/components/icons";
 import { PageHeader } from "@/components/PageHeader";
 import { RankingsBoard } from "@/components/RankingsBoard";
@@ -79,19 +80,7 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
         </div>
       )}
 
-      <section aria-labelledby="eligibility" className="mt-12 rounded-xl border border-line bg-panel/60 p-6 sm:p-8">
-        <p className="tabular-nums text-[11px] uppercase tracking-[0.12em] text-gold">Eligibility criteria</p>
-        <h2 id="eligibility" className="mt-2 font-semibold tracking-tight text-2xl text-fg sm:text-3xl">{tab.title}</h2>
-        <p className="mt-2 text-sm text-muted">{tab.eligibility.length > 1 ? "Meet all of these to be eligible." : "Meet this to be eligible."}</p>
-        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {tab.eligibility.map((rule) => (
-            <li key={rule.label} className="rounded-lg border border-line-2 bg-ink/60 p-5">
-              <p className="whitespace-nowrap tabular-nums text-3xl text-gold">{rule.value}</p>
-              <p className="mt-2 text-sm leading-snug text-fg">{rule.label}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <EligibilityCriteria id="eligibility" title={tab.title} rules={tab.eligibility} className="mt-12" />
     </>
   );
 }

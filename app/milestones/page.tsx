@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { Countdown } from "@/components/Countdown";
+import { EligibilityCriteria } from "@/components/EligibilityCriteria";
 import { ArrowRight, Lock } from "@/components/icons";
 import { PageHeader } from "@/components/PageHeader";
 import {
@@ -110,6 +111,13 @@ export default async function MilestonesPage() {
             </Link>
           </div>
         </div>
+
+        <EligibilityCriteria
+          id="current-milestone-eligibility"
+          title={current.title}
+          rules={current.eligibility}
+          className="mt-4"
+        />
       </section>
 
       {/* Upcoming milestones */}
