@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Terminal } from "./icons";
-import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
   { href: "/", label: "Home" },
@@ -44,7 +43,7 @@ export function SiteHeader({ unread }: { unread: number }) {
           <span className="inline-flex size-8 items-center justify-center rounded-md border border-line-2 bg-panel-2 text-gold">
             <Terminal size={16} />
           </span>
-          <span className="whitespace-nowrap rounded border border-gold/30 bg-gold/10 px-2 py-0.5 font-mono text-[11px] text-gold">
+          <span className="whitespace-nowrap rounded border border-gold/30 bg-gold/10 px-2 py-0.5 tabular-nums text-[11px] text-gold">
             Quant Research Hub
           </span>
         </Link>
@@ -54,7 +53,6 @@ export function SiteHeader({ unread }: { unread: number }) {
         </nav>
 
         <div className="flex items-center gap-1">
-          <ThemeToggle />
           <Link
             href="/announcements"
             aria-label={`Announcements, ${unread} new`}
@@ -62,7 +60,7 @@ export function SiteHeader({ unread }: { unread: number }) {
           >
             <Bell size={18} />
             {unread > 0 && (
-              <span className="absolute right-2 top-2 inline-flex size-4 items-center justify-center rounded-full bg-gold font-mono text-[10px] font-semibold text-ink">
+              <span className="absolute right-2 top-2 inline-flex size-4 items-center justify-center rounded-full bg-gold tabular-nums text-[10px] font-semibold text-ink">
                 {unread}
               </span>
             )}

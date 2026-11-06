@@ -29,10 +29,10 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="grid gap-10 pb-20 pt-14 sm:pt-20 lg:grid-cols-[1.4fr_1fr] lg:items-center">
         <div>
-          <h1 className="font-serif text-5xl leading-[1.02] tracking-tight text-fg sm:text-6xl lg:text-7xl">
+          <h1 className="font-semibold tracking-tight text-5xl leading-[1.02] tracking-tight text-fg sm:text-6xl lg:text-7xl">
             Track Every Alpha.
             <br />
-            <em className="text-gold">Master Every Dimension.</em>
+            <em className="not-italic text-gold">Master Every Dimension.</em>
           </h1>
           <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-muted sm:text-base">
             The official competitive research portal for Newton School of Technology scholars engineering
@@ -55,13 +55,13 @@ export default async function HomePage() {
         </div>
 
         <aside className="rounded-xl border border-line bg-panel/70 p-6 shadow-2xl shadow-black/30">
-          <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-gold">
+          <p className="flex items-center gap-2 tabular-nums text-[11px] uppercase tracking-[0.12em] text-gold">
             <span className="size-2 rounded-full bg-gold" />
             Current Milestone
           </p>
-          <h2 className="mt-5 font-serif text-xl text-fg">{milestone.title}</h2>
+          <h2 className="mt-5 font-semibold tracking-tight text-xl text-fg">{milestone.title}</h2>
           <div className="mt-5 rounded-lg border border-line bg-ink/80 p-4">
-            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-dim">Window closes in:</p>
+            <p className="mb-2 tabular-nums text-[10px] uppercase tracking-[0.14em] text-dim">Window closes in:</p>
             <Countdown target={milestone.closesAt} />
           </div>
           <a
@@ -80,7 +80,7 @@ export default async function HomePage() {
         <SectionHeading
           title="Official Bulletins"
           badge={
-            <span className="rounded border border-line-2 bg-panel-2 px-2 py-0.5 font-mono text-[11px] text-muted">
+            <span className="rounded border border-line-2 bg-panel-2 px-2 py-0.5 tabular-nums text-[11px] text-muted">
               {bulletins[0] ? <RelativeTime iso={bulletins[0].publishedAt} prefix="Updated " /> : "No bulletins yet"}
             </span>
           }
@@ -116,15 +116,15 @@ export default async function HomePage() {
             className="relative flex flex-col overflow-hidden rounded-xl border border-gold/40 bg-gold/[0.05] p-6 transition hover:border-gold/70 sm:p-8"
           >
             <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-gold/10 blur-3xl" />
-            <span className="relative inline-flex items-center gap-2 self-start rounded-md border border-gold/30 bg-gold/10 px-2.5 py-1 font-mono text-[11px] text-gold">
+            <span className="relative inline-flex items-center gap-2 self-start rounded-md border border-gold/30 bg-gold/10 px-2.5 py-1 tabular-nums text-[11px] text-gold">
               <Trophy size={12} /> Milestone incentives
             </span>
-            <p className="relative mt-6 font-serif text-6xl leading-none text-gold">{usd(mi.perResearcherUsd)}</p>
+            <p className="relative mt-6 font-semibold tracking-tight text-6xl leading-none text-gold">{usd(mi.perResearcherUsd)}</p>
             <p className="relative mt-3 text-[15px] text-fg">
               each for the <span className="text-gold">top {mi.winners} researchers</span> on every milestone.
             </p>
             <div className="min-h-4 flex-1" />
-            <p className="relative mt-4 font-mono text-xs text-dim">
+            <p className="relative mt-4 tabular-nums text-xs text-dim">
               {usd(mi.perResearcherUsd * mi.winners)} prize pool per milestone
             </p>
           </Link>
@@ -133,8 +133,8 @@ export default async function HomePage() {
             <span className="inline-flex size-10 items-center justify-center rounded-lg border border-teal/30 bg-teal/10 text-teal">
               <Wallet size={18} />
             </span>
-            <h3 className="mt-5 font-mono text-xs uppercase tracking-[0.12em] text-dim">BRAIN daily payouts</h3>
-            <p className="mt-2 whitespace-nowrap font-serif text-4xl text-fg">
+            <h3 className="mt-5 tabular-nums text-xs uppercase tracking-[0.12em] text-dim">BRAIN daily payouts</h3>
+            <p className="mt-2 whitespace-nowrap font-semibold tracking-tight text-4xl text-fg">
               {usd(stipends.daily.minUsd)}–{usd(stipends.daily.maxUsd)}
             </p>
             <p className="mt-1 text-sm text-muted">per day</p>
@@ -144,8 +144,8 @@ export default async function HomePage() {
             <span className="inline-flex size-10 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 text-gold">
               <Star size={18} />
             </span>
-            <h3 className="mt-5 font-mono text-xs uppercase tracking-[0.12em] text-dim">BRAIN quarterly stipends</h3>
-            <p className="mt-2 whitespace-nowrap font-serif text-4xl text-fg">
+            <h3 className="mt-5 tabular-nums text-xs uppercase tracking-[0.12em] text-dim">BRAIN quarterly stipends</h3>
+            <p className="mt-2 whitespace-nowrap font-semibold tracking-tight text-4xl text-fg">
               {usd(stipends.quarterly.minUsd)}–{usd(stipends.quarterly.maxUsd)}
             </p>
             <p className="mt-1 text-sm text-muted">per quarter</p>

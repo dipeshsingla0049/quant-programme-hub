@@ -1,19 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
+import { Inter } from "next/font/google";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { themeInitScript } from "@/components/ThemeToggle";
 import { getBulletins } from "@/lib/data";
 import "./globals.css";
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  variable: "--font-playfair",
-  display: "swap",
-});
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
 export const metadata: Metadata = {
   title: {
@@ -27,17 +19,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const bulletins = await getBulletins();
   return (
-    // data-theme is set before paint by themeInitScript, so React must not
-    // complain that the server-rendered value differs.
-    <html
-      lang="en"
-      data-theme="light"
-      suppressHydrationWarning
-      className={`${playfair.variable} ${inter.variable} ${jetbrains.variable}`}
-    >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-      </head>
+    <html lang="en" className={inter.variable}>
       <body className="min-h-screen font-sans antialiased">
         <SiteHeader unread={bulletins.length} />
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</main>

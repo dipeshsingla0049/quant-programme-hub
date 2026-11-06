@@ -15,7 +15,7 @@ export function ActivityCard({ activity }: { activity: Activity }) {
     <article className="flex h-full flex-col rounded-xl border border-line bg-panel/60 p-5 transition hover:border-line-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Tag kind={activity.kind} />
-        <time dateTime={activity.startsAt} className="font-mono text-xs text-dim">
+        <time dateTime={activity.startsAt} className="tabular-nums text-xs text-dim">
           {formatEventStamp(activity.startsAt)}
         </time>
       </div>

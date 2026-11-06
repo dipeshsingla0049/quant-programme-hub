@@ -2,8 +2,7 @@
 
 /*
  * Design tokens. Components only use these names (bg-ink, text-gold, …);
- * each theme below supplies the actual colors. Light is the default;
- * <html data-theme="dark"> switches to dark.
+ * :root below supplies the colors.
  */
 @theme inline {
   --color-ink: var(--ink);
@@ -23,12 +22,11 @@
   --color-violet: var(--violet);
   --color-sky: var(--sky);
 
-  --font-serif: var(--font-playfair), Georgia, serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  /* One typeface for everything: headings, body and numbers. */
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-/* Light (default). Text colors meet WCAG AA (≥ 4.5:1) on page and card backgrounds. */
+/* Light theme. Text colors meet WCAG AA (≥ 4.5:1) on page and card backgrounds. */
 :root {
   color-scheme: light;
   --ink: #f6f5f1;
@@ -51,27 +49,6 @@
   --glow: rgb(148 96 12 / 0.06);
 }
 
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --ink: #0a101d;
-  --panel: #0f1729;
-  --panel-2: #131d33;
-  --line: #1d2740;
-  --line-2: #2a3654;
-
-  --fg: #e6e9f2;
-  --muted: #8e97ad;
-  --dim: #626b82;
-
-  --gold: #f5c26b;
-  --gold-deep: #c8923f;
-  --teal: #4fd1c5;
-  --rose: #f48b8b;
-  --violet: #b39dfb;
-  --sky: #7fa8ff;
-
-  --glow: rgb(245 194 107 / 0.05);
-}
 
 body {
   background:

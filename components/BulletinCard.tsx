@@ -8,7 +8,7 @@ export function BulletinCard({ bulletin, expanded = false }: { bulletin: Bulleti
     <article className="group flex h-full flex-col rounded-xl border border-line bg-panel/60 p-5 transition hover:border-line-2 hover:bg-panel">
       <div className="flex items-center justify-between gap-3">
         <Tag kind={bulletin.tag} />
-        <time dateTime={bulletin.publishedAt} className="font-mono text-xs text-dim">
+        <time dateTime={bulletin.publishedAt} className="tabular-nums text-xs text-dim">
           {formatDate(bulletin.publishedAt)}
         </time>
       </div>

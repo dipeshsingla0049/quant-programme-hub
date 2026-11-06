@@ -27,7 +27,7 @@ export function Countdown({ target }: { target: string }) {
   }, [target]);
 
   if (remaining !== null && remaining <= 0) {
-    return <p className="font-mono text-lg text-rose">Window closed</p>;
+    return <p className="tabular-nums text-lg text-rose">Window closed</p>;
   }
 
   const parts = remaining === null ? null : split(remaining);
@@ -39,7 +39,7 @@ export function Countdown({ target }: { target: string }) {
   ];
 
   return (
-    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono" role="timer" aria-live="off">
+    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 tabular-nums" role="timer" aria-live="off">
       {units.map(([key, label], i) => (
         <span key={key} className="flex items-baseline gap-3">
           <span>

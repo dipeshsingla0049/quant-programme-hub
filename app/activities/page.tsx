@@ -36,20 +36,20 @@ export default async function ActivitiesPage() {
       <div className="space-y-12">
         {groupByMonth(activities).map(([month, items]) => (
           <section key={month}>
-            <h2 className="mb-4 font-mono text-xs uppercase tracking-[0.14em] text-dim">{month}</h2>
+            <h2 className="mb-4 tabular-nums text-xs uppercase tracking-[0.14em] text-dim">{month}</h2>
             <ul className="divide-y divide-line rounded-xl border border-line bg-panel/60">
               {items.map((a) => {
                 const { day, month: mon } = dayParts(a.startsAt);
                 return (
                   <li key={a.id} className="flex flex-wrap items-center gap-5 p-5 sm:flex-nowrap">
-                    <div className="w-14 shrink-0 text-center font-mono">
+                    <div className="w-14 shrink-0 text-center tabular-nums">
                       <div className="text-2xl leading-none text-gold">{day}</div>
                       <div className="mt-1 text-[11px] tracking-[0.12em] text-dim">{mon}</div>
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-base font-medium text-fg">{a.title}</h3>
                       <p className="mt-1 text-sm text-muted">{a.description}</p>
-                      <p className="mt-2 font-mono text-xs text-dim">
+                      <p className="mt-2 tabular-nums text-xs text-dim">
                         {formatEventStamp(a.startsAt)} · {a.location}
                       </p>
                     </div>

@@ -13,7 +13,7 @@ const STYLES: Record<TagKind, string> = {
 export function Tag({ kind, children }: { kind: TagKind; children?: React.ReactNode }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 font-mono text-[11px] leading-5 ${STYLES[kind]}`}
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 tabular-nums text-[11px] leading-5 ${STYLES[kind]}`}
     >
       {children ?? kind}
     </span>

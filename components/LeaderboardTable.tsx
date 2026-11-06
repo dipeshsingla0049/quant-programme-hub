@@ -19,7 +19,7 @@ export function LeaderboardTable({ rows }: { rows: Participant[] }) {
     <div className="overflow-x-auto rounded-xl border border-line bg-panel/60">
       <table className="w-full min-w-[720px] border-collapse text-sm">
         <thead>
-          <tr className="border-b border-line font-mono text-[11px] uppercase tracking-wider text-dim">
+          <tr className="border-b border-line tabular-nums text-[11px] uppercase tracking-wider text-dim">
             <th scope="col" className={`${th} text-left`}>Rank</th>
             <th scope="col" className={`${th} text-left`}>Participant</th>
             <th scope="col" className={`${th} text-right`}>Simulations</th>
@@ -35,7 +35,7 @@ export function LeaderboardTable({ rows }: { rows: Participant[] }) {
               className={`border-b border-line last:border-0 transition hover:bg-panel-2/60 ${p.rank === 1 ? "bg-gold/[0.04]" : ""}`}
             >
               <td
-                className={`border-l-2 ${td} font-mono font-medium ${rankTone(p.rank)} ${
+                className={`border-l-2 ${td} tabular-nums font-medium ${rankTone(p.rank)} ${
                   p.rank === 1 ? "border-l-gold" : "border-l-transparent"
                 }`}
               >
@@ -46,16 +46,16 @@ export function LeaderboardTable({ rows }: { rows: Participant[] }) {
                   <Avatar name={p.name} rank={p.rank} />
                   <div className="min-w-0">
                     <div className="truncate text-fg">{p.name}</div>
-                    <div className="truncate font-mono text-[11px] text-dim">{p.alias}</div>
+                    <div className="truncate tabular-nums text-[11px] text-dim">{p.alias}</div>
                   </div>
                 </div>
               </td>
-              <td className={`${td} text-right font-mono tabular-nums ${p.rank <= 3 ? "text-gold" : "text-fg"}`}>
+              <td className={`${td} text-right tabular-nums ${p.rank <= 3 ? "text-gold" : "text-fg"}`}>
                 {formatInt(p.totalSimulations)}
               </td>
-              <td className={`${td} text-right font-mono tabular-nums text-fg`}>{p.totalSubmissions}</td>
-              <td className={`${td} text-right font-mono tabular-nums text-fg`}>{formatMetric(p.avgSharpe)}</td>
-              <td className={`${td} text-right font-mono tabular-nums text-fg`}>{formatMetric(p.avgProdCorr, 3)}</td>
+              <td className={`${td} text-right tabular-nums text-fg`}>{p.totalSubmissions}</td>
+              <td className={`${td} text-right tabular-nums text-fg`}>{formatMetric(p.avgSharpe)}</td>
+              <td className={`${td} text-right tabular-nums text-fg`}>{formatMetric(p.avgProdCorr, 3)}</td>
             </tr>
           ))}
         </tbody>
@@ -114,7 +114,7 @@ export function FullReportTable({
     <div className="overflow-x-auto rounded-xl border border-line bg-panel/60">
       <table className="w-max min-w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-line bg-panel font-mono text-[11px] uppercase tracking-wider text-dim">
+          <tr className="border-b border-line bg-panel tabular-nums text-[11px] uppercase tracking-wider text-dim">
             {header("rank", "Rank", "left", "sticky left-0 z-10 bg-panel")}
             {REPORT_COLUMNS.map((c) =>
               header(c.id, c.label, c.text ? "left" : "right", c.id === "alias" ? "sticky left-16 z-10 bg-panel" : ""),
@@ -125,7 +125,7 @@ export function FullReportTable({
           {rows.map((p) => (
             <tr key={p.alias} className="group border-b border-line last:border-0">
               <td
-                className={`sticky left-0 z-10 w-16 min-w-16 border-l-2 bg-panel ${td} font-mono font-medium group-hover:bg-panel-2 ${rankTone(
+                className={`sticky left-0 z-10 w-16 min-w-16 border-l-2 bg-panel ${td} tabular-nums font-medium group-hover:bg-panel-2 ${rankTone(
                   p.rank,
                 )} ${p.rank === 1 ? "border-l-gold" : "border-l-transparent"}`}
               >
@@ -137,10 +137,10 @@ export function FullReportTable({
                   <td
                     key={c.id}
                     className={`${td} whitespace-nowrap group-hover:bg-panel-2/60 ${
-                      c.text ? "text-left text-fg" : "text-right font-mono tabular-nums text-fg"
+                      c.text ? "text-left text-fg" : "text-right tabular-nums text-fg"
                     } ${v === null ? "text-dim" : ""} ${
-                      c.id === "alias" ? "sticky left-16 z-10 bg-panel font-mono text-xs group-hover:bg-panel-2" : ""
-                    } ${c.id === "tier" ? "font-mono text-[11px] text-muted" : ""} ${
+                      c.id === "alias" ? "sticky left-16 z-10 bg-panel tabular-nums text-xs group-hover:bg-panel-2" : ""
+                    } ${c.id === "tier" ? "tabular-nums text-[11px] text-muted" : ""} ${
                       c.id === "totalSimulations" && p.rank <= 3 ? "text-gold" : ""
                     }`}
                   >

@@ -14,7 +14,7 @@ export function SectionHeading({ title, subtitle, badge, action, aside }: Props)
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
         <div className="flex flex-wrap items-center gap-3">
-          <h2 className="font-serif text-2xl text-fg sm:text-[28px]">{title}</h2>
+          <h2 className="font-semibold tracking-tight text-2xl text-fg sm:text-[28px]">{title}</h2>
           {badge}
         </div>
         {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}

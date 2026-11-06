@@ -9,7 +9,7 @@ export function Avatar({ name, rank }: { name: string; rank: number }) {
         : "bg-panel-2 text-muted border-line-2";
   return (
     <span
-      className={`inline-flex size-9 shrink-0 items-center justify-center rounded-lg border font-mono text-xs font-medium ${tone}`}
+      className={`inline-flex size-9 shrink-0 items-center justify-center rounded-lg border tabular-nums text-xs font-medium ${tone}`}
       aria-hidden
     >
       {initials(name)}

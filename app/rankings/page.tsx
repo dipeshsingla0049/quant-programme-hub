@@ -33,7 +33,7 @@ export default async function RankingsPage() {
         {tiles.map((t) => (
           <div key={t.label} className="rounded-xl border border-line bg-panel/60 p-5">
             <dt className="text-xs text-muted">{t.label}</dt>
-            <dd className="mt-2 font-mono text-2xl tabular-nums text-fg sm:text-3xl">{t.value}</dd>
+            <dd className="mt-2 tabular-nums text-2xl text-fg sm:text-3xl">{t.value}</dd>
           </div>
         ))}
       </dl>
@@ -41,13 +41,13 @@ export default async function RankingsPage() {
       <RankingsBoard participants={report.participants} universities={universities} />
 
       <section aria-labelledby="eligibility" className="mt-12 rounded-xl border border-line bg-panel/60 p-6 sm:p-8">
-        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-gold">Eligibility criteria</p>
-        <h2 id="eligibility" className="mt-2 font-serif text-2xl text-fg sm:text-3xl">{milestone.title}</h2>
+        <p className="tabular-nums text-[11px] uppercase tracking-[0.12em] text-gold">Eligibility criteria</p>
+        <h2 id="eligibility" className="mt-2 font-semibold tracking-tight text-2xl text-fg sm:text-3xl">{milestone.title}</h2>
         <p className="mt-2 text-sm text-muted">Meet all of these to be eligible for this milestone.</p>
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {milestone.eligibility.map((rule) => (
             <li key={rule.label} className="rounded-lg border border-line-2 bg-ink/60 p-5">
-              <p className="whitespace-nowrap font-mono text-3xl tabular-nums text-gold">{rule.value}</p>
+              <p className="whitespace-nowrap tabular-nums text-3xl text-gold">{rule.value}</p>
               <p className="mt-2 text-sm leading-snug text-fg">{rule.label}</p>
             </li>
           ))}

@@ -36,31 +36,31 @@ function Podium({ top }: { top: Participant[] }) {
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className={`font-serif text-5xl ${first ? "text-gold" : p.rank === 3 ? "text-gold-deep" : "text-fg"}`}>
+              <span className={`font-semibold tracking-tight text-5xl ${first ? "text-gold" : p.rank === 3 ? "text-gold-deep" : "text-fg"}`}>
                 {String(p.rank).padStart(2, "0")}
               </span>
               <Avatar name={p.name} rank={p.rank} />
             </div>
             <div className="mt-4 text-lg font-medium text-fg">{p.name}</div>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">
-              <span className="font-mono text-xs">{p.alias}</span>
+              <span className="tabular-nums text-xs">{p.alias}</span>
               <TierBadge tier={p.tier} />
             </div>
             <div className="min-h-4 flex-1" />
             <dl className="grid grid-cols-3 gap-2 border-t border-line pt-4">
               <div>
                 <dt className="text-[11px] text-muted">Simulations</dt>
-                <dd className={`font-mono text-lg tabular-nums ${first ? "text-gold" : "text-fg"}`}>
+                <dd className={`tabular-nums text-lg tabular-nums ${first ? "text-gold" : "text-fg"}`}>
                   {formatInt(p.totalSimulations)}
                 </dd>
               </div>
               <div>
                 <dt className="text-[11px] text-muted">Submissions</dt>
-                <dd className="font-mono text-lg tabular-nums text-fg">{p.totalSubmissions}</dd>
+                <dd className="tabular-nums text-lg text-fg">{p.totalSubmissions}</dd>
               </div>
               <div>
                 <dt className="text-[11px] text-muted">Avg Sharpe</dt>
-                <dd className="font-mono text-lg tabular-nums text-fg">{formatMetric(p.avgSharpe)}</dd>
+                <dd className="tabular-nums text-lg text-fg">{formatMetric(p.avgSharpe)}</dd>
               </div>
             </dl>
           </div>
@@ -168,7 +168,7 @@ export function RankingsBoard({ participants, universities }: { participants: Pa
       <FullReportTable rows={rows} sort={sort} onSort={onSort} />
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted">
-        <span className="font-mono text-xs">
+        <span className="tabular-nums text-xs">
           {filtered.length === 0
             ? "0 of 0"
             : `${current * PAGE_SIZE + 1}–${current * PAGE_SIZE + rows.length} of ${filtered.length}`}
