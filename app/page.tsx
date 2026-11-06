@@ -85,17 +85,17 @@ export default async function HomePage() {
       {/* Bulletins */}
       <section className="pb-20">
         <SectionHeading
-          title="Official Bulletins"
+          title="Announcements"
           badge={
             <span className="rounded border border-line-2 bg-panel-2 px-2 py-0.5 tabular-nums text-[11px] text-muted">
               {bulletins[0] ? <RelativeTime iso={bulletins[0].publishedAt} prefix="Updated " /> : "No bulletins yet"}
             </span>
           }
-          action={{ href: "/announcements", label: "Bulletin Archive" }}
+          action={{ href: "/announcements", label: "All announcements" }}
         />
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className={`grid gap-4 ${bulletins.length > 1 ? "md:grid-cols-3" : ""}`}>
           {bulletins.map((b) => (
-            <BulletinCard key={b.id} bulletin={b} />
+            <BulletinCard key={b.id} bulletin={b} expanded={bulletins.length === 1} />
           ))}
         </div>
       </section>

@@ -9,7 +9,7 @@ export function SiteFooter() {
           <span className="ml-2 inline-block size-1.5 rounded-full bg-gold align-middle" />
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-6 text-sm text-muted">
-          <Link href="/announcements" className="hover:text-fg">Bulletins</Link>
+          <Link href="/announcements" className="hover:text-fg">Announcements</Link>
           <a href="https://platform.worldquantbrain.com" className="hover:text-fg" target="_blank" rel="noreferrer">
             BRAIN Platform
           </a>

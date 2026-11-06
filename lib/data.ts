@@ -24,36 +24,16 @@ import type {
 
 const bulletins: Bulletin[] = [
   {
-    id: "b-4",
-    tag: "Deadline",
-    title: "Q4 Factor Formulation Dataset Cutoff for Global Sandbox Review",
-    body: "All alphas for the Q4 review must be submitted on BRAIN before the cutoff. Late submissions roll into Q1.",
-    publishedAt: "2026-11-05T10:00:00+05:30",
-    author: "NST Quant Board",
-  },
-  {
-    id: "b-3",
-    tag: "Result",
-    title: "October Alpha Cup Winners Announced: Top 10 Scholars Awarded Compute Credits",
-    body: "Congratulations to the top 10. Credits will be applied to your BRAIN accounts within the week.",
-    publishedAt: "2026-11-04T18:00:00+05:30",
-    author: "WorldQuant BRAIN Team",
-  },
-  {
-    id: "b-2",
+    id: "avg-prod-corr-leaderboard-updated",
     tag: "Announcement",
-    title: "Annual Goa Quant Leadership Retreat 2027 Qualification Criteria Published",
-    body: "Qualification is based on Grandmaster status and final leaderboard position. See the Rewards page for details.",
-    publishedAt: "2026-11-03T12:00:00+05:30",
-    author: "Dean of Research",
-  },
-  {
-    id: "b-1",
-    tag: "Announcement",
-    title: "Programme Orientation Recording and Slides Now Available",
-    body: "Missed orientation? The recording and slides are linked in the BRAIN Guide.",
-    publishedAt: "2026-10-29T09:00:00+05:30",
-    author: "NST Quant Board",
+    title: "Average Production Correlation leaderboard updated",
+    body: `The leaderboard now reflects the latest partnership report (${leaderboard.updated}). See where you stand, then check the milestone's eligibility criteria before the window closes.`,
+    publishedAt: "2026-11-06T11:53:00+05:30",
+    author: "Programme team",
+    links: [
+      { href: "/milestones", label: "View milestone" },
+      { href: "/rankings", label: "View rankings" },
+    ],
   },
 ];
 

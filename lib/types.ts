@@ -9,6 +9,8 @@ export interface Bulletin {
   body: string;
   publishedAt: string; // ISO 8601
   author: string;
+  /** Pages the announcement points to, shown as buttons. */
+  links?: { href: string; label: string }[];
 }
 
 export type UserTier = "CONSULTANT" | "CONDITIONALCONSULTANT";
