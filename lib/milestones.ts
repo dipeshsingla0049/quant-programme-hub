@@ -159,7 +159,7 @@ export const MILESTONES: Milestone[] = [
     name: "Low-Corr Sprint",
     goal: "Lowest average production correlation, with at least 10 alphas.",
     summary:
-      "A two-week sprint for original ideas. Submit at least 10 alphas between 7 and 21 November. The 10 researchers with the lowest average production correlation win.",
+      "A two-week sprint for original ideas. Submit at least 10 alphas between 7 and 21 November, within the data field and operator limits. The 10 researchers with the lowest average production correlation win.",
     start: "2026-11-07",
     end: "2026-11-21",
     reward: "$50 each",
@@ -173,6 +173,8 @@ export const MILESTONES: Milestone[] = [
         short: "Submissions",
         unit: "submissions",
       },
+      maxFields,
+      maxOperators,
     ],
     ranking: { metric: "avgProdCorr", order: "asc", winners: 10 },
     publicBoard: true,

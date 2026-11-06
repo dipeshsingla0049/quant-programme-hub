@@ -188,8 +188,8 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       if (b.score === null) return -1;
       return (a.score - b.score) * dir;
     }
-    // Tie-break: more submissions first, then name.
-    return (b.m.submissions ?? 0) - (a.m.submissions ?? 0) || a.p.name.localeCompare(b.p.name);
+    // Tie-break: more simulations first, then name.
+    return (b.m.simulations ?? 0) - (a.m.simulations ?? 0) || a.p.name.localeCompare(b.p.name);
   });
 
   let place = 0;

@@ -171,7 +171,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
       {m.ranking?.metric === "avgProdCorr" && (
         <p className="mt-3 text-sm text-muted">
           Among researchers who qualify, the lowest average production correlation ranks first. Ties go to the
-          researcher with more submissions.
+          researcher with more simulations.
         </p>
       )}
 
