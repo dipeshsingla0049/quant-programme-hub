@@ -93,6 +93,8 @@ export interface Opportunity {
   summary: string;
   /** Empty until the programme team publishes the criteria. */
   criteria: string[];
+  /** What meeting the criteria earns, e.g. "Eligible for a $2,000 quarterly stipend". */
+  reward?: string;
 }
 
 export interface RewardsProgramme {

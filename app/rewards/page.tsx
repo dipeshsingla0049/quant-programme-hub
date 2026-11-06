@@ -103,6 +103,15 @@ export default async function RewardsPage() {
                     Criteria coming soon.
                   </p>
                 )}
+                {o.reward && (
+                  <>
+                    <h4 className="mt-6 text-[11px] uppercase tracking-[0.12em] text-dim">Reward</h4>
+                    <p className="mt-3 flex items-center gap-2 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-medium text-gold">
+                      <Trophy size={16} className="shrink-0" />
+                      {o.reward}
+                    </p>
+                  </>
+                )}
               </article>
             );
           })}

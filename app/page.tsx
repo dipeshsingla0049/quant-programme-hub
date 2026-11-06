@@ -149,6 +149,11 @@ export default async function HomePage() {
                 </span>
                 <h3 className="mt-5 text-lg font-semibold tracking-tight text-fg">{o.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{o.summary}</p>
+                {o.reward && (
+                  <p className="mt-3 inline-flex items-center gap-1.5 self-start rounded-md border border-gold/30 bg-gold/10 px-2.5 py-1 text-xs font-medium text-gold">
+                    <Trophy size={12} /> {o.reward}
+                  </p>
+                )}
                 <div className="min-h-4 flex-1" />
                 <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-gold">
                   {o.criteria.length ? "See criteria" : "Criteria coming soon"}

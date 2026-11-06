@@ -125,8 +125,13 @@ const rewardsProgramme: RewardsProgramme = {
     {
       id: "master",
       title: "Master Criteria",
-      summary: "What it takes to reach Master level on BRAIN and unlock higher payouts.",
-      criteria: [],
+      summary: "What it takes to reach Master level on BRAIN and unlock higher payouts. All three in one quarter.",
+      criteria: [
+        "Submit at least 120 alphas",
+        "Complete 30 pyramids",
+        "Combined alpha performance ≥ 1",
+      ],
+      reward: "Eligible for a $2,000 quarterly stipend",
     },
     {
       id: "qrap-internship",
