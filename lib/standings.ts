@@ -152,6 +152,8 @@ export interface MilestoneStandings {
   qualified: number;
   /** Ranking value of the last place in the prize zone. */
   cutoff: string | null;
+  /** The programme week the standings fall in. */
+  week: Week | null;
 }
 
 const ZONE_ORDER: Record<Zone, number> = { prize: 0, qualified: 1, pending: 2 };
@@ -164,7 +166,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         ? milestone.end
         : latestReportDate
       : null;
-  const empty = { milestone, asOf, final: false, standings: [], notStarted: people.size, prize: 0, qualified: 0, cutoff: null };
+  const empty = { milestone, asOf, final: false, standings: [], notStarted: people.size, prize: 0, qualified: 0, cutoff: null, week: null };
   if (!asOf) return empty;
 
   const ranking = milestone.ranking;
@@ -180,7 +182,8 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     return { p, m, checks, score, qualified };
   });
 
-  const active = rows.filter((r) => (r.m.submissions ?? 0) > 0);
+  // Pass/fail boards list everyone; ranked boards list those who've submitted in the window.
+  const active = milestone.board === "passFail" ? rows : rows.filter((r) => (r.m.submissions ?? 0) > 0);
   active.sort((a, b) => {
     if (a.qualified !== b.qualified) return a.qualified ? -1 : 1;
     if (a.score !== b.score) {
@@ -221,47 +224,6 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     prize: prizeRows.length,
     qualified: standings.filter((s) => s.zone !== "pending").length,
     cutoff: ranking?.winners && prizeRows.length ? prizeRows.at(-1)!.score : null,
+    week: weekOf(asOf),
   };
-}
-
-export interface WeekResult extends Week {
-  /** The week's last day has a report. */
-  complete: boolean;
-  checks: Check[];
-  pass: boolean;
-}
-
-export interface BaselineRecord {
-  alias: string;
-  name: string;
-  university: string;
-  tier: UserTier;
-  /** Newest week first. */
-  weeks: WeekResult[];
-}
-
-/** Every researcher's Weekly Baseline result for each week so far. */
-export function getBaselineRecords(): { asOf: string | null; records: BaselineRecord[]; thisWeek: Week | null } {
-  const milestone = MILESTONES.find((m) => m.id === "weekly-baseline")!;
-  if (!latestReportDate) return { asOf: null, records: [], thisWeek: null };
-  const latest = latestReportDate;
-
-  const weeks: Week[] = [];
-  for (let w = weekOf(PROGRAMME_START); w.start <= latest; w = weekOf(addDays(w.end, 1))) weeks.unshift(w);
-
-  const records = [...people.values()]
-    .map((p) => ({
-      alias: p.alias,
-      name: p.name,
-      university: p.university,
-      tier: p.tier,
-      weeks: weeks.map((w) => {
-        const asOf = w.end < latest ? w.end : latest;
-        const checks = milestone.rules.map((r, i) => check(r, i, metricsFor(p.alias, w.start, asOf)));
-        return { ...w, complete: w.end <= latest, checks, pass: checks.every((c) => c.pass) };
-      }),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  return { asOf: latest, records, thisWeek: weeks[0] ?? null };
 }

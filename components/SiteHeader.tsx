@@ -7,11 +7,11 @@ import { useUnreadAnnouncements } from "./useUnreadAnnouncements";
 
 const NAV = [
   { href: "/", label: "Home" },
-  { href: "/weekly-baseline", label: "Weekly Baseline" },
-  { href: "/20-day-challenge", label: "20-Day Challenge" },
-  { href: "/low-corr-sprint", label: "Low-Corr Sprint" },
-  { href: "/goa-trip", label: "Goa Trip" },
-  { href: "/master", label: "Master" },
+  { href: "/weekly-baseline", label: "Baseline to Stay" },
+  { href: "/20-day-challenge", label: "$120 Challenge" },
+  { href: "/low-corr-sprint", label: "Low-Corr Sprint ($50)" },
+  { href: "/goa-trip", label: "Sponsored Goa Trip" },
+  { href: "/master", label: "Master ($2,000)" },
   { href: "/qrap-internship", label: "QRAP Internship" },
   { href: "/announcements", label: "Announcements" },
 ];
@@ -53,7 +53,7 @@ export function SiteHeader({ announcementIds }: { announcementIds: string[] }) {
           </span>
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-4 xl:flex 2xl:gap-6">
+        <nav aria-label="Main" className="hidden items-center gap-5 2xl:flex">
           {links}
         </nav>
 
@@ -73,7 +73,7 @@ export function SiteHeader({ announcementIds }: { announcementIds: string[] }) {
         </div>
       </div>
 
-      <nav aria-label="Main mobile" className="flex gap-5 overflow-x-auto border-t border-line px-4 xl:hidden">
+      <nav aria-label="Main mobile" className="flex gap-5 overflow-x-auto border-t border-line px-4 2xl:hidden">
         {links}
       </nav>
     </header>

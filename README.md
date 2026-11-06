@@ -20,10 +20,10 @@ npm run typecheck
 | Route | What it shows |
 | --- | --- |
 | `/` | November milestones (cards and timeline), latest announcements, other opportunities |
-| `/weekly-baseline` | Weekly minimum to keep your account. Researchers look up their own status; no public list |
-| `/20-day-challenge` | $120 for submitting on 20 different days by 31 Dec. Leaderboard with progress and limits |
-| `/low-corr-sprint` | 7–21 Nov, top 10 lowest avg prod corr win $50. Leaderboard with the prize zone highlighted |
-| `/goa-trip`, `/master`, `/qrap-internship` | Other opportunities and their criteria |
+| `/weekly-baseline` | **Baseline to Stay**: weekly minimum to keep your account. Everyone listed, green if cleared this week, red if not |
+| `/20-day-challenge` | **$120 Challenge**: submit on 20 different days by 31 Dec. Leaderboard with progress and limits |
+| `/low-corr-sprint` | **Low-Corr Sprint ($50 Challenge)**: 7–21 Nov, top 10 lowest avg prod corr are potential $50 winners |
+| `/goa-trip`, `/master`, `/qrap-internship` | Sponsored Goa Trip, Master ($2,000), QRAP Internship. "To be unlocked" until criteria are added |
 | `/activities` | Calendar grouped by month (`/activities/calendar.ics` is a subscribable feed) |
 | `/announcements` | Full bulletin archive |
 
@@ -52,8 +52,8 @@ Everything about the milestones (names, dates, rewards, thresholds, number of wi
 
 ```
 app/                  routes (server components)
-components/           UI. Client components: MilestoneBoard, BaselineLookup, WindowCountdown,
-                      TodayMarker, Countdown, RelativeTime, SiteHeader
+components/           UI. Client components: MilestoneBoard, WindowCountdown, TodayMarker,
+                      Countdown, RelativeTime, SiteHeader
 lib/milestones.ts     milestone config: windows, rewards, rules
 lib/standings.ts      applies the rules to the daily reports
 lib/reports.ts        parses data/reports into typed snapshots

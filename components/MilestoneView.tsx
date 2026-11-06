@@ -1,19 +1,12 @@
-import { BaselineLookup } from "@/components/BaselineLookup";
 import { EligibilityCriteria } from "@/components/EligibilityCriteria";
-import { Lock, Trophy } from "@/components/icons";
+import { ArrowRight, Lock, Trophy } from "@/components/icons";
+import { MilestoneBadge } from "@/components/MilestoneBadge";
 import { MilestoneBoard, type BoardColumn } from "@/components/MilestoneBoard";
 import { PageHeader } from "@/components/PageHeader";
 import { WindowCountdown } from "@/components/WindowCountdown";
 import { formatDay, formatDayRange } from "@/lib/format";
 import { getMilestone, type MilestoneId, type Rule } from "@/lib/milestones";
-import {
-  getBaselineRecords,
-  getStandings,
-  latestReportDate,
-  missingReportDates,
-  ruleTarget,
-  weekOf,
-} from "@/lib/standings";
+import { getStandings, latestReportDate, missingReportDates, ruleTarget, weekOf } from "@/lib/standings";
 
 const METRIC_LABEL: Record<string, string> = { avgProdCorr: "Avg prod corr", submissionDays: "Days" };
 
@@ -51,67 +44,68 @@ function JumpLinks({ links }: { links: [string, string][] }) {
   );
 }
 
-/** Full page for one November milestone: window, reward, criteria and standings. */
+/** Full page for one November milestone: window, reward, criteria and leaderboard. */
 export function MilestoneView({ id }: { id: MilestoneId }) {
   const m = getMilestone(id);
   const windowText = m.end ? formatDayRange(m.start, m.end) : `From ${formatDay(m.start)}, every week`;
   const winners = m.ranking?.winners;
-  const standings = m.publicBoard ? getStandings(id) : null;
-  const baseline = m.publicBoard ? null : getBaselineRecords();
-  const asOf = standings?.asOf ?? baseline?.asOf ?? null;
+  const passFail = m.board === "passFail";
+  const s = getStandings(id);
+  const week = s.week;
 
-  // The "right now" headline.
+  // The "right now" box.
   let now: React.ReactNode;
-  if (!asOf) {
+  if (!s.asOf) {
     now = (
       <p className="text-sm leading-relaxed text-muted">
         Standings start with the first daily report, covering {formatDay(m.start)}.
       </p>
     );
-  } else if (standings && winners) {
+  } else if (winners) {
     now = (
       <>
-        <p className="text-4xl font-semibold tabular-nums text-fg">
-          {standings.prize}
-          <span className="text-xl text-dim"> / {winners}</span>
-        </p>
-        <p className="mt-1 text-sm text-muted">prize places filled</p>
-        {standings.cutoff && (
-          <p className="mt-3 text-xs text-dim">
-            Cut-off right now: {METRIC_LABEL[m.ranking!.metric] ?? m.ranking!.metric} {standings.cutoff}
+        <p className="text-3xl font-semibold tracking-tight text-fg">Are you in the top {winners}?</p>
+        {s.cutoff && (
+          <p className="mt-2 text-sm text-muted">
+            Cut-off right now: {METRIC_LABEL[m.ranking!.metric] ?? m.ranking!.metric} {s.cutoff}
           </p>
         )}
+        <a href="#standings" className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-gold hover:text-fg">
+          Find yourself in the leaderboard <ArrowRight size={14} />
+        </a>
       </>
     );
-  } else if (standings) {
-    now = (
-      <>
-        <p className="text-4xl font-semibold tabular-nums text-fg">{standings.prize}</p>
-        <p className="mt-1 text-sm text-muted">completed so far</p>
-        <p className="mt-3 text-xs text-dim">{standings.standings.length} researchers have submitted since {formatDay(m.start)}</p>
-      </>
-    );
-  } else if (baseline) {
-    const met = baseline.records.filter((r) => r.weeks[0]?.pass).length;
-    const week = baseline.thisWeek!;
+  } else if (passFail && week) {
     now = (
       <>
         <p className="text-4xl font-semibold tabular-nums text-fg">
-          {met}
-          <span className="text-xl text-dim"> / {baseline.records.length}</span>
+          {s.prize}
+          <span className="text-xl text-dim"> / {s.standings.length}</span>
         </p>
-        <p className="mt-1 text-sm text-muted">researchers have met it in week {week.number} so far</p>
+        <p className="mt-1 text-sm text-muted">have cleared week {week.number} so far</p>
         <p className="mt-3 text-xs text-dim">Week {week.number}: {formatDayRange(week.start, week.end)}</p>
+      </>
+    );
+  } else {
+    now = (
+      <>
+        <p className="text-4xl font-semibold tabular-nums text-fg">{s.prize}</p>
+        <p className="mt-1 text-sm text-muted">completed so far</p>
+        <p className="mt-3 text-xs text-dim">{s.standings.length} researchers have submitted since {formatDay(m.start)}</p>
       </>
     );
   }
 
-  const boardTitle = m.publicBoard ? "Leaderboard" : "Check your status";
-  const zoneLabels =
-    id === "low-corr-sprint"
+  const zoneLabels = passFail
+    ? {
+        prize: { title: `Cleared week ${week?.number ?? 1} so far`, empty: "No one has cleared this week yet." },
+        qualified: { title: "Cleared" },
+        pending: { title: "Not cleared yet", empty: "Everyone has cleared this week." },
+      }
+    : winners
       ? {
-          prize: { title: `Prize zone · top ${winners} win ${m.reward}`, empty: "No one has qualified yet." },
-          qualified: { title: "Qualified · outside the top 10" },
+          prize: { title: `Top ${winners} · potential ${m.reward.replace(" each", "")} winners`, empty: "No one has qualified yet." },
+          qualified: { title: `Qualified · outside the top ${winners}` },
           pending: { title: "Not qualified yet", empty: "Everyone who has submitted has qualified." },
         }
       : {
@@ -119,21 +113,26 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
           qualified: { title: "Qualified" },
           pending: { title: "In progress", empty: "No one is in progress." },
         };
+  const prizeStatus = passFail ? "Cleared" : winners ? `Potential ${m.reward.replace(" each", "")} winner` : "Completed";
   const rankingIsRule = m.rules.some((r) => r.metric === m.ranking?.metric);
 
   return (
     <>
       <PageHeader
         eyebrow={`November milestone · ${windowText}`}
-        title={m.name}
+        title={
+          <>
+            {m.name} <MilestoneBadge badge={m.badge} size="lg" />
+          </>
+        }
         description={m.summary}
-        meta={asOf ? <>Standings from the {formatDay(asOf, true)} report. Updated daily.</> : <>Standings update daily from 7 Nov.</>}
+        meta={s.asOf ? <>Standings from the {formatDay(s.asOf, true)} report. Updated daily.</> : <>Standings update daily from 7 Nov.</>}
       />
 
       <JumpLinks
         links={[
           ["#criteria", "Criteria"],
-          ["#standings", boardTitle],
+          ["#standings", "Leaderboard"],
           ["#how-it-works", "How it's calculated"],
         ]}
       />
@@ -148,7 +147,8 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
             <p className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-fg">
               <Lock size={20} className="text-rose" /> {m.reward}
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-rose">{m.stakes}</p>
+            <p className="mt-1 text-lg font-semibold text-rose">{m.rewardDetail}</p>
+            <p className="mt-3 text-sm leading-relaxed text-muted">{m.stakes}</p>
           </Fact>
         ) : (
           <Fact label="Reward" tone="gold">
@@ -165,7 +165,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         id="criteria-title"
         title={m.ranking?.metric === "avgProdCorr" ? "Qualify, then go low" : "Meet all of these"}
         rules={m.rules.map((r) => ({ value: ruleTarget(r), label: r.label, note: r.note }))}
-        className="mt-12 scroll-mt-40 xl:scroll-mt-24"
+        className="mt-12 scroll-mt-40 2xl:scroll-mt-24"
         sectionId="criteria"
       />
       {m.ranking?.metric === "avgProdCorr" && (
@@ -175,42 +175,42 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         </p>
       )}
 
-      <section id="standings" aria-labelledby="standings-title" className="mt-16 scroll-mt-40 xl:scroll-mt-24">
+      <section id="standings" aria-labelledby="standings-title" className="mt-16 scroll-mt-40 2xl:scroll-mt-24">
         <h2 id="standings-title" className="text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
-          {boardTitle}
+          Leaderboard
         </h2>
-        {!asOf ? (
+        {!s.asOf ? (
           <p className="mt-6 rounded-xl border border-dashed border-line-2 bg-panel/40 px-5 py-10 text-center text-muted">
             The first standings appear after the {formatDay(m.start)} report is in.
           </p>
-        ) : standings ? (
-          <>
-            <p className="mt-2 mb-6 text-sm text-muted">
-              {standings.final ? "Final standings" : "Standings"} as of the {formatDay(standings.asOf!, true)} report.
-              {standings.notStarted > 0 && ` ${standings.notStarted} researchers haven't submitted in this window yet and aren't listed.`}
-            </p>
-            <MilestoneBoard
-              standings={standings.standings}
-              scoreLabel={m.ranking && !rankingIsRule ? (METRIC_LABEL[m.ranking.metric] ?? m.ranking.metric) : null}
-              columns={m.rules.map(columnFor)}
-              zoneLabels={zoneLabels}
-              prizeStatus={id === "low-corr-sprint" ? `Wins ${m.reward.replace(" each", "")}` : "Completed"}
-            />
-          </>
         ) : (
           <>
             <p className="mt-2 mb-6 text-sm text-muted">
-              There&apos;s no public list of names. Look yourself up to see this week and earlier weeks.
+              {s.final ? "Final standings" : "Standings"} as of the {formatDay(s.asOf, true)} report.
+              {passFail && week && (
+                <>
+                  {" "}
+                  Week {week.number} ({formatDayRange(week.start, week.end)}) so far.{" "}
+                  <span className="text-teal">Green</span>: cleared every rule. <span className="text-rose">Red</span>: not
+                  yet.
+                </>
+              )}
+              {!passFail && s.notStarted > 0 && ` ${s.notStarted} researchers haven't submitted in this window yet and aren't listed.`}
             </p>
-            <BaselineLookup
-              records={baseline!.records}
-              rules={m.rules.map((r) => ({ label: r.short, target: ruleTarget(r), of: r.op === ">=" ? r.value : undefined }))}
+            <MilestoneBoard
+              standings={s.standings}
+              style={m.board}
+              scoreLabel={m.ranking && !rankingIsRule ? (METRIC_LABEL[m.ranking.metric] ?? m.ranking.metric) : null}
+              columns={m.rules.map(columnFor)}
+              zoneLabels={zoneLabels}
+              prizeStatus={prizeStatus}
+              winners={winners}
             />
           </>
         )}
       </section>
 
-      <section id="how-it-works" aria-labelledby="how-title" className="mt-16 scroll-mt-40 xl:scroll-mt-24">
+      <section id="how-it-works" aria-labelledby="how-title" className="mt-16 scroll-mt-40 2xl:scroll-mt-24">
         <h2 id="how-title" className="text-xl font-semibold tracking-tight text-fg">How it&apos;s calculated</h2>
         <ul className="mt-4 max-w-3xl list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted">
           <li>
@@ -233,9 +233,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
             </li>
           )}
           {m.end && (
-            <li>
-              Standings freeze with the {formatDay(m.end)} report. Results are confirmed by the programme team.
-            </li>
+            <li>Standings freeze with the {formatDay(m.end)} report. Results are confirmed by the programme team.</li>
           )}
           {missingReportDates.length > 0 && latestReportDate && (
             <li className="text-gold">
@@ -243,9 +241,10 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
               are merged into the next day&apos;s report, so a submission day may be undercounted.
             </li>
           )}
-          {id === "weekly-baseline" && (
+          {passFail && (
             <li>
-              Weeks run Saturday to Friday. Week {weekOf(m.start).number} is {formatDayRange(weekOf(m.start).start, weekOf(m.start).end)}.
+              Weeks run Saturday to Friday. Week 1 is {formatDayRange(weekOf(m.start).start, weekOf(m.start).end)}.
+              A new week starts everyone at zero, so early in the week most rows are red.
             </li>
           )}
         </ul>

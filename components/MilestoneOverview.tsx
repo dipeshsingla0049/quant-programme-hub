@@ -1,21 +1,17 @@
 import Link from "next/link";
 import { ArrowRight, Lock, Trophy } from "@/components/icons";
+import { MilestoneBadge } from "@/components/MilestoneBadge";
 import { TodayMarker } from "@/components/TodayMarker";
 import { formatDay, formatDayRange } from "@/lib/format";
 import { MILESTONES, PROGRAMME_START, type Milestone } from "@/lib/milestones";
-import { addDays, getBaselineRecords, getStandings, ruleTarget } from "@/lib/standings";
+import { addDays, getStandings, ruleTarget } from "@/lib/standings";
 
 /** One line on where things stand, for the milestone's card. */
 function liveLine(m: Milestone): string {
-  if (!m.publicBoard) {
-    const b = getBaselineRecords();
-    if (!b.asOf || !b.thisWeek) return "Status from the first daily report";
-    const met = b.records.filter((r) => r.weeks[0]?.pass).length;
-    return `${met} of ${b.records.length} have met it in week ${b.thisWeek.number} so far`;
-  }
   const s = getStandings(m.id);
   if (!s.asOf) return "Standings from the first daily report";
-  if (m.ranking?.winners) return `${s.prize} of ${m.ranking.winners} prize places filled`;
+  if (m.board === "passFail") return `${s.prize} of ${s.standings.length} have cleared week ${s.week?.number ?? 1} so far`;
+  if (m.ranking?.winners) return `Are you in the top ${m.ranking.winners}?`;
   return `${s.prize} completed · ${s.standings.length} submitting`;
 }
 
@@ -29,11 +25,13 @@ export function MilestoneCards() {
             key={m.id}
             href={`/${m.id}`}
             className={`group flex flex-col rounded-2xl border p-6 transition sm:p-7 ${
-              stakes ? "border-line bg-panel/60 hover:border-rose/50" : "border-gold/40 bg-gold/[0.05] hover:border-gold/70"
+              stakes ? "border-rose/40 bg-rose/[0.03] hover:border-rose/70" : "border-gold/40 bg-gold/[0.05] hover:border-gold/70"
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-xl font-semibold tracking-tight text-fg">{m.name}</h3>
+              <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold tracking-tight text-fg">
+                {m.name} <MilestoneBadge badge={m.badge} />
+              </h3>
               <span className="rounded border border-line-2 bg-panel-2 px-2 py-0.5 text-[11px] tabular-nums text-muted">
                 {m.end ? formatDayRange(m.start, m.end) : `Weekly from ${formatDay(m.start)}`}
               </span>
@@ -47,7 +45,14 @@ export function MilestoneCards() {
               {stakes ? <Lock size={20} className="text-rose" /> : <Trophy size={24} />}
               {m.reward}
             </p>
-            <p className="mt-1 text-sm text-muted">{stakes ? m.stakes : m.rewardDetail}</p>
+            {stakes ? (
+              <>
+                <p className="mt-1 text-lg font-semibold text-rose">{m.rewardDetail}</p>
+                <p className="mt-1 text-sm text-muted">{m.stakes}</p>
+              </>
+            ) : (
+              <p className="mt-1 text-sm text-muted">{m.rewardDetail}</p>
+            )}
 
             <p className="mt-5 text-[15px] leading-snug text-fg">{m.goal}</p>
             <ul className="mt-4 space-y-1.5 border-t border-line pt-4 text-sm">
@@ -60,9 +65,11 @@ export function MilestoneCards() {
             </ul>
 
             <div className="min-h-5 flex-1" />
-            <p className="mt-5 text-xs tabular-nums text-dim">{liveLine(m)}</p>
+            <p className={`mt-5 tabular-nums ${m.ranking?.winners ? "text-base font-semibold text-fg" : "text-xs text-dim"}`}>
+              {liveLine(m)}
+            </p>
             <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-gold">
-              {m.publicBoard ? "See the leaderboard" : "Check your status"}
+              See the leaderboard
               <ArrowRight size={14} className="transition group-hover:translate-x-0.5" />
             </span>
           </Link>

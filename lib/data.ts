@@ -16,12 +16,12 @@ const bulletins: Bulletin[] = [
     id: "november-milestones",
     tag: "Announcement",
     title: "November milestones are here",
-    body: "Three milestones start on 7 November. The Weekly Baseline is the minimum to keep your account. The 20-Day Challenge pays $120 for submitting on 20 different days by 31 December. The Low-Corr Sprint pays $50 each to the 10 researchers with the lowest average production correlation from 7 to 21 November. Standings update daily.",
+    body: "Three milestones start on 7 November. Baseline to Stay is the weekly minimum to keep your account: miss it and you get banned. The $120 Challenge pays $120 for submitting on 20 different days by 31 December. The Low-Corr Sprint ($50 Challenge) pays $50 each to the 10 researchers with the lowest average production correlation from 7 to 21 November. Standings update daily.",
     publishedAt: "2026-11-06T18:00:00+05:30",
     author: "Programme team",
     links: [
-      { href: "/weekly-baseline", label: "Weekly Baseline" },
-      { href: "/20-day-challenge", label: "20-Day Challenge" },
+      { href: "/weekly-baseline", label: "Baseline to Stay" },
+      { href: "/20-day-challenge", label: "$120 Challenge" },
       { href: "/low-corr-sprint", label: "Low-Corr Sprint" },
     ],
   },
@@ -29,12 +29,12 @@ const bulletins: Bulletin[] = [
 
 const rewardsProgramme: RewardsProgramme = {
   // TODO(programme team): fill in each criteria list; the UI shows
-  // "Criteria coming soon" while a list is empty.
+  // "To be unlocked" while a list is empty.
   opportunities: [
     {
       id: "goa-trip",
-      title: "Goa Trip",
-      summary: "A trip to Goa for the programme's top performers.",
+      title: "Sponsored Goa Trip",
+      summary: "A sponsored trip to Goa for the programme's top performers.",
       criteria: [],
     },
     {

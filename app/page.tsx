@@ -88,7 +88,7 @@ export default async function HomePage() {
                 )}
                 <div className="min-h-4 flex-1" />
                 <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-gold">
-                  {o.criteria.length ? "See criteria" : "Criteria coming soon"}
+                  {o.criteria.length ? "See criteria" : "To be unlocked"}
                   <ArrowRight size={14} className="transition group-hover:translate-x-0.5" />
                 </span>
               </Link>

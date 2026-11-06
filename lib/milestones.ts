@@ -40,6 +40,10 @@ export interface Milestone {
   /** Also the page route: /<id>. */
   id: MilestoneId;
   name: string;
+  /** Label in the site navigation. */
+  navLabel: string;
+  /** Small tag next to the name, e.g. "Important". */
+  badge?: { text: string; tone: "rose" | "gold" };
   /** One line: what you have to do. */
   goal: string;
   summary: string;
@@ -59,8 +63,11 @@ export interface Milestone {
     /** Rewarded places. Omit when everyone who qualifies is rewarded. */
     winners?: number;
   };
-  /** False: no public list of names, researchers look themselves up. */
-  publicBoard: boolean;
+  /**
+   * prize: ranked leaderboard with the rewarded places highlighted.
+   * passFail: everyone listed, green if they've cleared every rule, red if not.
+   */
+  board: "prize" | "passFail";
 }
 
 const AVERAGE_NOTE =
@@ -89,14 +96,16 @@ const maxOperators: Rule = {
 export const MILESTONES: Milestone[] = [
   {
     id: "weekly-baseline",
-    name: "Weekly Baseline",
-    goal: "Meet the minimum every week to keep your account.",
+    name: "Baseline to Stay",
+    navLabel: "Baseline to Stay",
+    badge: { text: "Important", tone: "rose" },
+    goal: "Meet the minimum every week, or your account is banned.",
     summary:
       "The minimum every researcher must meet each week, checked individually within each of the four teams. Weeks run Saturday to Friday, starting 7 November.",
     start: PROGRAMME_START,
     end: null,
     reward: "Keep your account",
-    rewardDetail: "checked every week",
+    rewardDetail: "Don't get banned",
     stakes: "Accounts that miss the baseline will be banned. The team mentor's decision is final.",
     rules: [
       {
@@ -118,11 +127,12 @@ export const MILESTONES: Milestone[] = [
       maxFields,
       maxOperators,
     ],
-    publicBoard: false,
+    board: "passFail",
   },
   {
     id: "20-day-challenge",
-    name: "20-Day Challenge",
+    name: "$120 Challenge",
+    navLabel: "$120 Challenge",
     goal: "Submit on 20 different days by 31 December.",
     summary:
       "A long-term test of consistency. Submit alphas on 20 different days between 7 November and 31 December, keep every alpha simple, and keep your alphas different from each other.",
@@ -152,11 +162,13 @@ export const MILESTONES: Milestone[] = [
       },
     ],
     ranking: { metric: "submissionDays", order: "desc" },
-    publicBoard: true,
+    board: "prize",
   },
   {
     id: "low-corr-sprint",
     name: "Low-Corr Sprint",
+    navLabel: "Low-Corr Sprint ($50)",
+    badge: { text: "$50 Challenge", tone: "gold" },
     goal: "Lowest average production correlation, with at least 10 alphas.",
     summary:
       "A two-week sprint for original ideas. Submit at least 10 alphas between 7 and 21 November, within the data field and operator limits. The 10 researchers with the lowest average production correlation win.",
@@ -177,7 +189,7 @@ export const MILESTONES: Milestone[] = [
       maxOperators,
     ],
     ranking: { metric: "avgProdCorr", order: "asc", winners: 10 },
-    publicBoard: true,
+    board: "prize",
   },
 ];
 
