@@ -9,7 +9,11 @@ export default function config(phase: string): NextConfig {
     distDir: phase === PHASE_DEVELOPMENT_SERVER ? ".next-dev" : ".next",
     // The Rewards page was split into /goa-trip, /master and /qrap-internship.
     async redirects() {
-      return [{ source: "/rewards", destination: "/", permanent: false }];
+      return [
+        { source: "/rewards", destination: "/", permanent: false },
+        // The FAQ now lives on the Master page.
+        { source: "/faq", destination: "/master#faq", permanent: false },
+      ];
     },
   };
 }

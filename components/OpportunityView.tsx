@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckCircle, Trophy } from "@/components/icons";
+import { ArrowRight, CheckCircle, Trophy } from "@/components/icons";
 import { PageHeader } from "@/components/PageHeader";
 import { getOpportunity } from "@/lib/data";
 import type { Opportunity } from "@/lib/types";
@@ -68,6 +69,16 @@ export async function OpportunityView({ id }: { id: Opportunity["id"] }) {
           </section>
         )}
       </div>
+
+      {/* The Master page shows the FAQ itself, right below. */}
+      {id !== "master" && (
+        <Link
+          href="/master#faq"
+          className="mt-8 inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-gold transition hover:text-fg"
+        >
+          Questions about levels and criteria? Read the FAQ <ArrowRight size={14} />
+        </Link>
+      )}
     </>
   );
 }
