@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Clock } from "@/components/icons";
 import { PageHeader } from "@/components/PageHeader";
 import { RankingsBoard } from "@/components/RankingsBoard";
 import { getLeaderboard, getLeaderboardStats, getRankingTabs, getUniversities } from "@/lib/data";
@@ -52,17 +53,31 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
         })}
       </nav>
 
-      <dl className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {tiles.map((t) => (
-          <div key={t.label} className="rounded-xl border border-line bg-panel/60 p-5">
-            <dt className="text-xs text-muted">{t.label}</dt>
-            <dd className="mt-2 tabular-nums text-2xl text-fg sm:text-3xl">{t.value}</dd>
-          </div>
-        ))}
-      </dl>
+      {tab.hasLeaderboard ? (
+        <>
+        <dl className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {tiles.map((t) => (
+            <div key={t.label} className="rounded-xl border border-line bg-panel/60 p-5">
+              <dt className="text-xs text-muted">{t.label}</dt>
+              <dd className="mt-2 tabular-nums text-2xl text-fg sm:text-3xl">{t.value}</dd>
+            </div>
+          ))}
+        </dl>
 
-      {/* key resets search, filters and sort when switching tabs */}
-      <RankingsBoard key={tab.id} participants={report.participants} universities={universities} />
+        {/* key resets search, filters and sort when switching tabs */}
+        <RankingsBoard key={tab.id} participants={report.participants} universities={universities} />
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-line-2 bg-panel/40 px-6 py-20 text-center">
+          <span className="inline-flex size-14 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-gold">
+            <Clock size={22} />
+          </span>
+          <h2 className="mt-5 text-2xl font-semibold tracking-tight text-fg">Leaderboard will be updated soon</h2>
+          <p className="mt-2 max-w-md text-sm text-muted">
+            The {tab.title} standings aren&apos;t published yet. Check the eligibility criteria below in the meantime.
+          </p>
+        </div>
+      )}
 
       <section aria-labelledby="eligibility" className="mt-12 rounded-xl border border-line bg-panel/60 p-6 sm:p-8">
         <p className="tabular-nums text-[11px] uppercase tracking-[0.12em] text-gold">Eligibility criteria</p>

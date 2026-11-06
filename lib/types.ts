@@ -77,6 +77,8 @@ export interface RankingTab {
   label: string;
   title: string;
   eligibility: EligibilityRule[];
+  /** False while this tab's leaderboard isn't published yet. */
+  hasLeaderboard: boolean;
 }
 
 export interface CurrentMilestone {

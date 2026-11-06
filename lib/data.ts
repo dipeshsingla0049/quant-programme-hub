@@ -259,8 +259,8 @@ export async function getProdCorrStandings(limit = 5): Promise<{
 }
 
 /**
- * Rankings page tabs. Both use the same partnership-report leaderboard for
- * now; each tab has its own eligibility rules.
+ * Rankings page tabs. A tab with a leaderboard shows the partnership report;
+ * one without shows "will be updated soon". Each tab has its own eligibility.
  */
 export async function getRankingTabs(): Promise<RankingTab[]> {
   return [
@@ -269,12 +269,15 @@ export async function getRankingTabs(): Promise<RankingTab[]> {
       label: "Avg Production Correlation",
       title: currentMilestone.title,
       eligibility: currentMilestone.eligibility,
+      hasLeaderboard: true,
     },
     {
       id: "qcap",
       label: "QCAP $120",
       title: "QCAP $120",
       eligibility: [{ value: "≥ 20", label: "different days with a submission in the quarter" }],
+      // Set to true once the QCAP leaderboard is published.
+      hasLeaderboard: false,
     },
   ];
 }
