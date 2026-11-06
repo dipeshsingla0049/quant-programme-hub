@@ -66,7 +66,6 @@ export default async function HomePage() {
         <SectionHeading
           title="Rewards"
           subtitle="Milestone prizes and opportunities for top performers."
-          action={{ href: "/rewards", label: "All Rewards" }}
         />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr]">
           <Link
@@ -92,7 +91,7 @@ export default async function HomePage() {
             return (
               <Link
                 key={o.id}
-                href={`/rewards#${o.id}`}
+                href={`/${o.id}`}
                 className="group flex flex-col rounded-xl border border-line bg-panel/60 p-6 transition hover:border-gold/50"
               >
                 <span className="inline-flex size-10 items-center justify-center rounded-lg border border-gold/30 bg-gold/10 text-gold">

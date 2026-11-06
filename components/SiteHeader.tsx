@@ -9,7 +9,9 @@ const NAV = [
   { href: "/", label: "Home" },
   { href: "/rankings", label: "Rankings" },
   { href: "/milestones", label: "Milestones" },
-  { href: "/rewards", label: "Rewards" },
+  { href: "/goa-trip", label: "Goa Trip" },
+  { href: "/master", label: "Master" },
+  { href: "/qrap-internship", label: "QRAP Internship" },
   { href: "/announcements", label: "Announcements" },
 ];
 
@@ -50,7 +52,7 @@ export function SiteHeader({ announcementIds }: { announcementIds: string[] }) {
           </span>
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-4 md:flex lg:gap-6">
+        <nav aria-label="Main" className="hidden items-center gap-4 lg:flex xl:gap-6">
           {links}
         </nav>
 
@@ -70,7 +72,7 @@ export function SiteHeader({ announcementIds }: { announcementIds: string[] }) {
         </div>
       </div>
 
-      <nav aria-label="Main mobile" className="flex gap-5 overflow-x-auto border-t border-line px-4 md:hidden">
+      <nav aria-label="Main mobile" className="flex gap-5 overflow-x-auto border-t border-line px-4 lg:hidden">
         {links}
       </nav>
     </header>

@@ -17,6 +17,7 @@ import type {
   CurrentMilestone,
   LeaderboardReport,
   MilestoneStage,
+  Opportunity,
   Participant,
   RankingTab,
   RewardsProgramme,
@@ -118,21 +119,6 @@ const rewardsProgramme: RewardsProgramme = {
       title: "QRAP Internship",
       summary: "An internship opportunity for leading researchers.",
       criteria: [],
-    },
-  ],
-  stipends: {
-    daily: { minUsd: 1, maxUsd: 60 },
-    quarterly: { minUsd: 100, maxUsd: 25000 },
-    minSubmissionDaysPerQuarter: 20,
-  },
-  tips: [
-    {
-      title: "Quality over overfitting",
-      body: "An alpha tuned until it looks perfect in-sample usually falls apart out-of-sample. Keep ideas simple, check that they hold across periods and regions, and submit fewer, stronger alphas.",
-    },
-    {
-      title: "Aim for Master and Grandmaster",
-      body: "Higher BRAIN levels unlock higher payouts. Treat Master and Grandmaster as your targets and build a steady record of quality submissions to get there.",
     },
   ],
 };
@@ -288,6 +274,10 @@ export async function getCurrentMilestone(): Promise<CurrentMilestone> {
 
 export async function getRewardsProgramme(): Promise<RewardsProgramme> {
   return rewardsProgramme;
+}
+
+export async function getOpportunity(id: Opportunity["id"]): Promise<Opportunity | undefined> {
+  return rewardsProgramme.opportunities.find((o) => o.id === id);
 }
 
 export async function getActivities(opts: { limit?: number } = {}): Promise<Activity[]> {

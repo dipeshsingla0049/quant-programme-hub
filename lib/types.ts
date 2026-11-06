@@ -91,7 +91,7 @@ export interface CurrentMilestone {
 }
 
 export interface Opportunity {
-  /** Anchor on the Rewards page: /rewards#<id>. */
+  /** Also the page route: /<id>. */
   id: "goa-trip" | "master" | "qrap-internship";
   title: string;
   summary: string;
@@ -104,12 +104,6 @@ export interface Opportunity {
 export interface RewardsProgramme {
   milestoneIncentive: { perResearcherUsd: number; winners: number };
   opportunities: Opportunity[];
-  stipends: {
-    daily: { minUsd: number; maxUsd: number };
-    quarterly: { minUsd: number; maxUsd: number };
-    minSubmissionDaysPerQuarter: number;
-  };
-  tips: { title: string; body: string }[];
 }
 
 export type LocationType = "venue" | "virtual" | "portal";
