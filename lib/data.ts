@@ -16,10 +16,8 @@ import type {
   Bulletin,
   CurrentMilestone,
   LeaderboardReport,
-  MilestoneStage,
   Opportunity,
   Participant,
-  RankingTab,
   RewardsProgramme,
 } from "./types";
 
@@ -32,48 +30,9 @@ const bulletins: Bulletin[] = [
     publishedAt: "2026-11-06T11:53:00+05:30",
     author: "Programme team",
     links: [
-      { href: "/milestones", label: "View milestone" },
-      { href: "/rankings", label: "View rankings" },
+      { href: "/avg-prod-corr", label: "View milestone" },
+      { href: "/avg-prod-corr#leaderboard", label: "View leaderboard" },
     ],
-  },
-];
-
-const milestones: MilestoneStage[] = [
-  {
-    id: "enrolled",
-    order: 1,
-    name: "Enrolled",
-    summary: "You're in the programme and set up on WorldQuant BRAIN.",
-    requirement: "Register on BRAIN through the programme link and complete the onboarding module.",
-    unlocks: "Access to programme workshops, the BRAIN Guide and the cohort community.",
-    prestige: false,
-  },
-  {
-    id: "first-alpha",
-    order: 2,
-    name: "First Alpha",
-    summary: "Your first alpha has passed BRAIN's submission checks.",
-    requirement: "Submit at least one alpha that passes all in-sample tests on BRAIN.",
-    unlocks: "A place on the programme leaderboard and entry to monthly Alpha Cups.",
-    prestige: false,
-  },
-  {
-    id: "master",
-    order: 3,
-    name: "Master",
-    summary: "A consistent, high-quality researcher across datasets.",
-    requirement: "Reach Master level on BRAIN by sustained, low-correlation submissions.",
-    unlocks: "Research Fellowship eligibility, 1:1 mentor sessions and priority event seats.",
-    prestige: true,
-  },
-  {
-    id: "grandmaster",
-    order: 4,
-    name: "Grandmaster",
-    summary: "The programme's top tier.",
-    requirement: "Reach Grandmaster level on BRAIN and finish in the programme's top ranks.",
-    unlocks: "Qualification for the Goa Quant Leadership Retreat and fast-track researcher interviews.",
-    prestige: true,
   },
 ];
 
@@ -203,11 +162,6 @@ export async function getParticipants(): Promise<Participant[]> {
   return leaderboard.participants;
 }
 
-/** Top participants by official report rank. */
-export async function getLeaders(limit = 5): Promise<Participant[]> {
-  return leaderboard.participants.slice(0, limit);
-}
-
 export async function getUniversities(): Promise<string[]> {
   return [...new Set(leaderboard.participants.map((p) => p.university))].sort();
 }
@@ -231,10 +185,6 @@ export async function getLeaderboardStats(): Promise<LeaderboardStats> {
   };
 }
 
-export async function getMilestones(): Promise<MilestoneStage[]> {
-  return [...milestones].sort((a, b) => a.order - b.order);
-}
-
 /** Minimum submitted alphas for an average to count toward the current milestone. */
 export const PROD_CORR_MIN_SUBMISSIONS = 3;
 
@@ -256,30 +206,6 @@ export async function getProdCorrStandings(limit = 5): Promise<{
     ? eligible.reduce((n, p) => n + p.avgProdCorr!, 0) / eligible.length
     : null;
   return { leaders: sorted.slice(0, limit), eligible: eligible.length, programmeAverage };
-}
-
-/**
- * Rankings page tabs. A tab with a leaderboard shows the partnership report;
- * one without shows "will be updated soon". Each tab has its own eligibility.
- */
-export async function getRankingTabs(): Promise<RankingTab[]> {
-  return [
-    {
-      id: "prod-corr",
-      label: "Avg Production Correlation",
-      title: currentMilestone.title,
-      eligibility: currentMilestone.eligibility,
-      hasLeaderboard: true,
-    },
-    {
-      id: "qcap",
-      label: "QCAP $120",
-      title: "QCAP $120",
-      eligibility: [{ value: "≥ 20", label: "different days with a submission in the quarter" }],
-      // Set to true once the QCAP leaderboard is published.
-      hasLeaderboard: false,
-    },
-  ];
 }
 
 export async function getCurrentMilestone(): Promise<CurrentMilestone> {

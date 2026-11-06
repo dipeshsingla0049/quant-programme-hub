@@ -1,7 +1,5 @@
-import { formatInt, formatMetric } from "@/lib/format";
 import { REPORT_COLUMNS, formatCell } from "@/lib/reportColumns";
 import type { Participant } from "@/lib/types";
-import { Avatar } from "./Avatar";
 
 function rankTone(rank: number) {
   if (rank === 1) return "text-gold";
@@ -12,57 +10,6 @@ function rankTone(rank: number) {
 
 const th = "px-4 py-3 font-normal whitespace-nowrap";
 const td = "px-4 py-3.5";
-
-/** Short top-N table used on the home page. */
-export function LeaderboardTable({ rows }: { rows: Participant[] }) {
-  return (
-    <div className="overflow-x-auto rounded-xl border border-line bg-panel/60">
-      <table className="w-full min-w-[720px] border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-line tabular-nums text-[11px] uppercase tracking-wider text-dim">
-            <th scope="col" className={`${th} text-left`}>Rank</th>
-            <th scope="col" className={`${th} text-left`}>Participant</th>
-            <th scope="col" className={`${th} text-right`}>Simulations</th>
-            <th scope="col" className={`${th} text-right`}>Submissions</th>
-            <th scope="col" className={`${th} text-right`}>Avg Sharpe</th>
-            <th scope="col" className={`${th} text-right`}>Avg Prod Corr</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((p) => (
-            <tr
-              key={p.alias}
-              className={`border-b border-line last:border-0 transition hover:bg-panel-2/60 ${p.rank === 1 ? "bg-gold/[0.04]" : ""}`}
-            >
-              <td
-                className={`border-l-2 ${td} tabular-nums font-medium ${rankTone(p.rank)} ${
-                  p.rank === 1 ? "border-l-gold" : "border-l-transparent"
-                }`}
-              >
-                #{p.rank}
-              </td>
-              <td className={td}>
-                <div className="flex items-center gap-3">
-                  <Avatar name={p.name} rank={p.rank} />
-                  <div className="min-w-0">
-                    <div className="truncate text-fg">{p.name}</div>
-                    <div className="truncate tabular-nums text-[11px] text-dim">{p.alias}</div>
-                  </div>
-                </div>
-              </td>
-              <td className={`${td} text-right tabular-nums ${p.rank <= 3 ? "text-gold" : "text-fg"}`}>
-                {formatInt(p.totalSimulations)}
-              </td>
-              <td className={`${td} text-right tabular-nums text-fg`}>{p.totalSubmissions}</td>
-              <td className={`${td} text-right tabular-nums text-fg`}>{formatMetric(p.avgSharpe)}</td>
-              <td className={`${td} text-right tabular-nums text-fg`}>{formatMetric(p.avgProdCorr, 3)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 
 export interface SortState {
   /** "rank" or a REPORT_COLUMNS id. */

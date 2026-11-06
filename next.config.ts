@@ -11,6 +11,9 @@ export default function config(phase: string): NextConfig {
     async redirects() {
       return [
         { source: "/rewards", destination: "/", permanent: false },
+        // Milestones and Rankings merged into one Avg Prod Corr page.
+        { source: "/milestones", destination: "/avg-prod-corr", permanent: false },
+        { source: "/rankings", destination: "/avg-prod-corr#leaderboard", permanent: false },
         // The FAQ now lives on the Master page.
         { source: "/faq", destination: "/master#faq", permanent: false },
       ];

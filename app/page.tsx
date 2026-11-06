@@ -2,13 +2,10 @@ import Link from "next/link";
 import { BulletinCard } from "@/components/BulletinCard";
 import { ArrowRight, Briefcase, MapPin, Star, Trophy } from "@/components/icons";
 import type { Opportunity } from "@/lib/types";
-import { LeaderboardTable } from "@/components/LeaderboardTable";
 import { RelativeTime } from "@/components/RelativeTime";
 import { SectionHeading } from "@/components/SectionHeading";
 import {
   getBulletins,
-  getLeaderboard,
-  getLeaders,
   getRewardsProgramme,
 } from "@/lib/data";
 
@@ -19,12 +16,7 @@ const OPPORTUNITY_ICON: Record<Opportunity["id"], typeof Star> = {
 };
 
 export default async function HomePage() {
-  const [bulletins, leaders, programme, report] = await Promise.all([
-    getBulletins(3),
-    getLeaders(5),
-    getRewardsProgramme(),
-    getLeaderboard(),
-  ]);
+  const [bulletins, programme] = await Promise.all([getBulletins(3), getRewardsProgramme()]);
   const { milestoneIncentive: mi } = programme;
   const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
@@ -51,16 +43,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Leaders */}
-      <section className="pb-20">
-        <SectionHeading
-          title="Avg Production Correlation Leaderboard"
-          subtitle={`Ranked by total simulations · report updated ${report.updated}`}
-          action={{ href: "/rankings", label: "View Full Leaderboard" }}
-        />
-        <LeaderboardTable rows={leaders} />
-      </section>
-
       {/* Rewards */}
       <section className="border-t border-line pb-20 pt-20">
         <SectionHeading
@@ -69,7 +51,7 @@ export default async function HomePage() {
         />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr]">
           <Link
-            href="/milestones"
+            href="/avg-prod-corr"
             className="relative flex flex-col overflow-hidden rounded-xl border border-gold/40 bg-gold/[0.05] p-6 transition hover:border-gold/70 sm:p-8"
           >
             <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-gold/10 blur-3xl" />

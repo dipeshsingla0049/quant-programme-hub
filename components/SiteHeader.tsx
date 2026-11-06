@@ -7,8 +7,7 @@ import { useUnreadAnnouncements } from "./useUnreadAnnouncements";
 
 const NAV = [
   { href: "/", label: "Home" },
-  { href: "/rankings", label: "Rankings" },
-  { href: "/milestones", label: "Milestones" },
+  { href: "/avg-prod-corr", label: "Avg Prod Corr" },
   { href: "/goa-trip", label: "Goa Trip" },
   { href: "/master", label: "Master" },
   { href: "/qrap-internship", label: "QRAP Internship" },

@@ -53,32 +53,11 @@ export interface LeaderboardReport {
   participants: Participant[];
 }
 
-export interface MilestoneStage {
-  id: "enrolled" | "first-alpha" | "master" | "grandmaster";
-  order: number;
-  name: string;
-  summary: string;
-  requirement: string;
-  unlocks: string;
-  prestige: boolean;
-}
-
 export interface EligibilityRule {
   /** Shown big, e.g. "≥ 1,500". */
   value: string;
   /** What the value counts, e.g. "simulations per week". */
   label: string;
-}
-
-/** One tab on the Rankings page: a leaderboard plus its eligibility rules. */
-export interface RankingTab {
-  /** Used in the URL: /rankings?tab=<id>. */
-  id: string;
-  label: string;
-  title: string;
-  eligibility: EligibilityRule[];
-  /** False while this tab's leaderboard isn't published yet. */
-  hasLeaderboard: boolean;
 }
 
 export interface CurrentMilestone {

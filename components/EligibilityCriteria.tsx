@@ -6,15 +6,18 @@ export function EligibilityCriteria({
   title,
   rules,
   className = "",
+  sectionId,
 }: {
   /** Heading id, for aria-labelledby. Must be unique on the page. */
   id: string;
   title: string;
   rules: EligibilityRule[];
   className?: string;
+  /** Optional id on the section itself, for in-page links. */
+  sectionId?: string;
 }) {
   return (
-    <section aria-labelledby={id} className={`rounded-xl border border-line bg-panel/60 p-6 sm:p-8 ${className}`}>
+    <section id={sectionId} aria-labelledby={id} className={`rounded-xl border border-line bg-panel/60 p-6 sm:p-8 ${className}`}>
       <p className="text-[11px] uppercase tracking-[0.12em] text-gold">Eligibility criteria</p>
       <h2 id={id} className="mt-2 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
         {title}
