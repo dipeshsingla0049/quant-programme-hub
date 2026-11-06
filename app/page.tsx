@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BulletinCard } from "@/components/BulletinCard";
-import { Countdown } from "@/components/Countdown";
 import { ArrowRight, Briefcase, MapPin, Star, Trophy } from "@/components/icons";
 import type { Opportunity } from "@/lib/types";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
@@ -8,7 +7,6 @@ import { RelativeTime } from "@/components/RelativeTime";
 import { SectionHeading } from "@/components/SectionHeading";
 import {
   getBulletins,
-  getCurrentMilestone,
   getLeaderboard,
   getLeaders,
   getRewardsProgramme,
@@ -21,8 +19,7 @@ const OPPORTUNITY_ICON: Record<Opportunity["id"], typeof Star> = {
 };
 
 export default async function HomePage() {
-  const [milestone, bulletins, leaders, programme, report] = await Promise.all([
-    getCurrentMilestone(),
+  const [bulletins, leaders, programme, report] = await Promise.all([
     getBulletins(3),
     getLeaders(5),
     getRewardsProgramme(),
@@ -33,57 +30,11 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="grid gap-10 pb-20 pt-14 sm:pt-20 lg:grid-cols-[1.4fr_1fr] lg:items-center">
-        <div>
-          <h1 className="font-semibold tracking-tight text-5xl leading-[1.02] tracking-tight text-fg sm:text-6xl lg:text-7xl">
-            Track Every Alpha.
-            <br />
-            <em className="not-italic text-gold">Master Every Dimension.</em>
-          </h1>
-          <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-muted sm:text-base">
-            The official competitive research portal for Newton School of Technology scholars engineering
-            quantitative models on WorldQuant BRAIN.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/rankings"
-              className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-gold px-6 text-sm font-semibold text-ink transition hover:bg-gold/90"
-            >
-              View Rankings <ArrowRight size={16} />
-            </Link>
-            <Link
-              href="/milestones"
-              className="inline-flex min-h-12 items-center rounded-lg border border-line-2 bg-panel/60 px-6 text-sm font-medium text-fg transition hover:border-muted"
-            >
-              See Milestones
-            </Link>
-          </div>
-        </div>
-
-        <aside className="rounded-xl border border-line bg-panel/70 p-6 shadow-2xl shadow-black/30">
-          <p className="flex items-center gap-2 tabular-nums text-[11px] uppercase tracking-[0.12em] text-gold">
-            <span className="size-2 rounded-full bg-gold" />
-            Current Milestone
-          </p>
-          <h2 className="mt-5 font-semibold tracking-tight text-xl text-fg">{milestone.title}</h2>
-          <div className="mt-5 rounded-lg border border-line bg-ink/80 p-4">
-            <p className="mb-2 tabular-nums text-[10px] uppercase tracking-[0.14em] text-dim">Window closes in:</p>
-            <Countdown target={milestone.closesAt} />
-          </div>
-          <a
-            href={milestone.actionHref}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-gold text-sm font-semibold text-ink transition hover:bg-gold/90"
-          >
-            {milestone.actionLabel} on BRAIN <ArrowRight size={16} />
-          </a>
-        </aside>
-      </section>
+      {/* The page opens on announcements; this heading names the page for screen readers. */}
+      <h1 className="sr-only">Quant Research Hub</h1>
 
       {/* Bulletins */}
-      <section className="pb-20">
+      <section className="pb-20 pt-14 sm:pt-20">
         <SectionHeading
           title="Announcements"
           badge={
