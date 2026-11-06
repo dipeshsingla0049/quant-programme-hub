@@ -90,13 +90,27 @@ export interface CurrentMilestone {
   actionHref: string;
 }
 
+export interface CriteriaItem {
+  label: string;
+  /** Shows a "Mandatory" tag. */
+  mandatory?: boolean;
+}
+
+/** A set of criteria, e.g. "Mandatory" or "Combined performance (any one ≥ 1)". */
+export interface CriteriaGroup {
+  heading: string;
+  /** Explains how the group is met, e.g. "At least one of these four must be ≥ 1." */
+  note?: string;
+  items: CriteriaItem[];
+}
+
 export interface Opportunity {
   /** Also the page route: /<id>. */
   id: "goa-trip" | "master" | "qrap-internship";
   title: string;
   summary: string;
   /** Empty until the programme team publishes the criteria. */
-  criteria: string[];
+  criteria: CriteriaGroup[];
   /** What meeting the criteria earns, e.g. "Eligible for a $2,000 quarterly stipend". */
   reward?: string;
 }

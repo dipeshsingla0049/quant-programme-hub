@@ -19,14 +19,33 @@ export async function OpportunityView({ id }: { id: Opportunity["id"] }) {
             Criteria
           </h2>
           {o.criteria.length ? (
-            <ul className="mt-5 space-y-4">
-              {o.criteria.map((c) => (
-                <li key={c} className="flex gap-3 text-lg text-fg">
-                  <CheckCircle size={22} className="mt-0.5 shrink-0 text-teal" />
-                  {c}
-                </li>
+            <div className="mt-5 space-y-8">
+              {o.criteria.map((g) => (
+                <div key={g.heading}>
+                  <h3 className="text-lg font-semibold tracking-tight text-fg">{g.heading}</h3>
+                  {g.note && (
+                    <p className="mt-2 rounded-lg border border-teal/30 bg-teal/[0.06] px-4 py-3 text-sm text-teal">
+                      {g.note}
+                    </p>
+                  )}
+                  <ul className="mt-4 space-y-3">
+                    {g.items.map((c) => (
+                      <li key={c.label} className="flex items-start gap-3 text-base text-fg sm:text-lg">
+                        <CheckCircle size={20} className="mt-1 shrink-0 text-teal" />
+                        <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+                          <span>{c.label}</span>
+                          {c.mandatory && (
+                            <span className="rounded-md border border-rose/30 bg-rose/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-rose">
+                              Mandatory
+                            </span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           ) : (
             <p className="mt-5 rounded-lg border border-dashed border-line-2 px-5 py-6 text-center text-muted">
               Criteria coming soon.

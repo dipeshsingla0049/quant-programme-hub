@@ -106,11 +106,25 @@ const rewardsProgramme: RewardsProgramme = {
     {
       id: "master",
       title: "Master Criteria",
-      summary: "What it takes to reach Master level on BRAIN and unlock higher payouts. All three in one quarter.",
+      summary: "What it takes to reach Master level on BRAIN and unlock higher payouts. All within one quarter.",
       criteria: [
-        "Submit at least 120 alphas",
-        "Complete 30 pyramids",
-        "Combined alpha performance ≥ 1",
+        {
+          heading: "Required",
+          items: [
+            { label: "Submit at least 120 alphas", mandatory: true },
+            { label: "Complete 30 pyramids", mandatory: true },
+          ],
+        },
+        {
+          heading: "Combined performance",
+          note: "Only one of these four needs to meet the base criteria of ≥ 1.",
+          items: [
+            { label: "Combined Alpha Performance" },
+            { label: "Combined Selected Alpha Performance" },
+            { label: "Combined Power Pool Alpha Performance" },
+            { label: "Combined Osmosis Performance" },
+          ],
+        },
       ],
       reward: "Eligible for a $2,000 quarterly stipend",
     },
