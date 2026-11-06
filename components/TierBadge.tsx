@@ -1,4 +1,4 @@
-import { TIER_LABEL } from "@/lib/leaderboard";
+import { TIER_LABEL } from "@/lib/reports";
 import type { UserTier } from "@/lib/types";
 
 export function TierBadge({ tier }: { tier: UserTier }) {

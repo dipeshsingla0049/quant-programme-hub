@@ -1,6 +1,6 @@
 import type { EligibilityRule } from "@/lib/types";
 
-/** The eligibility box shared by the Rankings and Milestones pages. */
+/** The criteria box on each milestone page. */
 export function EligibilityCriteria({
   id,
   title,
@@ -30,6 +30,7 @@ export function EligibilityCriteria({
           <li key={rule.label} className="rounded-lg border border-line-2 bg-ink/60 p-5">
             <p className="whitespace-nowrap text-3xl tabular-nums text-gold">{rule.value}</p>
             <p className="mt-2 text-sm leading-snug text-fg">{rule.label}</p>
+            {rule.note && <p className="mt-2 text-xs leading-relaxed text-dim">{rule.note}</p>}
           </li>
         ))}
       </ul>

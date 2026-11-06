@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, CheckCircle, Trophy } from "@/components/icons";
+import { ArrowRight, CheckCircle, Lock, Trophy } from "@/components/icons";
 import { PageHeader } from "@/components/PageHeader";
 import { getOpportunity } from "@/lib/data";
 import type { Opportunity } from "@/lib/types";
@@ -63,8 +63,8 @@ export async function OpportunityView({ id }: { id: Opportunity["id"] }) {
             ))}
           </div>
         ) : (
-          <p className="rounded-2xl border border-dashed border-line-2 bg-panel/40 px-5 py-8 text-center text-muted">
-            Criteria coming soon.
+          <p className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-line-2 bg-panel/40 px-5 py-8 text-center text-muted">
+            <Lock size={16} /> To be unlocked
           </p>
         )}
       </section>
