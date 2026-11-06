@@ -21,7 +21,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen font-sans antialiased">
-        <SiteHeader unread={bulletins.length} />
+        <SiteHeader announcementIds={bulletins.map((b) => b.id)} />
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</main>
         <SiteFooter />
       </body>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Terminal } from "./icons";
+import { useUnreadAnnouncements } from "./useUnreadAnnouncements";
 
 const NAV = [
   { href: "/", label: "Home" },
@@ -16,8 +17,9 @@ function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-export function SiteHeader({ unread }: { unread: number }) {
+export function SiteHeader({ announcementIds }: { announcementIds: string[] }) {
   const pathname = usePathname();
+  const unread = useUnreadAnnouncements(announcementIds, pathname.startsWith("/announcements"));
 
   const links = NAV.map((item) => {
     const active = isActive(pathname, item.href);
@@ -55,7 +57,7 @@ export function SiteHeader({ unread }: { unread: number }) {
         <div className="flex items-center gap-1">
           <Link
             href="/announcements"
-            aria-label={`Announcements, ${unread} new`}
+            aria-label={unread > 0 ? `Announcements, ${unread} new` : "Announcements"}
             className="relative inline-flex size-11 items-center justify-center text-muted transition hover:text-fg"
           >
             <Bell size={18} />
