@@ -34,7 +34,7 @@ export default async function HomePage() {
             </p>
           </div>
           <span className="rounded border border-line-2 bg-panel-2 px-2 py-0.5 text-[11px] tabular-nums text-muted">
-            {latestReportDate ? `Data as of ${formatDay(latestReportDate, true)}` : "First report: Nov 7"}
+            {latestReportDate ? `Data up to ${formatDay(latestReportDate, true)}` : "First report: Nov 7"}
           </span>
         </div>
         <div className="mt-8 space-y-4">

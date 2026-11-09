@@ -11,7 +11,7 @@ type Cell = string | number | null;
 
 /** One stored report, as written by scripts/import-report.mjs. */
 export interface RawReport {
-  /** YYYY-MM-DD, the day the report covers up to. */
+  /** YYYY-MM-DD, the last day the report's data covers (the day before BRAIN sent it). */
   date: string;
   source: string;
   columns: string[];
@@ -27,7 +27,11 @@ function parse(report: RawReport): Snapshot {
   const idx = new Map(report.columns.map((c, i) => [c, i]));
   const col = (row: Cell[], label: string): Cell => {
     const i = idx.get(label);
-    if (i === undefined) throw new Error(`Report ${report.date} is missing column "${label}"`);
+    if (i === undefined) {
+      // BRAIN dropped OperatorsPerAlpha from the report on 9 Nov.
+      if (label === "OperatorsPerAlpha") return null;
+      throw new Error(`Report ${report.date} is missing column "${label}"`);
+    }
     return row[i] ?? null;
   };
   const num = (row: Cell[], label: string): number | null => {

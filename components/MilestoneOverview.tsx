@@ -4,15 +4,25 @@ import { MilestoneBadge } from "@/components/MilestoneBadge";
 import { TodayMarker } from "@/components/TodayMarker";
 import { formatDay, formatDayRange } from "@/lib/format";
 import { MILESTONES, PROGRAMME_START, type Milestone } from "@/lib/milestones";
-import { addDays, getStandings, ruleTarget } from "@/lib/standings";
+import { addDays, countOf, getStandings, ruleTarget } from "@/lib/standings";
 
 /** One line on where things stand, for the milestone's card. */
-function liveLine(m: Milestone): string {
+function liveLine(m: Milestone): React.ReactNode {
   const s = getStandings(m.id);
   if (!s.asOf) return "Standings from the first daily report";
-  if (m.board === "passFail") return `${s.prize} of ${s.standings.length} have cleared week ${s.week?.number ?? 1} so far`;
-  if (m.ranking?.winners) return `Are you in the top ${m.ranking.winners}?`;
-  return `${s.prize} completed · ${s.standings.length} submitting`;
+  if (m.ranking) return `Are you in the top ${m.ranking.winners}?`;
+  const [green, yellow, red] = ["green", "yellow", "red"].map((g) => countOf(s, g));
+  return (
+    <>
+      <span className="text-teal">
+        {green} {m.board === "weekly" ? `completed week ${s.week?.number}` : "eligible"}
+      </span>{" "}
+      · <span className="text-amber">{yellow} on track</span> ·{" "}
+      <span className="text-rose">
+        {red} {m.board === "weekly" ? "at risk" : "not eligible"}
+      </span>
+    </>
+  );
 }
 
 export function MilestoneCards() {
@@ -59,13 +69,20 @@ export function MilestoneCards() {
               {m.rules.map((r) => (
                 <li key={r.metric} className="flex gap-3">
                   <span className="w-16 shrink-0 tabular-nums text-gold">{ruleTarget(r)}</span>
-                  <span className="text-muted">{r.label}</span>
+                  <span className="text-muted">
+                    {r.label}
+                    {r.note?.startsWith("New.") && (
+                      <span className="ml-1.5 rounded border border-rose/40 bg-rose/10 px-1 py-px text-[10px] font-semibold uppercase tracking-wide text-rose">
+                        New
+                      </span>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>
 
             <div className="min-h-5 flex-1" />
-            <p className={`mt-5 tabular-nums ${m.ranking?.winners ? "text-base font-semibold text-fg" : "text-xs text-dim"}`}>
+            <p className={`mt-5 tabular-nums ${m.ranking ? "text-base font-semibold text-fg" : "text-xs font-medium"}`}>
               {liveLine(m)}
             </p>
             <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-gold">

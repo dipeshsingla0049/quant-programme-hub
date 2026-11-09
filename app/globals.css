@@ -21,6 +21,8 @@
   --color-rose: var(--rose);
   --color-violet: var(--violet);
   --color-sky: var(--sky);
+  --color-amber: var(--amber);
+  --color-amber-bright: var(--amber-bright);
 
   /* One typeface for everything: headings, body and numbers. */
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -45,6 +47,9 @@
   --rose: #b3332d;
   --violet: #5f43c4;
   --sky: #2556c4;
+  /* "On track" rows: dark text on a light yellow tint. */
+  --amber: #854d0e;
+  --amber-bright: #eab308;
 
   --glow: rgb(148 96 12 / 0.06);
 }

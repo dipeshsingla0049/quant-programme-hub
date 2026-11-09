@@ -32,6 +32,12 @@ export interface Rule {
   /** Decimals for showing a researcher's value. */
   decimals?: number;
   note?: string;
+  /** What to fix when a limit is broken, e.g. "avg prod corr must be below 0.8". */
+  fix?: string;
+  /** Counts calendar days, so at most one more per day left in the window. */
+  perDay?: boolean;
+  /** false: listed in the criteria but not checked on the site (no data for it). */
+  tracked?: boolean;
 }
 
 export type MilestoneId = "weekly-baseline" | "20-day-challenge" | "low-corr-sprint";
@@ -60,14 +66,17 @@ export interface Milestone {
   ranking?: {
     metric: MetricId;
     order: "asc" | "desc";
-    /** Rewarded places. Omit when everyone who qualifies is rewarded. */
-    winners?: number;
+    /** Places highlighted as potential winners. */
+    winners: number;
+    /** Alphas needed to appear in the ranking (eligibility for the reward is a rule). */
+    minAlphas: number;
   };
   /**
-   * prize: ranked leaderboard with the rewarded places highlighted.
-   * passFail: everyone listed, green if they've cleared every rule, red if not.
+   * weekly: everyone, green (completed this week) / yellow (on track) / red (at risk).
+   * target: green (eligible) / yellow (on track) / red (not eligible) / grey (not started).
+   * ranked: everyone with minAlphas ranked, top places gold, then grey groups.
    */
-  board: "prize" | "passFail";
+  board: "weekly" | "target" | "ranked";
 }
 
 const AVERAGE_NOTE =
@@ -81,6 +90,7 @@ const maxFields: Rule = {
   short: "Fields/alpha",
   decimals: 2,
   note: AVERAGE_NOTE,
+  fix: "data fields must be 4 or fewer",
 };
 
 const maxOperators: Rule = {
@@ -90,7 +100,8 @@ const maxOperators: Rule = {
   label: "operators in any alpha",
   short: "Operators/alpha",
   decimals: 2,
-  note: AVERAGE_NOTE,
+  note: "Still required, but not checked on the site for now: BRAIN's daily report no longer includes operators per alpha.",
+  tracked: false,
 };
 
 export const MILESTONES: Milestone[] = [
@@ -99,9 +110,9 @@ export const MILESTONES: Milestone[] = [
     name: "Baseline to Stay",
     navLabel: "Baseline to Stay",
     badge: { text: "Important", tone: "rose" },
-    goal: "Meet the minimum every week, or your account is banned.",
+    goal: "Meet the minimum every week, including average production correlation below 0.8, or your account is banned.",
     summary:
-      "The minimum every researcher must meet each week, checked individually within each of the four teams. Weeks run Saturday to Friday, starting 7 November.",
+      "The minimum every researcher must meet each week, checked individually within each of the four teams: 4 submission days, 1,500 simulations, at most 4 data fields per alpha and average production correlation below 0.8. Weeks run Saturday to Friday, starting 7 November.",
     start: PROGRAMME_START,
     end: null,
     reward: "Keep your account",
@@ -115,6 +126,7 @@ export const MILESTONES: Milestone[] = [
         label: "days with a submission each week",
         short: "Days",
         unit: "days",
+        perDay: true,
       },
       {
         metric: "weekSimulations",
@@ -124,10 +136,20 @@ export const MILESTONES: Milestone[] = [
         short: "Simulations",
         unit: "simulations",
       },
+      {
+        metric: "avgProdCorr",
+        op: "<",
+        value: 0.8,
+        label: "average production correlation",
+        short: "Avg prod corr",
+        decimals: 3,
+        fix: "avg prod corr must be below 0.8",
+        note: "New. Across all your alphas since 7 Nov. Checked once you've submitted an alpha.",
+      },
       maxFields,
       maxOperators,
     ],
-    board: "passFail",
+    board: "weekly",
   },
   {
     id: "20-day-challenge",
@@ -148,6 +170,7 @@ export const MILESTONES: Milestone[] = [
         label: "different days with a submission",
         short: "Days",
         unit: "days",
+        perDay: true,
         note: "The days don't need to be in a row.",
       },
       maxFields,
@@ -159,10 +182,10 @@ export const MILESTONES: Milestone[] = [
         label: "average self-correlation",
         short: "Self-corr",
         decimals: 3,
+        fix: "self-corr must be below 0.7",
       },
     ],
-    ranking: { metric: "submissionDays", order: "desc" },
-    board: "prize",
+    board: "target",
   },
   {
     id: "low-corr-sprint",
@@ -182,14 +205,15 @@ export const MILESTONES: Milestone[] = [
         op: ">=",
         value: 10,
         label: "alphas submitted from 7 Nov",
-        short: "Submissions",
-        unit: "submissions",
+        short: "Alphas",
+        unit: "alphas",
+        note: "Everyone with 2 or more alphas is ranked. You need 10 to be eligible for $50.",
       },
       maxFields,
       maxOperators,
     ],
-    ranking: { metric: "avgProdCorr", order: "asc", winners: 10 },
-    board: "prize",
+    ranking: { metric: "avgProdCorr", order: "asc", winners: 10, minAlphas: 2 },
+    board: "ranked",
   },
 ];
 
