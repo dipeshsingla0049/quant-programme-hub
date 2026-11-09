@@ -1,0 +1,13 @@
+{
+  "_note": "Researchers left out of the site. `npm run import:report` drops these aliases from every report it imports. Re-import a report after editing this list.",
+  "aliases": {
+    "DS14043": "Dipesh Singla",
+    "AT77782": "Ankita Thakur",
+    "PA20370": "Priyanshu Agrahari",
+    "MM33350": "Mihika Mathur",
+    "VV90616": "Vani Vashishtha",
+    "SP22843": "Satvik Prasad",
+    "SB42503": "Sudeshhna Behera",
+    "AS22582": "Ankit Raj Singh"
+  }
+}
