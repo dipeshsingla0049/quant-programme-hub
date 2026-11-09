@@ -14,7 +14,8 @@
  *
  * Only the columns in KEEP are stored. Email addresses, BRAIN user IDs and any
  * other column never reach the site. Columns in OPTIONAL may be missing from a
- * report; the site then doesn't judge that rule.
+ * report; the site then doesn't judge that rule. Aliases listed in
+ * data/excluded.json are dropped from every report.
  */
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -123,7 +124,10 @@ const cell = (raw, key) => {
   if (Number.isNaN(n)) throw new Error(`"${key}" should be a number, got "${v}"`);
   return Number.isInteger(n) ? n : Math.round(n * 1e4) / 1e4;
 };
-const rows = body.map((r) => at.map((i, k) => cell(r[i], stored[k])));
+const excluded = new Set(Object.keys(JSON.parse(await readFile(path.join(root, "data", "excluded.json"), "utf8")).aliases));
+const all = body.map((r) => at.map((i, k) => cell(r[i], stored[k])));
+const rows = all.filter((r) => !excluded.has(r[0]));
+if (all.length > rows.length) console.log(`Left out ${all.length - rows.length} researcher(s) listed in data/excluded.json.`);
 
 const aliases = rows.map((r) => r[0]);
 const dupes = [...new Set(aliases.filter((a, i) => aliases.indexOf(a) !== i))];
