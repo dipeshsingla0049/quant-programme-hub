@@ -9,11 +9,9 @@ import { getMilestone, type MilestoneId, type Rule } from "@/lib/milestones";
 import {
   countOf,
   getStandings,
-  mergedReports,
   paceFor,
   ruleTarget,
   trackedRules,
-  weekOf,
   type Tone,
 } from "@/lib/standings";
 
@@ -55,9 +53,10 @@ function JumpLinks({ links }: { links: [string, string][] }) {
 
 const SWATCH: Record<Tone, string> = {
   green: "border-teal bg-teal/15",
+  blue: "border-sky bg-sky/10",
   yellow: "border-amber-bright bg-amber-bright/25",
   red: "border-rose bg-rose/15",
-  gold: "border-gold bg-gold/15",
+  gold: "border-amber-bright bg-amber-bright/40",
   plain: "border-line-2 bg-panel",
   grey: "border-line-2 bg-panel-2",
 };
@@ -88,7 +87,6 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
   const week = s.week;
   const prize = m.reward.replace(" each", "");
   const rules = trackedRules(m);
-  const untracked = m.rules.filter((r) => r.tracked === false);
   const count = (g: string) => countOf(s, g);
 
   // The "right now" box.
@@ -126,10 +124,16 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         </p>
         <p className="mt-1 text-sm text-muted">{weekly ? `completed week ${week?.number}` : `eligible for ${prize} so far`}</p>
         <p className="mt-3 text-sm">
-          <span className="font-medium text-amber">{count("yellow")} on track</span>
+          <span className="font-medium text-sky">{count("ontrack")} on track</span>
+          {weekly && (
+            <>
+              <span className="text-dim"> · </span>
+              <span className="font-medium text-amber">{count("atrisk")} at risk</span>
+            </>
+          )}
           <span className="text-dim"> · </span>
           <span className="font-medium text-rose">
-            {count("red")} {weekly ? "at risk of removal" : "not eligible right now"}
+            {count("red")} {weekly ? "very behind or breaking a rule" : "not eligible right now"}
           </span>
         </p>
         {weekly && week && (
@@ -144,25 +148,26 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
   const ruleOf = (metric: string) => rules.find((r) => r.metric === metric);
   let legend: [Tone, string, string][] = [];
   if (m.board === "weekly" && s.weekDay) {
-    const days = paceFor(ruleOf("weekSubmissionDays")!, s.weekDay);
-    const sims = paceFor(ruleOf("weekSimulations")!, s.weekDay);
+    const days = paceFor(ruleOf("weekSubmissionDays")!, s.weekDay - 1);
+    const sims = paceFor(ruleOf("weekSimulations")!, s.weekDay - 1);
     legend = [
       ["green", `Completed week ${week?.number}`, "Every rule met for this week."],
       [
-        "yellow",
+        "blue",
         "On track",
-        `At or above this week's pace (day ${s.weekDay} of 7: ${days} ${days === 1 ? "day" : "days"} and ${sims.toLocaleString("en-US")} simulations), 4 days still reachable, no limit broken.`,
+        `Keeping pace (day ${s.weekDay} of 7: at least ${days ? `${days} ${days === 1 ? "day" : "days"} and ` : ""}${sims.toLocaleString("en-US")} simulations so far), no rule broken.`,
       ],
+      ["yellow", "At risk", "Behind pace, but 4 days are still reachable. Catch up this week."],
       [
         "red",
-        "At risk of removal",
-        "Behind pace, can't reach 4 days this week, avg prod corr 0.8 or higher, or more than 4 data fields per alpha.",
+        "Very behind or breaking a rule",
+        "No activity this week, can't reach 4 days, avg prod corr 0.8 or higher, or more than 4 data fields per alpha.",
       ],
     ];
   } else if (m.board === "target") {
     legend = [
       ["green", `Eligible for ${prize}`, "20 days, self-corr below 0.7 and at most 4 data fields per alpha."],
-      ["yellow", "On track", `Still time to reach 20 days by ${formatDay(m.end!)}, no limit broken.`],
+      ["blue", "On track", `Still time to reach 20 days by ${formatDay(m.end!)}, no limit broken.`],
       ["red", "Not eligible right now", "Self-corr 0.7 or higher, more than 4 data fields, or 20 days no longer reachable."],
       ["grey", "Not started", "No alphas submitted yet."],
     ];
@@ -171,11 +176,11 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
       [
         "gold",
         `Top ${winners}`,
-        `Lowest avg prod corr among everyone with ${m.ranking!.minAlphas}+ alphas. A potential ${prize} winner once you have 10 alphas.`,
+        `Lowest avg prod corr among everyone with ${m.ranking!.minAlphas}+ alphas and at most 4 data fields per alpha. A potential ${prize} winner once you have 10 alphas.`,
       ],
-      ["plain", `Ranked ${winners! + 1} and below`, `${m.ranking!.minAlphas}+ alphas, outside the top ${winners}.`],
-      ["grey", "Not ranked yet", `Fewer than ${m.ranking!.minAlphas} alphas. Submit more alphas to be ranked.`],
-      ["grey", "Not started", "No alphas submitted yet."],
+      ["plain", `Ranked ${winners! + 1} and below`, `Within the rules, outside the top ${winners}.`],
+      ["red", "Can't win right now", "More than 4 data fields per alpha. Not ranked until it's back to 4 or fewer."],
+      ["grey", "Not ranked yet · Not started", `Fewer than ${m.ranking!.minAlphas} alphas, or none yet.`],
     ];
   }
   const rankingIsRule = rules.some((r) => r.metric === m.ranking?.metric);
@@ -197,7 +202,6 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         links={[
           ["#criteria", "Criteria"],
           ["#standings", "Leaderboard"],
-          ["#how-it-works", "How it's calculated"],
         ]}
       />
 
@@ -234,8 +238,9 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
       />
       {m.ranking?.metric === "avgProdCorr" && (
         <p className="mt-3 text-sm text-muted">
-          Everyone with {m.ranking.minAlphas} or more alphas is ranked, lowest average production correlation first.
-          Ties go to the researcher with more simulations. To be eligible for {prize} you need at least 10 alphas.
+          Everyone with {m.ranking.minAlphas} or more alphas and at most 4 data fields per alpha is ranked, lowest
+          average production correlation first. Ties go to the researcher with more simulations. More than 4 data
+          fields means you can&apos;t win. To be eligible for {prize} you need at least 10 alphas.
         </p>
       )}
 
@@ -266,66 +271,6 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         )}
       </section>
 
-      <section id="how-it-works" aria-labelledby="how-title" className="mt-16 scroll-mt-40 2xl:scroll-mt-24">
-        <h2 id="how-title" className="text-xl font-semibold tracking-tight text-fg">How it&apos;s calculated</h2>
-        <ul className="mt-4 max-w-3xl list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted">
-          <li>
-            Standings come from the WorldQuant BRAIN partnership report, refreshed daily. From 7 Nov the report
-            counts only activity since 7 Nov. Each report arrives the morning after, so the report sent on 9 Nov has
-            data up to 8 Nov.
-          </li>
-          {m.rules.some((r) => r.metric === "submissionDays" || r.metric === "weekSubmissionDays") && (
-            <li>
-              A day counts as a submission day when your submission total went up since the previous day&apos;s
-              report.
-              {mergedReports.length > 0 && (
-                <>
-                  {" "}
-                  {mergedReports.map((r) => formatDayRange(r.from, r.to)).join(", ")} came in one report, so days there
-                  are estimated: each new alpha counts as one day, up to the days covered (2 or more alphas = 2 days,
-                  1 alpha = 1 day).
-                </>
-              )}
-            </li>
-          )}
-          {m.rules.some((r) => r.metric === "weekSimulations") && (
-            <li>Simulations each week are your total at the end of the week minus your total at the start.</li>
-          )}
-          {m.board === "weekly" && (
-            <li>
-              Pace: by day N of the week you should have N/7 of each target (whole days rounded down). Being behind
-              pace, being unable to reach 4 days, or breaking a limit puts you in red.
-            </li>
-          )}
-          {m.rules.some((r) => r.metric === "avgProdCorr" && r.op !== ">=") && (
-            <li>
-              Average production correlation is across all your alphas since 7 Nov. It&apos;s only checked once
-              you&apos;ve submitted an alpha.
-            </li>
-          )}
-          {m.rules.some((r) => r.metric === "datafieldsPerAlpha") && (
-            <li>
-              The report gives average data fields per alpha across all your alphas since 7 Nov, so that average is
-              what&apos;s shown. The rule applies to every single alpha.
-            </li>
-          )}
-          {untracked.length > 0 && (
-            <li>
-              BRAIN&apos;s daily report no longer includes operators per alpha, so the site doesn&apos;t check the
-              operator limit for now. It still applies.
-            </li>
-          )}
-          {m.end && (
-            <li>Standings freeze with the data for {formatDay(m.end)}. Results are confirmed by the programme team.</li>
-          )}
-          {m.board === "weekly" && (
-            <li>
-              Weeks run Saturday to Friday. Week 1 is {formatDayRange(weekOf(m.start).start, weekOf(m.start).end)}.
-              A new week starts everyone at zero. From week 2 the board also shows whether you met the previous week.
-            </li>
-          )}
-        </ul>
-      </section>
     </>
   );
 }

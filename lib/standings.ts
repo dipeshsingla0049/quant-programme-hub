@@ -103,7 +103,11 @@ export function ruleTarget(rule: Rule): string {
   return `${OP[rule.op]} ${num(rule.value)}`;
 }
 
-/** Weekly pace: by day N of the week, N/7 of the target (whole days rounded down). */
+/**
+ * Weekly pace with one day of grace: by day N of the week you need what an
+ * even pace gives by day N − 1, i.e. (N − 1)/7 of the target (whole days
+ * rounded down). Pass N − 1 as weekDay.
+ */
 export function paceFor(rule: Rule, weekDay: number): number {
   const pace = (rule.value * weekDay) / 7;
   return rule.perDay ? Math.floor(pace) : Math.round(pace);
@@ -122,7 +126,7 @@ export interface Check {
   state: "pass" | "fail" | "open" | "na";
 }
 
-export type Tone = "green" | "yellow" | "red" | "gold" | "plain" | "grey";
+export type Tone = "green" | "blue" | "yellow" | "red" | "gold" | "plain" | "grey";
 
 export interface Standing {
   alias: string;
@@ -245,7 +249,8 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     const left = 7 - weekDay;
     const prev = week.number > 1 ? addDays(week.start, -1) : null;
     const green: Row[] = [];
-    const yellow: Row[] = [];
+    const onTrack: Row[] = [];
+    const atRisk: Row[] = [];
     const red: Row[] = [];
     const flags = new Map<Row, string[]>();
     for (const r of everyone) {
@@ -255,21 +260,24 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       }
       const progress = rules.filter((x) => x.op === ">=");
       const unreachable = progress.filter((x) => x.perDay && (r.m[x.metric] ?? 0) + left < x.value);
-      const slow = progress.filter((x) => (r.m[x.metric] ?? 0) < paceFor(x, weekDay));
-      const behind = slow.length > 0;
+      const slow = progress.filter((x) => (r.m[x.metric] ?? 0) < paceFor(x, weekDay - 1));
       for (const x of [...unreachable, ...slow]) r.a.checks[rules.indexOf(x)].state = "fail";
       const idle = progress.every((x) => !r.m[x.metric]);
-      const f = idle
-        ? ["No activity this week"]
-        : [
-            ...unreachable.map((x) => `Can't reach ${num(x.value)} ${x.unit} this week`),
-            ...(behind && !unreachable.length ? ["Behind pace"] : []),
-            ...r.a.brokenFlags,
-          ];
-      if (f.length) {
-        flags.set(r, f);
+      if (!left) {
+        // The week is over: completed or missed.
+        flags.set(r, [`Missed week ${week.number}`, ...r.a.brokenFlags]);
         red.push(r);
-      } else yellow.push(r);
+      } else if (unreachable.length || r.a.broken.length || (idle && slow.length)) {
+        // Very behind or breaking a rule.
+        flags.set(r, [
+          ...(idle ? ["No activity this week"] : unreachable.map((x) => `Can't reach ${num(x.value)} ${x.unit} this week`)),
+          ...r.a.brokenFlags,
+        ]);
+        red.push(r);
+      } else if (slow.length) {
+        flags.set(r, ["Behind pace"]);
+        atRisk.push(r);
+      } else onTrack.push(r);
     }
     const bySims = (a: Row, b: Row) => (b.m.weekSimulations ?? 0) - (a.m.weekSimulations ?? 0) || byName(a, b);
     const byDays = (a: Row, b: Row) => (b.m.weekSubmissionDays ?? 0) - (a.m.weekSubmissionDays ?? 0) || bySims(a, b);
@@ -289,8 +297,14 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         empty: "No one has completed this week yet.",
         rows: green.sort(bySims).map(toStanding),
       },
-      { id: "yellow", title: "On track", tone: "yellow", rows: yellow.sort(byDays).map(toStanding) },
-      { id: "red", title: "At risk of removal", tone: "red", rows: red.sort(byDays).map(toStanding) },
+      { id: "ontrack", title: "On track", tone: "blue", rows: onTrack.sort(byDays).map(toStanding) },
+      { id: "atrisk", title: "At risk · behind pace", tone: "yellow", rows: atRisk.sort(byDays).map(toStanding) },
+      {
+        id: "red",
+        title: left ? "Very behind or breaking a rule" : `Missed week ${week.number}`,
+        tone: "red",
+        rows: red.sort(byDays).map(toStanding),
+      },
     ];
   } else if (milestone.board === "target") {
     const left = milestone.end ? Math.max(0, daysBetween(asOf, milestone.end)) : Infinity;
@@ -333,7 +347,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         empty: "No one is eligible yet.",
         rows: green.sort(byDays).map(toStanding),
       },
-      { id: "yellow", title: "On track", tone: "yellow", rows: yellow.sort(byDays).map(toStanding) },
+      { id: "ontrack", title: "On track", tone: "blue", rows: yellow.sort(byDays).map(toStanding) },
       { id: "red", title: "Not eligible right now", tone: "red", rows: red.sort(byDays).map(toStanding) },
       { id: "not-started", title: "Not started", tone: "grey", rows: grey.sort(byName).map(toStanding) },
     ];
@@ -342,10 +356,14 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     const dir = ranking.order === "asc" ? 1 : -1;
     const decimals = ranking.metric === "avgProdCorr" ? 4 : 0;
     const score = (r: Row) => r.m[ranking.metric];
+    const byScore = (a: Row, b: Row) =>
+      ((score(a) ?? Infinity) - (score(b) ?? Infinity)) * dir || (b.m.simulations ?? 0) - (a.m.simulations ?? 0) || byName(a, b);
+    // Breaking a limit (e.g. more than 4 data fields) rules you out of the ranking: you can't win.
+    const ruledOut = everyone.filter((r) => r.m.submissions && r.a.broken.length > 0);
     const ranked = everyone
-      .filter((r) => (r.m.submissions ?? 0) >= ranking.minAlphas && score(r) !== null)
-      .sort((a, b) => (score(a)! - score(b)!) * dir || (b.m.simulations ?? 0) - (a.m.simulations ?? 0) || byName(a, b));
-    const unranked = everyone.filter((r) => r.m.submissions && !ranked.includes(r));
+      .filter((r) => (r.m.submissions ?? 0) >= ranking.minAlphas && score(r) !== null && !r.a.broken.length)
+      .sort(byScore);
+    const unranked = everyone.filter((r) => r.m.submissions && !ranked.includes(r) && !ruledOut.includes(r));
     const grey = everyone.filter((r) => !r.m.submissions);
     const toRanked = (r: Row, i: number) => {
       const top = i < ranking.winners;
@@ -374,11 +392,24 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       },
       { id: "rest", title: `Ranked ${ranking.winners + 1} and below`, tone: "plain", rows: rows.slice(ranking.winners) },
       {
+        id: "ruled-out",
+        title: "Can't win right now · breaking a rule",
+        tone: "red",
+        rows: ruledOut.sort(byScore).map((r) => ({
+          ...standing(r.p, {
+            checks: r.a.checks,
+            flags: r.a.brokenFlags,
+            needed: `${sentence(r.a.fixes)} to be ranked and win ${prize}`,
+          }),
+          score: formatValue(score(r), decimals),
+        })),
+      },
+      {
         id: "not-ranked",
         title: "Not ranked yet",
         tone: "grey",
         rows: unranked
-          .sort((a, b) => ((score(a) ?? Infinity) - (score(b) ?? Infinity)) * dir || byName(a, b))
+          .sort(byScore)
           .map((r) => ({
             ...plain(r, score(r) === null ? "No production correlation in the report yet" : "Submit more alphas to be ranked"),
             score: formatValue(score(r), decimals),

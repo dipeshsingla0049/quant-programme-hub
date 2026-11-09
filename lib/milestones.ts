@@ -207,7 +207,7 @@ export const MILESTONES: Milestone[] = [
         label: "alphas submitted from 7 Nov",
         short: "Alphas",
         unit: "alphas",
-        note: "Everyone with 2 or more alphas is ranked. You need 10 to be eligible for $50.",
+        note: "Everyone with 2 or more alphas within the data field limit is ranked. You need 10 to be eligible for $50.",
       },
       maxFields,
       maxOperators,

@@ -20,8 +20,8 @@ npm run typecheck
 | Route | What it shows |
 | --- | --- |
 | `/` | November milestones (cards and timeline), latest announcements, other opportunities |
-| `/weekly-baseline` | **Baseline to Stay**: weekly minimum to keep your account (4 days, 1,500 simulations, ≤ 4 fields/alpha, avg prod corr < 0.8). Green completed this week, yellow on track, red at risk of removal |
-| `/20-day-challenge` | **$120 Challenge**: submit on 20 different days by 31 Dec. Green eligible, yellow on track, red not eligible right now, grey not started |
+| `/weekly-baseline` | **Baseline to Stay**: weekly minimum to keep your account (4 days, 1,500 simulations, ≤ 4 fields/alpha, avg prod corr < 0.8). Green completed this week, blue on track, yellow at risk, red very behind or breaking a rule |
+| `/20-day-challenge` | **$120 Challenge**: submit on 20 different days by 31 Dec. Green eligible, blue on track, red not eligible right now, grey not started |
 | `/low-corr-sprint` | **Low-Corr Sprint ($50 Challenge)**: 7–21 Nov. Everyone with 2+ alphas ranked by lowest avg prod corr, top 10 in gold; 10 alphas needed to be eligible for $50 |
 | `/goa-trip`, `/master`, `/qrap-internship` | Sponsored Goa Trip, Master ($2,000), QRAP Internship. "To be unlocked" until criteria are added |
 | `/activities` | Calendar grouped by month (`/activities/calendar.ics` is a subscribable feed) |
@@ -56,9 +56,9 @@ coloured groups; pages follow automatically.
 
 | Board | Groups, in order |
 | --- | --- |
-| Baseline to Stay | green completed this week · yellow on track (at or above this week's pace: by day N, N/7 of each target) · red at risk (behind pace, can't reach 4 days, or a limit broken) |
-| $120 Challenge | green eligible · yellow on track · red not eligible right now (a limit broken or 20 days out of reach) · grey not started |
-| Low-Corr Sprint | gold top 10 of everyone with 2+ alphas · ranked 11 and below · grey not ranked yet · grey not started |
+| Baseline to Stay | green completed this week · blue on track (keeping pace with one day of grace: by day N, (N − 1)/7 of each target) · yellow at risk (behind pace, 4 days still reachable) · red very behind or breaking a rule (no activity, 4 days out of reach, or a limit broken) |
+| $120 Challenge | green eligible · blue on track · red not eligible right now (a limit broken or 20 days out of reach) · grey not started |
+| Low-Corr Sprint | gold top 10 of everyone with 2+ alphas and ≤ 4 fields/alpha · ranked 11 and below · red can't win (more than 4 fields/alpha, not ranked) · grey not ranked yet · grey not started |
 
 Every row has a "What's needed" line.
 

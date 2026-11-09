@@ -16,7 +16,7 @@ const bulletins: Bulletin[] = [
     id: "baseline-prod-corr",
     tag: "Announcement",
     title: "Baseline to Stay: average production correlation must be below 0.8",
-    body: "Baseline to Stay now also needs your average production correlation below 0.8, on top of 4 submission days and 1,500 simulations a week with at most 4 data fields per alpha. The Baseline leaderboard is colour-coded: green has completed this week, yellow is on track, red is at risk of removal. Find your name and see exactly what you still need.",
+    body: "Baseline to Stay now also needs your average production correlation below 0.8, on top of 4 submission days and 1,500 simulations a week with at most 4 data fields per alpha. The Baseline leaderboard is colour-coded: green has completed this week, blue is on track, yellow is at risk (behind pace), red is very behind or breaking a rule. Find your name and see exactly what you still need.",
     publishedAt: "2026-11-09T12:00:00+05:30",
     author: "Programme team",
     links: [{ href: "/weekly-baseline", label: "Baseline to Stay" }],

@@ -11,15 +11,21 @@ function liveLine(m: Milestone): React.ReactNode {
   const s = getStandings(m.id);
   if (!s.asOf) return "Standings from the first daily report";
   if (m.ranking) return `Are you in the top ${m.ranking.winners}?`;
-  const [green, yellow, red] = ["green", "yellow", "red"].map((g) => countOf(s, g));
+  const [green, onTrack, atRisk, red] = ["green", "ontrack", "atrisk", "red"].map((g) => countOf(s, g));
+  const weekly = m.board === "weekly";
   return (
     <>
       <span className="text-teal">
-        {green} {m.board === "weekly" ? `completed week ${s.week?.number}` : "eligible"}
+        {green} {weekly ? `completed week ${s.week?.number}` : "eligible"}
       </span>{" "}
-      · <span className="text-amber">{yellow} on track</span> ·{" "}
+      · <span className="text-sky">{onTrack} on track</span> ·{" "}
+      {weekly && (
+        <>
+          <span className="text-amber">{atRisk} at risk</span> ·{" "}
+        </>
+      )}
       <span className="text-rose">
-        {red} {m.board === "weekly" ? "at risk" : "not eligible"}
+        {red} {weekly ? "very behind" : "not eligible"}
       </span>
     </>
   );

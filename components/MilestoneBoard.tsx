@@ -21,6 +21,13 @@ const TONE: Record<Tone, { body: string; edge: string; heading: string; pill: st
     pill: "border-teal/40 bg-teal/10 text-teal",
     text: "text-teal",
   },
+  blue: {
+    body: "bg-sky/[0.07]",
+    edge: "border-l-sky",
+    heading: "text-sky",
+    pill: "border-sky/40 bg-sky/10 text-sky",
+    text: "text-sky",
+  },
   yellow: {
     body: "bg-amber-bright/[0.13]",
     edge: "border-l-amber-bright",
@@ -29,7 +36,13 @@ const TONE: Record<Tone, { body: string; edge: string; heading: string; pill: st
     text: "text-amber",
   },
   red: { body: "bg-rose/[0.08]", edge: "border-l-rose", heading: "text-rose", pill: "border-rose/40 bg-rose/10 text-rose", text: "text-rose" },
-  gold: { body: "bg-gold/[0.07]", edge: "border-l-gold", heading: "text-gold", pill: "border-gold/40 bg-gold/10 text-gold", text: "text-fg" },
+  gold: {
+    body: "bg-linear-to-r from-amber-bright/30 via-amber-bright/[0.12] to-amber-bright/[0.04]",
+    edge: "border-l-amber-bright",
+    heading: "text-gold-deep",
+    pill: "border-gold/50 bg-amber-bright/25 text-gold-deep",
+    text: "text-fg",
+  },
   plain: { body: "", edge: "border-l-transparent", heading: "text-muted", pill: "", text: "text-muted" },
   grey: { body: "bg-panel-2/50", edge: "border-l-line-2", heading: "text-dim", pill: "", text: "text-dim" },
 };
@@ -127,6 +140,7 @@ export function MilestoneBoard({
                     scope="colgroup"
                     className={`border-l-4 px-4 py-2.5 text-left text-xs font-semibold ${tone.edge} ${tone.heading}`}
                   >
+                    {g.tone === "gold" && <span aria-hidden>🏆 </span>}
                     {g.title} <span className="ml-1 font-normal tabular-nums text-dim">· {q ? `${g.rows.length} of ${total}` : total}</span>
                     {collapsible && (
                       <button
@@ -151,7 +165,7 @@ export function MilestoneBoard({
                   g.rows.map((s) => (
                     <tr key={s.alias} className={`border-b border-l-4 border-line last:border-b-0 ${tone.edge}`}>
                       {ranked && (
-                        <td className={`px-4 py-3 tabular-nums ${g.tone === "gold" ? "font-semibold text-gold" : "text-dim"}`}>
+                        <td className={`px-4 py-3 tabular-nums ${g.tone === "gold" ? "font-bold text-gold-deep" : "text-dim"}`}>
                           {s.position ?? "—"}
                         </td>
                       )}
@@ -159,7 +173,18 @@ export function MilestoneBoard({
                         <div className="flex items-center gap-3">
                           <Avatar name={s.name} rank={s.position === 1 ? 1 : 0} />
                           <div className="min-w-0">
-                            <div className={`truncate font-medium ${g.tone === "grey" ? "text-muted" : "text-fg"}`}>{s.name}</div>
+                            <div
+                              className={`truncate ${
+                                g.tone === "gold" ? "font-semibold text-gold-deep" : g.tone === "grey" ? "font-medium text-muted" : "font-medium text-fg"
+                              }`}
+                            >
+                              {s.name}
+                              {g.tone === "gold" && (
+                                <span role="img" aria-label="top 10" className="ml-1.5">
+                                  🏆
+                                </span>
+                              )}
+                            </div>
                             <div className="truncate text-[11px] text-dim">
                               <span className="tabular-nums">{s.alias}</span> · {s.university}
                             </div>
@@ -169,7 +194,7 @@ export function MilestoneBoard({
                       {scoreLabel && (
                         <td
                           className={`px-4 py-3 text-right text-base tabular-nums ${
-                            g.tone === "gold" ? "font-semibold text-gold" : g.tone === "grey" ? "text-dim" : "text-fg"
+                            g.tone === "gold" ? "font-bold text-gold-deep" : g.tone === "grey" ? "text-dim" : "text-fg"
                           }`}
                         >
                           {s.score ?? "—"}
@@ -214,7 +239,9 @@ export function MilestoneBoard({
                         </td>
                       )}
                       <td className="px-4 py-3 text-xs leading-relaxed">
-                        {s.flags.length > 0 && <div className="font-semibold text-rose">{s.flags.join(" · ")}</div>}
+                        {s.flags.length > 0 && (
+                          <div className={`font-semibold ${g.tone === "yellow" ? "text-amber" : "text-rose"}`}>{s.flags.join(" · ")}</div>
+                        )}
                         {s.good ? (
                           <span className={`inline-flex whitespace-nowrap rounded-md border px-2 py-0.5 font-medium ${tone.pill}`}>
                             {s.needed}
