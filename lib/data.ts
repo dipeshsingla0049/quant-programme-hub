@@ -13,10 +13,19 @@ import type { Activity, Bulletin, Opportunity, RewardsProgramme } from "./types"
 
 const bulletins: Bulletin[] = [
   {
+    id: "baseline-prod-corr",
+    tag: "Announcement",
+    title: "Baseline to Stay: average production correlation must be below 0.8",
+    body: "Baseline to Stay now also needs your average production correlation below 0.8, on top of 4 submission days and 1,500 simulations a week with at most 4 data fields per alpha. The Baseline leaderboard is colour-coded: green has completed this week, blue is on track, yellow is at risk (behind pace), red is very behind or breaking a rule. Find your name and see exactly what you still need.",
+    publishedAt: "2026-11-09T12:00:00+05:30",
+    author: "Programme team",
+    links: [{ href: "/weekly-baseline", label: "Baseline to Stay" }],
+  },
+  {
     id: "november-milestones",
     tag: "Announcement",
     title: "November milestones are here",
-    body: "Three milestones start on 7 November. Baseline to Stay is the weekly minimum to keep your account: miss it and you get banned. The $120 Challenge pays $120 for submitting on 20 different days by 31 December. The Low-Corr Sprint ($50 Challenge) pays $50 each to the 10 researchers with the lowest average production correlation from 7 to 21 November. Standings update daily.",
+    body: "Three milestones start on 7 November. Baseline to Stay is the weekly minimum to keep your account (4 submission days, 1,500 simulations, average production correlation below 0.8): miss it and you get banned. The $120 Challenge pays $120 for submitting on 20 different days by 31 December. The Low-Corr Sprint ($50 Challenge) pays $50 each to the 10 researchers with the lowest average production correlation from 7 to 21 November. Standings update daily.",
     publishedAt: "2026-11-06T18:00:00+05:30",
     author: "Programme team",
     links: [

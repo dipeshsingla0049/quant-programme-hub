@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Standing, Zone } from "@/lib/standings";
+import type { Group, Tone } from "@/lib/standings";
 import { Avatar } from "./Avatar";
 import { CheckCircle, XCircle } from "./icons";
 
@@ -13,59 +13,87 @@ export interface BoardColumn {
   of?: number;
 }
 
-type Tone = "gold" | "green" | "red" | "plain";
-
-const TONE = {
-  gold: { body: "bg-gold/[0.05]", edge: "border-l-gold", heading: "text-gold", pill: "border-gold/40 bg-gold/10 text-gold" },
-  green: { body: "bg-teal/[0.09]", edge: "border-l-teal", heading: "text-teal", pill: "border-teal/40 bg-teal/10 text-teal" },
-  red: { body: "bg-rose/[0.08]", edge: "border-l-rose", heading: "text-rose", pill: "border-rose/40 bg-rose/10 text-rose" },
-  plain: { body: "", edge: "border-l-transparent", heading: "text-muted", pill: "" },
-} satisfies Record<Tone, Record<string, string>>;
+const TONE: Record<Tone, { body: string; edge: string; heading: string; pill: string; text: string }> = {
+  green: {
+    body: "bg-teal/[0.09]",
+    edge: "border-l-teal",
+    heading: "text-teal",
+    pill: "border-teal/40 bg-teal/10 text-teal",
+    text: "text-teal",
+  },
+  blue: {
+    body: "bg-sky/[0.07]",
+    edge: "border-l-sky",
+    heading: "text-sky",
+    pill: "border-sky/40 bg-sky/10 text-sky",
+    text: "text-sky",
+  },
+  yellow: {
+    body: "bg-amber-bright/[0.13]",
+    edge: "border-l-amber-bright",
+    heading: "text-amber",
+    pill: "border-amber/40 bg-amber-bright/15 text-amber",
+    text: "text-amber",
+  },
+  red: { body: "bg-rose/[0.08]", edge: "border-l-rose", heading: "text-rose", pill: "border-rose/40 bg-rose/10 text-rose", text: "text-rose" },
+  gold: {
+    body: "bg-linear-to-r from-amber-bright/30 via-amber-bright/[0.12] to-amber-bright/[0.04]",
+    edge: "border-l-amber-bright",
+    heading: "text-gold-deep",
+    pill: "border-gold/50 bg-amber-bright/25 text-gold-deep",
+    text: "text-fg",
+  },
+  plain: { body: "", edge: "border-l-transparent", heading: "text-muted", pill: "", text: "text-muted" },
+  grey: { body: "bg-panel-2/50", edge: "border-l-line-2", heading: "text-dim", pill: "", text: "text-dim" },
+};
 
 /**
- * A milestone leaderboard with a search box on top.
- *
- * - prize: rewarded places first (gold), then the rest who qualify, then those
- *   still working on it with what they're missing.
- * - passFail: everyone, green if they've cleared every rule, red if not.
+ * A milestone leaderboard: coloured groups in a fixed order, a search box on
+ * top, and a "What's needed" line for every researcher. Grey groups (not
+ * started, not ranked) are collapsed until opened or searched.
  */
 export function MilestoneBoard({
-  standings,
-  style,
+  groups,
+  ranked,
   scoreLabel,
   columns,
-  zoneLabels,
-  prizeStatus,
-  winners,
+  lastWeekLabel,
 }: {
-  standings: Standing[];
-  style: "prize" | "passFail";
-  /** Ranking metric column, when it isn't already one of the rule columns. */
+  groups: Group[];
+  /** Show the # column. */
+  ranked: boolean;
+  /** Ranking metric column, e.g. "Avg prod corr". */
   scoreLabel: string | null;
-  /** One per milestone rule, in rule order. */
+  /** One per tracked rule, in rule order. */
   columns: BoardColumn[];
-  zoneLabels: Record<Zone, { title: string; empty?: string }>;
-  /** Status text for rows in the top group, e.g. "Potential $50 winner". */
-  prizeStatus: string;
-  /** Rewarded places, if limited. */
-  winners?: number;
+  /** Header for the previous week's result column, when there is one. */
+  lastWeekLabel: string | null;
 }) {
   const [query, setQuery] = useState("");
-  const passFail = style === "passFail";
-  const toneOf = (zone: Zone): Tone =>
-    zone === "prize" ? (passFail ? "green" : "gold") : zone === "pending" && passFail ? "red" : "plain";
+  const [opened, setOpened] = useState<Set<string>>(new Set());
+  const q = query.trim().toLowerCase();
+  const hasLastWeek = !!lastWeekLabel;
 
-  const groups = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const rows = standings.filter(
-      (s) => !q || s.name.toLowerCase().includes(q) || s.alias.toLowerCase().includes(q) || s.university.toLowerCase().includes(q),
-    );
-    return (["prize", "qualified", "pending"] as Zone[]).map((zone) => ({ zone, rows: rows.filter((r) => r.zone === zone) }));
-  }, [standings, query]);
+  const shownGroups = useMemo(
+    () =>
+      groups.map((g) => ({
+        ...g,
+        rows: g.rows.filter(
+          (s) => !q || s.name.toLowerCase().includes(q) || s.alias.toLowerCase().includes(q) || s.university.toLowerCase().includes(q),
+        ),
+      })),
+    [groups, q],
+  );
 
-  const showPosition = !passFail;
-  const colCount = (showPosition ? 1 : 0) + 2 + (scoreLabel ? 1 : 0) + columns.length;
-  const shown = groups.reduce((n, g) => n + g.rows.length, 0);
+  const colCount = (ranked ? 1 : 0) + 1 + (scoreLabel ? 1 : 0) + columns.length + (hasLastWeek ? 1 : 0) + 1;
+  const shown = shownGroups.reduce((n, g) => n + g.rows.length, 0);
+  const toggle = (id: string) =>
+    setOpened((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   return (
     <div className="space-y-4">
@@ -81,103 +109,157 @@ export function MilestoneBoard({
       </label>
 
       <div className="relative overflow-x-auto rounded-xl border border-line bg-panel/60">
-        <table className="w-full min-w-[640px] border-collapse text-sm">
+        <table className="w-full min-w-[760px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-line text-left text-[11px] uppercase tracking-[0.08em] text-dim">
-              {showPosition && <th scope="col" className="w-12 px-4 py-3 font-medium">#</th>}
+              {ranked && <th scope="col" className="w-12 px-4 py-3 font-medium">#</th>}
               <th scope="col" className="px-4 py-3 font-medium">Researcher</th>
               {scoreLabel && <th scope="col" className="px-4 py-3 text-right font-medium">{scoreLabel}</th>}
               {columns.map((c) => (
-                <th key={c.label} scope="col" className="px-4 py-3 text-right font-medium">
+                <th key={c.label} scope="col" className="whitespace-nowrap px-4 py-3 text-right font-medium">
                   {c.label}
                   {c.target && <span className="block normal-case tracking-normal text-dim/80">{c.target}</span>}
                 </th>
               ))}
-              <th scope="col" className="px-4 py-3 font-medium">Status</th>
+              {hasLastWeek && <th scope="col" className="whitespace-nowrap px-4 py-3 font-medium">{lastWeekLabel}</th>}
+              <th scope="col" className="min-w-56 px-4 py-3 font-medium">What&apos;s needed</th>
             </tr>
           </thead>
-          {groups.map(({ zone, rows }) => {
-            const label = zoneLabels[zone];
-            // Hide empty groups while searching, and groups with no empty-state text always.
-            if (!rows.length && (query || !label.empty)) return null;
-            const tone = TONE[toneOf(zone)];
-            const top = zone === "prize";
+          {shownGroups.map((g, gi) => {
+            const total = groups[gi].rows.length;
+            // Hide empty groups while searching, and empty groups with no empty-state text always.
+            if (!g.rows.length && (q || !g.empty)) return null;
+            const tone = TONE[g.tone];
+            const collapsible = g.tone === "grey" && !q && g.rows.length > 0;
+            const open = !collapsible || opened.has(g.id);
             return (
-              <tbody key={zone} className={tone.body}>
+              <tbody key={g.id} className={tone.body}>
                 <tr className="border-b border-line">
                   <th
                     colSpan={colCount}
                     scope="colgroup"
-                    className={`border-l-2 px-4 py-2.5 text-left text-xs font-semibold ${tone.edge} ${tone.heading}`}
+                    className={`border-l-4 px-4 py-2.5 text-left text-xs font-semibold ${tone.edge} ${tone.heading}`}
                   >
-                    {label.title} <span className="ml-1 font-normal tabular-nums text-dim">· {rows.length}</span>
+                    {g.tone === "gold" && <span aria-hidden>🏆 </span>}
+                    {g.title} <span className="ml-1 font-normal tabular-nums text-dim">· {q ? `${g.rows.length} of ${total}` : total}</span>
+                    {collapsible && (
+                      <button
+                        type="button"
+                        onClick={() => toggle(g.id)}
+                        aria-expanded={open}
+                        className="ml-3 inline-flex min-h-8 items-center rounded-md border border-line-2 bg-panel px-2.5 text-[11px] font-medium text-muted hover:border-gold/60 hover:text-gold"
+                      >
+                        {open ? "Hide" : "Show"}
+                      </button>
+                    )}
                   </th>
                 </tr>
-                {!rows.length && (
+                {!g.rows.length && (
                   <tr className="border-b border-line">
-                    <td colSpan={colCount} className="px-4 py-5 text-sm text-muted">{label.empty}</td>
+                    <td colSpan={colCount} className={`border-l-4 px-4 py-5 text-sm text-muted ${tone.edge}`}>
+                      {g.empty}
+                    </td>
                   </tr>
                 )}
-                {rows.map((s) => (
-                  <tr key={s.alias} className={`border-b border-l-2 border-line last:border-b-0 ${tone.edge}`}>
-                    {showPosition && (
-                      <td className={`px-4 py-3 tabular-nums ${top ? "font-semibold text-gold" : "text-dim"}`}>
-                        {s.position ?? "—"}
-                      </td>
-                    )}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <Avatar name={s.name} rank={!passFail && s.position === 1 ? 1 : 0} />
-                        <div className="min-w-0">
-                          <div className="truncate font-medium text-fg">{s.name}</div>
-                          <div className="truncate text-[11px] text-dim">
-                            <span className="tabular-nums">{s.alias}</span> · {s.university}
+                {open &&
+                  g.rows.map((s) => (
+                    <tr key={s.alias} className={`border-b border-l-4 border-line last:border-b-0 ${tone.edge}`}>
+                      {ranked && (
+                        <td className={`px-4 py-3 tabular-nums ${g.tone === "gold" ? "font-bold text-gold-deep" : "text-dim"}`}>
+                          {s.position ?? "—"}
+                        </td>
+                      )}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <Avatar name={s.name} rank={s.position === 1 ? 1 : 0} />
+                          <div className="min-w-0">
+                            <div
+                              className={`truncate ${
+                                g.tone === "gold" ? "font-semibold text-gold-deep" : g.tone === "grey" ? "font-medium text-muted" : "font-medium text-fg"
+                              }`}
+                            >
+                              {s.name}
+                              {g.tone === "gold" && (
+                                <span role="img" aria-label="top 10" className="ml-1.5">
+                                  🏆
+                                </span>
+                              )}
+                            </div>
+                            <div className="truncate text-[11px] text-dim">
+                              <span className="tabular-nums">{s.alias}</span> · {s.university}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    {scoreLabel && (
-                      <td className={`px-4 py-3 text-right text-base tabular-nums ${top ? "font-semibold text-gold" : "text-fg"}`}>
-                        {s.score}
                       </td>
-                    )}
-                    {s.checks.map((c) => {
-                      const col = columns[c.rule];
-                      return (
-                        <td key={c.rule} className="whitespace-nowrap px-4 py-3 text-right tabular-nums">
-                          <span className={`inline-flex items-center gap-1.5 ${c.pass ? "text-fg" : "text-rose"}`}>
-                            {c.value}
-                            {col?.of !== undefined && <span className="text-dim">/ {col.of.toLocaleString("en-US")}</span>}
-                            {c.pass ? <CheckCircle size={14} className="text-teal" /> : <XCircle size={14} />}
-                            <span className="sr-only">{c.pass ? "meets the rule" : "does not meet the rule"}</span>
-                          </span>
+                      {scoreLabel && (
+                        <td
+                          className={`px-4 py-3 text-right text-base tabular-nums ${
+                            g.tone === "gold" ? "font-bold text-gold-deep" : g.tone === "grey" ? "text-dim" : "text-fg"
+                          }`}
+                        >
+                          {s.score ?? "—"}
                         </td>
-                      );
-                    })}
-                    <td className="px-4 py-3 text-xs">
-                      {top ? (
-                        <span className={`inline-flex whitespace-nowrap rounded-md border px-2 py-0.5 font-medium ${tone.pill}`}>
-                          {prizeStatus}
-                        </span>
-                      ) : zone === "qualified" ? (
-                        <span className="text-muted">Qualified, outside the top {winners}</span>
-                      ) : (
-                        <span className={passFail ? "text-rose" : "text-muted"}>
-                          {[...new Set(s.checks.filter((c) => !c.pass).map((c) => c.gap))].join(" · ")}
-                        </span>
                       )}
-                    </td>
-                  </tr>
-                ))}
+                      {s.checks.map((c, i) => {
+                        const col = columns[i];
+                        // A target not reached yet but still on course: plain progress, no icon.
+                        if (c.state === "open")
+                          return (
+                            <td key={col.label} className="whitespace-nowrap px-4 py-3 text-right tabular-nums text-fg">
+                              {c.value} <span className="text-dim">/ {col.of!.toLocaleString("en-US")}</span>
+                              <span className="sr-only">so far</span>
+                            </td>
+                          );
+                        return (
+                          <td key={col.label} className="whitespace-nowrap px-4 py-3 text-right tabular-nums">
+                            {c.state === "na" ? (
+                              <span className="text-dim">
+                                —<span className="sr-only">not checked yet, no alphas</span>
+                              </span>
+                            ) : (
+                              <span className={`inline-flex items-center gap-1.5 ${c.state === "pass" ? "text-fg" : "text-rose"}`}>
+                                {c.value}
+                                {col.of !== undefined && <span className="text-dim">/ {col.of.toLocaleString("en-US")}</span>}
+                                {c.state === "pass" ? <CheckCircle size={14} className="text-teal" /> : <XCircle size={14} />}
+                                <span className="sr-only">{c.state === "pass" ? "meets the rule" : "does not meet the rule"}</span>
+                              </span>
+                            )}
+                          </td>
+                        );
+                      })}
+                      {hasLastWeek && (
+                        <td className="whitespace-nowrap px-4 py-3 text-xs">
+                          {s.lastWeek === "met" ? (
+                            <span className="text-teal">Met</span>
+                          ) : s.lastWeek === "missed" ? (
+                            <span className="font-medium text-rose">Missed</span>
+                          ) : (
+                            <span className="text-dim">—</span>
+                          )}
+                        </td>
+                      )}
+                      <td className="px-4 py-3 text-xs leading-relaxed">
+                        {s.flags.length > 0 && (
+                          <div className={`font-semibold ${g.tone === "yellow" ? "text-amber" : "text-rose"}`}>{s.flags.join(" · ")}</div>
+                        )}
+                        {s.good ? (
+                          <span className={`inline-flex whitespace-nowrap rounded-md border px-2 py-0.5 font-medium ${tone.pill}`}>
+                            {s.needed}
+                          </span>
+                        ) : (
+                          <span className={g.tone === "red" ? "text-fg" : tone.text}>{s.needed}</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             );
           })}
-          {shown === 0 && query && (
+          {shown === 0 && q && (
             <tbody>
               <tr>
                 <td colSpan={colCount} className="px-4 py-8 text-center text-sm text-muted">
                   No one matches “{query}”.
-                  {!passFail && " Only researchers with at least one submission in the window are listed."}
                 </td>
               </tr>
             </tbody>
