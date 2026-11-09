@@ -42,6 +42,8 @@ with no date in the file name it's yesterday (IST). Importing a day again replac
 `data/reports/` and redeploy.
 
 - Only the columns the site needs are stored. **Email addresses and BRAIN user IDs are dropped.**
+- To leave someone off the site, add their alias to `data/excluded.json` and re-import the
+  latest report.
 - `OperatorsPerAlpha` is optional (BRAIN dropped it on 9 Nov). The 8-operator rule is marked
   `tracked: false` in `lib/milestones.ts`, so it's listed in the criteria but not checked.
 - Import every day. Submission days come from comparing consecutive reports. When a report covers
