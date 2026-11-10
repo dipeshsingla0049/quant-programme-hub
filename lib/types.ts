@@ -29,6 +29,8 @@ export interface ReportRow {
   avgSelfCorr: number | null;
   operatorsPerAlpha: number | null;
   datafieldsPerAlpha: number | null;
+  /** BRAIN's count of days with a submission since 7 Nov. Null in reports before 10 Nov. */
+  submissionDays: number | null;
 }
 
 export interface EligibilityRule {

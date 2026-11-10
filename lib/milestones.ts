@@ -100,8 +100,8 @@ const maxOperators: Rule = {
   label: "operators in any alpha",
   short: "Operators/alpha",
   decimals: 2,
-  note: "Still required, but not checked on the site for now: BRAIN's daily report no longer includes operators per alpha.",
-  tracked: false,
+  note: AVERAGE_NOTE,
+  fix: "operators must be 8 or fewer",
 };
 
 export const MILESTONES: Milestone[] = [
@@ -112,7 +112,7 @@ export const MILESTONES: Milestone[] = [
     badge: { text: "Important", tone: "rose" },
     goal: "Meet the minimum every week, including average production correlation below 0.8, or your account is banned.",
     summary:
-      "The minimum every researcher must meet each week, checked individually within each of the four teams: 4 submission days, 1,500 simulations, at most 4 data fields per alpha and average production correlation below 0.8. Weeks run Saturday to Friday, starting 7 November.",
+      "The minimum every researcher must meet each week, checked individually within each of the four teams: 4 submission days, 1,500 simulations, at most 4 data fields and 8 operators per alpha, and average production correlation below 0.8. Weeks run Saturday to Friday, starting 7 November.",
     start: PROGRAMME_START,
     end: null,
     reward: "Keep your account",
@@ -207,7 +207,7 @@ export const MILESTONES: Milestone[] = [
         label: "alphas submitted from 7 Nov",
         short: "Alphas",
         unit: "alphas",
-        note: "Everyone with 2 or more alphas within the data field limit is ranked. You need 10 to be eligible for $50.",
+        note: "Everyone with 2 or more alphas within the data field and operator limits is ranked. You need 10 to be eligible for $50.",
       },
       maxFields,
       maxOperators,

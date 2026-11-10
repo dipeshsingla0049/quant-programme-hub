@@ -4,10 +4,12 @@
  *
  * Reports are cumulative from 7 Nov and stored under the last day they cover,
  * so totals and averages come straight from the newest report in a window.
- * Submission days come from comparing consecutive reports. When a report
- * covers more than one day (the first report covered 7–8 Nov), each new alpha
- * counts as one day, up to the number of days covered: 2+ alphas = 2 days,
- * 1 alpha = 1 day, none = 0.
+ * Submission days are BRAIN's own SubmissionDays count (cumulative since
+ * 7 Nov), so days in a window are the count at its end minus the count before
+ * it. Reports without that column (before 10 Nov) fall back to an estimate
+ * from comparing consecutive reports: when a report covers more than one day
+ * (the first covered 7–8 Nov), each new alpha counts as one day, up to the
+ * number of days covered.
  */
 import { formatDay } from "./format";
 import { MILESTONES, PROGRAMME_START, type MetricId, type Milestone, type MilestoneId, type Rule } from "./milestones";
@@ -25,16 +27,12 @@ const series = snapshots.filter((s) => s.date >= PROGRAMME_START);
 /** Last day covered by the newest report, or null before the first one arrives. */
 export const latestReportDate: string | null = series.at(-1)?.date ?? null;
 
-/** Reports that covered more than one day, so submission days in them are estimated. */
-export const mergedReports: { from: string; to: string }[] = [];
-
-/** Per researcher, the days counted as submission days. */
+/** Per researcher, estimated submission days, for reports without BRAIN's count. */
 const submissionDates = new Map<string, string[]>();
 series.forEach((s, i) => {
   const prev = series[i - 1];
   const from = prev ? addDays(prev.date, 1) : PROGRAMME_START;
   const covered = daysBetween(from, s.date) + 1;
-  if (covered > 1) mergedReports.push({ from, to: s.date });
   for (const [alias, row] of s.rows) {
     const added = row.submissions - (prev?.rows.get(alias)?.submissions ?? 0);
     if (added <= 0) continue;
@@ -53,6 +51,15 @@ for (const s of series) for (const [alias, row] of s.rows) people.set(alias, row
 function reportOn(date: string): Snapshot | undefined {
   for (let i = series.length - 1; i >= 0; i--) if (series[i].date <= date) return series[i];
   return undefined;
+}
+
+/** Submission days from 7 Nov up to a date: BRAIN's count when the report has it, else the estimate. */
+function daysUpTo(alias: string, date: string): number {
+  const s = reportOn(date);
+  if (!s) return 0;
+  const brain = s.rows.get(alias)?.submissionDays;
+  if (brain != null) return brain;
+  return (submissionDates.get(alias) ?? []).filter((d) => d <= s.date).length;
 }
 
 export interface Week {
@@ -74,13 +81,13 @@ function metricsFor(alias: string, from: string, asOf: string): Metrics {
   const row = reportOn(asOf)?.rows.get(alias);
   const week = weekOf(asOf);
   const beforeWeek = reportOn(addDays(week.start, -1))?.rows.get(alias);
-  const dates = submissionDates.get(alias) ?? [];
+  const days = daysUpTo(alias, asOf);
   const simulations = row?.simulations ?? 0;
   return {
     submissions: row?.submissions ?? 0,
     simulations,
-    submissionDays: dates.filter((d) => d >= from && d <= asOf).length,
-    weekSubmissionDays: dates.filter((d) => d >= week.start && d <= asOf).length,
+    submissionDays: Math.max(0, days - daysUpTo(alias, addDays(from, -1))),
+    weekSubmissionDays: Math.max(0, days - daysUpTo(alias, addDays(week.start, -1))),
     weekSimulations: Math.max(0, simulations - (beforeWeek?.simulations ?? 0)),
     avgProdCorr: row?.avgProdCorr ?? null,
     avgSelfCorr: row?.avgSelfCorr ?? null,
@@ -358,7 +365,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     const score = (r: Row) => r.m[ranking.metric];
     const byScore = (a: Row, b: Row) =>
       ((score(a) ?? Infinity) - (score(b) ?? Infinity)) * dir || (b.m.simulations ?? 0) - (a.m.simulations ?? 0) || byName(a, b);
-    // Breaking a limit (e.g. more than 4 data fields) rules you out of the ranking: you can't win.
+    // Breaking a limit (more than 4 data fields or 8 operators) rules you out of the ranking: you can't win.
     const ruledOut = everyone.filter((r) => r.m.submissions && r.a.broken.length > 0);
     const ranked = everyone
       .filter((r) => (r.m.submissions ?? 0) >= ranking.minAlphas && score(r) !== null && !r.a.broken.length)

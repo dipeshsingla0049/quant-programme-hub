@@ -161,14 +161,14 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
       [
         "red",
         "Very behind or breaking a rule",
-        "No activity this week, can't reach 4 days, avg prod corr 0.8 or higher, or more than 4 data fields per alpha.",
+        "No activity this week, can't reach 4 days, avg prod corr 0.8 or higher, or more than 4 data fields or 8 operators per alpha.",
       ],
     ];
   } else if (m.board === "target") {
     legend = [
-      ["green", `Eligible for ${prize}`, "20 days, self-corr below 0.7 and at most 4 data fields per alpha."],
+      ["green", `Eligible for ${prize}`, "20 days, self-corr below 0.7, at most 4 data fields and 8 operators per alpha."],
       ["blue", "On track", `Still time to reach 20 days by ${formatDay(m.end!)}, no limit broken.`],
-      ["red", "Not eligible right now", "Self-corr 0.7 or higher, more than 4 data fields, or 20 days no longer reachable."],
+      ["red", "Not eligible right now", "Self-corr 0.7 or higher, more than 4 data fields or 8 operators, or 20 days no longer reachable."],
       ["grey", "Not started", "No alphas submitted yet."],
     ];
   } else if (m.board === "ranked") {
@@ -176,10 +176,10 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
       [
         "gold",
         `Top ${winners}`,
-        `Lowest avg prod corr among everyone with ${m.ranking!.minAlphas}+ alphas and at most 4 data fields per alpha. A potential ${prize} winner once you have 10 alphas.`,
+        `Lowest avg prod corr among everyone with ${m.ranking!.minAlphas}+ alphas, at most 4 data fields and 8 operators per alpha. A potential ${prize} winner once you have 10 alphas.`,
       ],
       ["plain", `Ranked ${winners! + 1} and below`, `Within the rules, outside the top ${winners}.`],
-      ["red", "Can't win right now", "More than 4 data fields per alpha. Not ranked until it's back to 4 or fewer."],
+      ["red", "Can't win right now", "More than 4 data fields or 8 operators per alpha. Not ranked until both are back within the limit."],
       ["grey", "Not ranked yet · Not started", `Fewer than ${m.ranking!.minAlphas} alphas, or none yet.`],
     ];
   }
@@ -238,9 +238,9 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
       />
       {m.ranking?.metric === "avgProdCorr" && (
         <p className="mt-3 text-sm text-muted">
-          Everyone with {m.ranking.minAlphas} or more alphas and at most 4 data fields per alpha is ranked, lowest
-          average production correlation first. Ties go to the researcher with more simulations. More than 4 data
-          fields means you can&apos;t win. To be eligible for {prize} you need at least 10 alphas.
+          Everyone with {m.ranking.minAlphas} or more alphas, at most 4 data fields and at most 8 operators per alpha
+          is ranked, lowest average production correlation first. Ties go to the researcher with more simulations.
+          More than 4 data fields or 8 operators means you can&apos;t win. To be eligible for {prize} you need at least 10 alphas.
         </p>
       )}
 
