@@ -42,8 +42,10 @@ const KEEP = [
   "AvgSelfCorr",
   "OperatorsPerAlpha",
   "DatafieldsPerAlpha",
+  "SubmissionDays",
 ];
-const OPTIONAL = new Set(["OperatorsPerAlpha"]);
+// Missing from some reports: OperatorsPerAlpha on 9 Nov, SubmissionDays before 10 Nov.
+const OPTIONAL = new Set(["OperatorsPerAlpha", "SubmissionDays"]);
 const TEXT = new Set(["UserAlias", "UserTypeLabel", "FirstName", "LastName", "UniversityName"]);
 const PROGRAMME_START = "2026-11-07";
 

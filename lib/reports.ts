@@ -23,13 +23,15 @@ export interface Snapshot {
   rows: Map<string, ReportRow>;
 }
 
+const OPTIONAL = new Set(["OperatorsPerAlpha", "SubmissionDays"]);
+
 function parse(report: RawReport): Snapshot {
   const idx = new Map(report.columns.map((c, i) => [c, i]));
   const col = (row: Cell[], label: string): Cell => {
     const i = idx.get(label);
     if (i === undefined) {
-      // BRAIN dropped OperatorsPerAlpha from the report on 9 Nov.
-      if (label === "OperatorsPerAlpha") return null;
+      // Not in every report: OperatorsPerAlpha was missing on 9 Nov, SubmissionDays before 10 Nov.
+      if (OPTIONAL.has(label)) return null;
       throw new Error(`Report ${report.date} is missing column "${label}"`);
     }
     return row[i] ?? null;
@@ -56,6 +58,7 @@ function parse(report: RawReport): Snapshot {
       avgSelfCorr: submissions > 0 ? num(r, "AvgSelfCorr") : null,
       operatorsPerAlpha: submissions > 0 ? num(r, "OperatorsPerAlpha") : null,
       datafieldsPerAlpha: submissions > 0 ? num(r, "DatafieldsPerAlpha") : null,
+      submissionDays: num(r, "SubmissionDays"),
     });
   }
   return { date: report.date, rows };

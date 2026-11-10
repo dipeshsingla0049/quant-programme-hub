@@ -13,6 +13,18 @@ import type { Activity, Bulletin, Opportunity, RewardsProgramme } from "./types"
 
 const bulletins: Bulletin[] = [
   {
+    id: "operators-and-days",
+    tag: "Announcement",
+    title: "Leaderboards now check operators per alpha and use BRAIN's submission days",
+    body: "Every milestone needs 8 or fewer operators per alpha, and the leaderboards now check it: over 8 turns your row red on Baseline to Stay and the $120 Challenge, and moves you out of the Low-Corr Sprint ranking until it's fixed. Submission days now come straight from BRAIN's report instead of being estimated, so your day count matches BRAIN exactly.",
+    publishedAt: "2026-11-10T12:00:00+05:30",
+    author: "Programme team",
+    links: [
+      { href: "/weekly-baseline", label: "Baseline to Stay" },
+      { href: "/low-corr-sprint", label: "Low-Corr Sprint" },
+    ],
+  },
+  {
     id: "baseline-prod-corr",
     tag: "Announcement",
     title: "Baseline to Stay: average production correlation must be below 0.8",

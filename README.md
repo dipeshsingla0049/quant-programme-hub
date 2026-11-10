@@ -44,11 +44,12 @@ with no date in the file name it's yesterday (IST). Importing a day again replac
 - Only the columns the site needs are stored. **Email addresses and BRAIN user IDs are dropped.**
 - To leave someone off the site, add their alias to `data/excluded.json` and re-import the
   latest report.
-- `OperatorsPerAlpha` is optional (BRAIN dropped it on 9 Nov). The 8-operator rule is marked
-  `tracked: false` in `lib/milestones.ts`, so it's listed in the criteria but not checked.
-- Import every day. Submission days come from comparing consecutive reports. When a report covers
-  more than one day (the first one covered 7–8 Nov), each new alpha counts as one day, up to the
-  number of days covered.
+- Submission days are BRAIN's `SubmissionDays` column (cumulative since 7 Nov); days in a week are
+  the count at the end minus the count before the week. Reports without it (the one covering 7–8
+  Nov) fall back to an estimate from comparing consecutive reports.
+- `OperatorsPerAlpha` and `SubmissionDays` are optional, because older reports lack one or the
+  other. A rule whose column is missing shows "—" and isn't judged. Set `tracked: false` on a rule
+  in `lib/milestones.ts` to list it in the criteria without checking it.
 
 ## Changing the rules
 
