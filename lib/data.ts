@@ -49,8 +49,7 @@ const bulletins: Bulletin[] = [
 ];
 
 const rewardsProgramme: RewardsProgramme = {
-  // TODO(programme team): fill in each criteria list; the UI shows
-  // "To be unlocked" while a list is empty.
+  // The UI shows "To be unlocked" while a criteria list is empty.
   opportunities: [
     {
       id: "goa-trip",
@@ -59,35 +58,32 @@ const rewardsProgramme: RewardsProgramme = {
       criteria: [],
     },
     {
-      id: "master",
-      title: "Master Criteria",
-      summary: "What it takes to reach Master level on BRAIN and unlock higher payouts. All within one quarter.",
+      id: "qrap-elective",
+      title: "QRAP Internship Elective",
+      summary:
+        "Top 40 students from NST-RU and top 30 from NST-ADYPU (2nd and 3rd year) will be chosen for this elective-based internship next semester.",
       criteria: [
         {
-          heading: "Required",
+          heading: "Who's chosen",
           items: [
-            { label: "Submit at least 120 alphas", mandatory: true },
-            { label: "Complete 30 pyramids", mandatory: true },
+            { label: "Top 40 students from NST-RU (2nd and 3rd year)" },
+            { label: "Top 30 students from NST-ADYPU (2nd and 3rd year)" },
           ],
         },
         {
-          heading: "Combined performance",
-          note: "Only one of these four needs to meet the base criteria of ≥ 1.",
+          heading: "How you're selected",
           items: [
-            { label: "Combined Alpha Performance" },
-            { label: "Combined Selected Alpha Performance" },
-            { label: "Combined Power Pool Alpha Performance" },
-            { label: "Combined Osmosis Performance" },
+            { label: "QCAP performance", weight: "40%" },
+            { label: "Test (in December)", weight: "40%" },
+            { label: "Interview", weight: "20%" },
           ],
         },
       ],
-      reward: "Eligible for a $2,000 quarterly stipend",
-    },
-    {
-      id: "qrap-internship",
-      title: "QRAP Internship",
-      summary: "An internship opportunity for leading researchers.",
-      criteria: [],
+      reward: "$2,000 to $8,000",
+      notice: {
+        heading: "First-year students",
+        body: "A separate Audit programme will launch next semester, aimed at reaching Master and Grandmaster levels on WorldQuant BRAIN.",
+      },
     },
   ],
 };

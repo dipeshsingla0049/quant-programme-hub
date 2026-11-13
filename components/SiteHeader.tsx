@@ -11,8 +11,7 @@ const NAV = [
   { href: "/20-day-challenge", label: "$120 Challenge" },
   { href: "/low-corr-sprint", label: "Low-Corr Sprint ($50)" },
   { href: "/goa-trip", label: "Sponsored Goa Trip" },
-  { href: "/master", label: "Master ($2,000)" },
-  { href: "/qrap-internship", label: "QRAP Internship" },
+  { href: "/qrap-elective", label: "QRAP Internship Elective ($2,000–$8,000)" },
   { href: "/announcements", label: "Announcements" },
 ];
 

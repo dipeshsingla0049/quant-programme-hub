@@ -48,7 +48,7 @@ function Block({ block }: { block: FaqBlock }) {
   );
 }
 
-/** BRAIN Genius FAQ, shown on the Master page. Anchor: #faq. */
+/** BRAIN Genius FAQ, shown on the QRAP Internship Elective page. Anchor: #faq. */
 export function FaqSection() {
   return (
     <section id="faq" aria-labelledby="faq-title" className="mt-20 scroll-mt-40 lg:scroll-mt-24">

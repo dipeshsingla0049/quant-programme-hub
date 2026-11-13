@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BulletinCard } from "@/components/BulletinCard";
-import { ArrowRight, Briefcase, MapPin, Star, Trophy } from "@/components/icons";
+import { ArrowRight, Briefcase, MapPin, Trophy } from "@/components/icons";
 import { MilestoneCards, MilestoneTimeline } from "@/components/MilestoneOverview";
 import type { Opportunity } from "@/lib/types";
 import { RelativeTime } from "@/components/RelativeTime";
@@ -9,10 +9,9 @@ import { getBulletins, getRewardsProgramme } from "@/lib/data";
 import { formatDay } from "@/lib/format";
 import { latestReportDate } from "@/lib/standings";
 
-const OPPORTUNITY_ICON: Record<Opportunity["id"], typeof Star> = {
+const OPPORTUNITY_ICON: Record<Opportunity["id"], typeof MapPin> = {
   "goa-trip": MapPin,
-  master: Star,
-  "qrap-internship": Briefcase,
+  "qrap-elective": Briefcase,
 };
 
 export default async function HomePage() {
@@ -67,7 +66,7 @@ export default async function HomePage() {
           title="More opportunities"
           subtitle="Beyond the November milestones."
         />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {programme.opportunities.map((o) => {
             const Icon = OPPORTUNITY_ICON[o.id];
             return (

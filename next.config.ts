@@ -11,12 +11,15 @@ export default function config(phase: string): NextConfig {
     async redirects() {
       return [
         { source: "/rewards", destination: "/", permanent: false },
+        // Master and QRAP Internship were replaced by the QRAP Internship Elective.
+        { source: "/master", destination: "/qrap-elective", permanent: false },
+        { source: "/qrap-internship", destination: "/qrap-elective", permanent: false },
         // The Avg Prod Corr milestone became the Low-Corr Sprint.
         { source: "/avg-prod-corr", destination: "/low-corr-sprint", permanent: false },
         { source: "/milestones", destination: "/", permanent: false },
         { source: "/rankings", destination: "/low-corr-sprint#leaderboard", permanent: false },
-        // The FAQ now lives on the Master page.
-        { source: "/faq", destination: "/master#faq", permanent: false },
+        // The FAQ now lives on the QRAP Internship Elective page.
+        { source: "/faq", destination: "/qrap-elective#faq", permanent: false },
       ];
     },
   };

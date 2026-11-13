@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { getOpportunity } from "@/lib/data";
 import type { Opportunity } from "@/lib/types";
 
-/** Full page for one reward: Goa Trip, Master or QRAP Internship. */
+/** Full page for one reward: Goa Trip or QRAP Internship Elective. */
 export async function OpportunityView({ id }: { id: Opportunity["id"] }) {
   const o = await getOpportunity(id);
   if (!o) notFound();
@@ -55,6 +55,11 @@ export async function OpportunityView({ id }: { id: Opportunity["id"] }) {
                             Mandatory
                           </span>
                         )}
+                        {c.weight && (
+                          <span className="ml-auto rounded-md border border-gold/30 bg-gold/10 px-2 py-0.5 tabular-nums text-sm font-semibold text-gold">
+                            {c.weight}
+                          </span>
+                        )}
                       </span>
                     </li>
                   ))}
@@ -69,10 +74,20 @@ export async function OpportunityView({ id }: { id: Opportunity["id"] }) {
         )}
       </section>
 
-      {/* The Master page shows the FAQ itself, right below. */}
-      {id !== "master" && (
+      {o.notice && (
+        <section
+          aria-label={o.notice.heading}
+          className="mt-4 rounded-2xl border border-teal/30 bg-teal/[0.06] p-5 sm:p-6"
+        >
+          <h3 className="text-lg font-semibold tracking-tight text-fg">{o.notice.heading}</h3>
+          <p className="mt-2 text-[15px] leading-relaxed text-teal">{o.notice.body}</p>
+        </section>
+      )}
+
+      {/* The QRAP Internship Elective page shows the FAQ itself, right below. */}
+      {id !== "qrap-elective" && (
         <Link
-          href="/master#faq"
+          href="/qrap-elective#faq"
           className="mt-8 inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-gold transition hover:text-fg"
         >
           Questions about levels and criteria? Read the FAQ <ArrowRight size={14} />
