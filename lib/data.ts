@@ -52,12 +52,6 @@ const rewardsProgramme: RewardsProgramme = {
   // The UI shows "To be unlocked" while a criteria list is empty.
   opportunities: [
     {
-      id: "goa-trip",
-      title: "Sponsored Goa Trip",
-      summary: "A sponsored trip to Goa for the programme's top performers.",
-      criteria: [],
-    },
-    {
       id: "qrap-elective",
       title: "QRAP Internship Elective",
       summary:
@@ -84,6 +78,12 @@ const rewardsProgramme: RewardsProgramme = {
         heading: "First-year students",
         body: "A separate Audit programme will launch next semester, aimed at reaching Master and Grandmaster levels on WorldQuant BRAIN.",
       },
+    },
+    {
+      id: "goa-trip",
+      title: "Sponsored Goa Trip",
+      summary: "A sponsored trip to Goa for the programme's top performers.",
+      criteria: [],
     },
   ],
 };
