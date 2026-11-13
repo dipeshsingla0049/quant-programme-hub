@@ -2,26 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Terminal } from "./icons";
-import { useUnreadAnnouncements } from "./useUnreadAnnouncements";
+import { Terminal } from "./icons";
 
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/weekly-baseline", label: "Baseline to Stay" },
   { href: "/20-day-challenge", label: "$120 Challenge" },
   { href: "/low-corr-sprint", label: "Low-Corr Sprint ($50)" },
-  { href: "/qrap-elective", label: "QRAP Internship Elective ($2,000–$8,000)" },
+  { href: "/qrap-elective", label: "QRAP Internship Elective (Jan to May 2027, $2,000–$8,000)" },
   { href: "/goa-trip", label: "Sponsored Goa Trip" },
-  { href: "/announcements", label: "Announcements" },
 ];
 
 function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-export function SiteHeader({ announcementIds }: { announcementIds: string[] }) {
+export function SiteHeader() {
   const pathname = usePathname();
-  const unread = useUnreadAnnouncements(announcementIds, pathname.startsWith("/announcements"));
 
   const links = NAV.map((item) => {
     const active = isActive(pathname, item.href);
@@ -55,21 +52,6 @@ export function SiteHeader({ announcementIds }: { announcementIds: string[] }) {
         <nav aria-label="Main" className="hidden items-center gap-5 2xl:flex">
           {links}
         </nav>
-
-        <div className="flex items-center gap-1">
-          <Link
-            href="/announcements"
-            aria-label={unread > 0 ? `Announcements, ${unread} new` : "Announcements"}
-            className="relative inline-flex size-11 items-center justify-center text-muted transition hover:text-fg"
-          >
-            <Bell size={18} />
-            {unread > 0 && (
-              <span className="absolute right-2 top-2 inline-flex size-4 items-center justify-center rounded-full bg-gold tabular-nums text-[10px] font-semibold text-ink">
-                {unread}
-              </span>
-            )}
-          </Link>
-        </div>
       </div>
 
       <nav aria-label="Main mobile" className="flex gap-5 overflow-x-auto border-t border-line px-4 2xl:hidden">

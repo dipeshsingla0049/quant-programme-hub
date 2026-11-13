@@ -11,6 +11,8 @@ export default function config(phase: string): NextConfig {
     async redirects() {
       return [
         { source: "/rewards", destination: "/", permanent: false },
+        // Announcements were removed from the site.
+        { source: "/announcements", destination: "/", permanent: false },
         // Master and QRAP Internship were replaced by the QRAP Internship Elective.
         { source: "/master", destination: "/qrap-elective", permanent: false },
         { source: "/qrap-internship", destination: "/qrap-elective", permanent: false },
