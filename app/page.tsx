@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { BulletinCard } from "@/components/BulletinCard";
 import { ArrowRight, Briefcase, MapPin, Trophy } from "@/components/icons";
 import { MilestoneCards, MilestoneTimeline } from "@/components/MilestoneOverview";
 import type { Opportunity } from "@/lib/types";
-import { RelativeTime } from "@/components/RelativeTime";
 import { SectionHeading } from "@/components/SectionHeading";
-import { getBulletins, getRewardsProgramme } from "@/lib/data";
+import { getRewardsProgramme } from "@/lib/data";
 import { formatDay } from "@/lib/format";
 import { latestReportDate } from "@/lib/standings";
 
@@ -15,7 +13,7 @@ const OPPORTUNITY_ICON: Record<Opportunity["id"], typeof MapPin> = {
 };
 
 export default async function HomePage() {
-  const [bulletins, programme] = await Promise.all([getBulletins(3), getRewardsProgramme()]);
+  const programme = await getRewardsProgramme();
 
   return (
     <>
@@ -39,24 +37,6 @@ export default async function HomePage() {
         <div className="mt-8 space-y-4">
           <MilestoneCards />
           <MilestoneTimeline />
-        </div>
-      </section>
-
-      {/* Bulletins */}
-      <section className="border-t border-line pb-20 pt-20">
-        <SectionHeading
-          title="Announcements"
-          badge={
-            <span className="rounded border border-line-2 bg-panel-2 px-2 py-0.5 tabular-nums text-[11px] text-muted">
-              {bulletins[0] ? <RelativeTime iso={bulletins[0].publishedAt} prefix="Updated " /> : "No bulletins yet"}
-            </span>
-          }
-          action={{ href: "/announcements", label: "All announcements" }}
-        />
-        <div className={`grid gap-4 ${bulletins.length > 1 ? "md:grid-cols-3" : ""}`}>
-          {bulletins.map((b) => (
-            <BulletinCard key={b.id} bulletin={b} expanded={bulletins.length === 1} />
-          ))}
         </div>
       </section>
 

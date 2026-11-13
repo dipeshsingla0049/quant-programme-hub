@@ -1,9 +1,7 @@
 {"date":"2026-11-09","source":"Newton_School_Partnership_Report_20261110.csv","columns":["UserAlias","UserTypeLabel","FirstName","LastName","UniversityName","TotalSimulations","TotalSubmissions","AvgProdCorr","AvgSelfCorr","OperatorsPerAlpha","DatafieldsPerAlpha","SubmissionDays"],"rows":[
 ["AA49107","CONSULTANT","Ankush","Ankush","Rishihood University",100,0,null,null,null,null,0],
 ["KM83185","CONSULTANT","Kartik","Mehra","Rishihood University",59,3,0.7094,0,13,4.3333,3],
-["PN20490","CONSULTANT","Praveen","Nitharwal","Rishihood University",0,0,null,null,null,null,0],
 ["DS10377","CONSULTANT","Digvijay","Shahi","Rishihood University",4,0,null,null,null,null,0],
-["SJ68597","CONSULTANT","Shaik","Junaid Sami","Rishihood University",0,0,null,null,null,null,0],
 ["YG11934","CONSULTANT","Yashvi","Goyal","Rishihood University",2027,3,0.6407,0.3345,26,9,1],
 ["PB15938","CONSULTANT","Parthraj Singh","Bhati","Rishihood University",0,0,null,null,null,null,0],
 ["SC61271","CONSULTANT","Shanmukha Sai","Chakali","Ajeenkya DY Patil University",186,3,0.8683,0.6564,15.6667,6.6667,3],
@@ -151,7 +149,6 @@
 ["RT36093","CONDITIONALCONSULTANT","Rudresh","Tiwari","Rishihood University",11,0,null,null,null,null,0],
 ["MD53644","CONDITIONALCONSULTANT","Mausam Kumar","Dwivedi","Rishihood University",96,5,0.9011,0.627,5.4,2.6,2],
 ["SK50212","CONDITIONALCONSULTANT","Satyam","Kumar","Rishihood University",8,0,null,null,null,null,0],
-["PD55536","CONDITIONALCONSULTANT","PRIYUM","DEB","Rishihood University",63,3,0.9506,0.7244,6.6667,3,1],
 ["SS85829","CONDITIONALCONSULTANT","Surya","Singh","Rishihood University",0,0,null,null,null,null,0],
 ["AG56271","CONDITIONALCONSULTANT","ARYAN","GOYAL","Rishihood University",0,0,null,null,null,null,0],
 ["AK83771","CONDITIONALCONSULTANT","Anurag","Kumar","Rishihood University",43,0,null,null,null,null,0],

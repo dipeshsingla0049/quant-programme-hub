@@ -2,17 +2,6 @@ export type BulletinTag = "Deadline" | "Result" | "Announcement";
 export type ActivityKind = "Workshop" | "Guest Session" | "Deadline" | "Contest";
 export type TagKind = BulletinTag | ActivityKind | "Prestige";
 
-export interface Bulletin {
-  id: string;
-  tag: BulletinTag;
-  title: string;
-  body: string;
-  publishedAt: string; // ISO 8601
-  author: string;
-  /** Pages the announcement points to, shown as buttons. */
-  links?: { href: string; label: string }[];
-}
-
 export type UserTier = "CONSULTANT" | "CONDITIONALCONSULTANT";
 
 /** One researcher in one daily partnership report. Totals are cumulative since 7 Nov 2026. */
