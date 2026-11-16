@@ -12,7 +12,7 @@
  * number of days covered.
  */
 import { formatDay } from "./format";
-import { MILESTONES, PROGRAMME_START, type MetricId, type Milestone, type MilestoneId, type Rule } from "./milestones";
+import { MILESTONES, PROGRAMME_START, periodOf, type MetricId, type Milestone, type MilestoneId, type Period, type Rule } from "./milestones";
 import { snapshots, type Snapshot } from "./reports";
 import type { ReportRow, UserTier } from "./types";
 
@@ -62,33 +62,22 @@ function daysUpTo(alias: string, date: string): number {
   return (submissionDates.get(alias) ?? []).filter((d) => d <= s.date).length;
 }
 
-export interface Week {
-  number: number;
-  start: string;
-  end: string;
-}
-
-/** Programme weeks run 7 days at a time (Saturday to Friday) from the programme start. */
-export function weekOf(date: string): Week {
-  const n = Math.max(0, Math.floor(daysBetween(PROGRAMME_START, date) / 7));
-  const start = addDays(PROGRAMME_START, 7 * n);
-  return { number: n + 1, start, end: addDays(start, 6) };
-}
+export { periodOf, type Period } from "./milestones";
 
 type Metrics = Record<MetricId, number | null>;
 
 function metricsFor(alias: string, from: string, asOf: string): Metrics {
   const row = reportOn(asOf)?.rows.get(alias);
-  const week = weekOf(asOf);
-  const beforeWeek = reportOn(addDays(week.start, -1))?.rows.get(alias);
+  const period = periodOf(asOf);
+  const beforePeriod = reportOn(addDays(period.start, -1))?.rows.get(alias);
   const days = daysUpTo(alias, asOf);
   const simulations = row?.simulations ?? 0;
   return {
     submissions: row?.submissions ?? 0,
     simulations,
     submissionDays: Math.max(0, days - daysUpTo(alias, addDays(from, -1))),
-    weekSubmissionDays: Math.max(0, days - daysUpTo(alias, addDays(week.start, -1))),
-    weekSimulations: Math.max(0, simulations - (beforeWeek?.simulations ?? 0)),
+    periodSubmissionDays: Math.max(0, days - daysUpTo(alias, addDays(period.start, -1))),
+    periodSimulations: Math.max(0, simulations - (beforePeriod?.simulations ?? 0)),
     avgProdCorr: row?.avgProdCorr ?? null,
     avgSelfCorr: row?.avgSelfCorr ?? null,
     operatorsPerAlpha: row?.operatorsPerAlpha ?? null,
@@ -111,12 +100,12 @@ export function ruleTarget(rule: Rule): string {
 }
 
 /**
- * Weekly pace with one day of grace: by day N of the week you need what an
- * even pace gives by day N − 1, i.e. (N − 1)/7 of the target (whole days
- * rounded down). Pass N − 1 as weekDay.
+ * Pace with one day of grace: by day N of an L-day period you need what an
+ * even pace gives by day N − 1, i.e. (N − 1)/L of the target (whole days
+ * rounded down). Pass N − 1 as periodDay.
  */
-export function paceFor(rule: Rule, weekDay: number): number {
-  const pace = (rule.value * weekDay) / 7;
+export function paceFor(rule: Rule, periodDay: number, length: number): number {
+  const pace = (rule.value * periodDay) / length;
   return rule.perDay ? Math.floor(pace) : Math.round(pace);
 }
 
@@ -152,8 +141,8 @@ export interface Standing {
   needed: string;
   /** The needed line is good news (completed, eligible, potential winner). */
   good: boolean;
-  /** Weekly boards from week 2: did they meet last week's baseline? */
-  lastWeek: "met" | "missed" | null;
+  /** Baseline board from period 2: did they meet the previous period's baseline? */
+  lastPeriod: "met" | "missed" | null;
 }
 
 export interface Group {
@@ -176,10 +165,10 @@ export interface MilestoneStandings {
   total: number;
   /** Ranking value of the last highlighted place (ranked boards). */
   cutoff: string | null;
-  /** The programme week the standings fall in. */
-  week: Week | null;
-  /** Day of that week the data reaches, 1–7. */
-  weekDay: number | null;
+  /** The programme period the standings fall in. */
+  period: Period | null;
+  /** Day of that period the data reaches, 1 to period.length. */
+  periodDay: number | null;
 }
 
 /** Where one researcher stands against the tracked rules. */
@@ -224,7 +213,7 @@ function standing(p: ReportRow, fields: Partial<Standing> & Pick<Standing, "chec
     score: null,
     flags: [],
     good: false,
-    lastWeek: null,
+    lastPeriod: null,
     ...fields,
   };
 }
@@ -237,7 +226,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         ? milestone.end
         : latestReportDate
       : null;
-  const base = { milestone, asOf, final: false, groups: [], total: 0, cutoff: null, week: null, weekDay: null };
+  const base = { milestone, asOf, final: false, groups: [], total: 0, cutoff: null, period: null, periodDay: null };
   if (!asOf) return base;
 
   const rules = trackedRules(milestone);
@@ -246,15 +235,15 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     return { p, m, a: assess(rules, m) };
   });
   type Row = (typeof everyone)[number];
-  const week = weekOf(asOf);
-  const weekDay = daysBetween(week.start, asOf) + 1;
+  const period = periodOf(asOf);
+  const periodDay = daysBetween(period.start, asOf) + 1;
   const prize = milestone.reward.replace(" each", "");
   let groups: Group[];
   let cutoff: string | null = null;
 
   if (milestone.board === "weekly") {
-    const left = 7 - weekDay;
-    const prev = week.number > 1 ? addDays(week.start, -1) : null;
+    const left = period.length - periodDay;
+    const prev = period.number > 1 ? addDays(period.start, -1) : null;
     const green: Row[] = [];
     const onTrack: Row[] = [];
     const atRisk: Row[] = [];
@@ -267,17 +256,17 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       }
       const progress = rules.filter((x) => x.op === ">=");
       const unreachable = progress.filter((x) => x.perDay && (r.m[x.metric] ?? 0) + left < x.value);
-      const slow = progress.filter((x) => (r.m[x.metric] ?? 0) < paceFor(x, weekDay - 1));
+      const slow = progress.filter((x) => (r.m[x.metric] ?? 0) < paceFor(x, periodDay - 1, period.length));
       for (const x of [...unreachable, ...slow]) r.a.checks[rules.indexOf(x)].state = "fail";
       const idle = progress.every((x) => !r.m[x.metric]);
       if (!left) {
-        // The week is over: completed or missed.
-        flags.set(r, [`Missed week ${week.number}`, ...r.a.brokenFlags]);
+        // The period is over: completed or missed.
+        flags.set(r, [`Missed period ${period.number}`, ...r.a.brokenFlags]);
         red.push(r);
       } else if (unreachable.length || r.a.broken.length || (idle && slow.length)) {
         // Very behind or breaking a rule.
         flags.set(r, [
-          ...(idle ? ["No activity this week"] : unreachable.map((x) => `Can't reach ${num(x.value)} ${x.unit} this week`)),
+          ...(idle ? ["No activity this period"] : unreachable.map((x) => `Can't reach ${num(x.value)} ${x.unit} this period`)),
           ...r.a.brokenFlags,
         ]);
         red.push(r);
@@ -286,29 +275,29 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         atRisk.push(r);
       } else onTrack.push(r);
     }
-    const bySims = (a: Row, b: Row) => (b.m.weekSimulations ?? 0) - (a.m.weekSimulations ?? 0) || byName(a, b);
-    const byDays = (a: Row, b: Row) => (b.m.weekSubmissionDays ?? 0) - (a.m.weekSubmissionDays ?? 0) || bySims(a, b);
+    const bySims = (a: Row, b: Row) => (b.m.periodSimulations ?? 0) - (a.m.periodSimulations ?? 0) || byName(a, b);
+    const byDays = (a: Row, b: Row) => (b.m.periodSubmissionDays ?? 0) - (a.m.periodSubmissionDays ?? 0) || bySims(a, b);
     const needed = (r: Row) =>
       r.a.done
-        ? `Done for week ${week.number}`
-        : sentence([r.a.needs && (left ? `needs ${r.a.needs} by ${formatDay(week.end)}` : `missed by ${r.a.needs}`), ...r.a.fixes]);
-    const lastWeek = (r: Row): Standing["lastWeek"] =>
+        ? `Done for period ${period.number}`
+        : sentence([r.a.needs && (left ? `needs ${r.a.needs} by ${formatDay(period.end)}` : `missed by ${r.a.needs}`), ...r.a.fixes]);
+    const lastPeriod = (r: Row): Standing["lastPeriod"] =>
       prev ? (assess(rules, metricsFor(r.p.alias, milestone.start, prev)).done ? "met" : "missed") : null;
     const toStanding = (r: Row) =>
-      standing(r.p, { checks: r.a.checks, needed: needed(r), good: r.a.done, flags: flags.get(r) ?? [], lastWeek: lastWeek(r) });
+      standing(r.p, { checks: r.a.checks, needed: needed(r), good: r.a.done, flags: flags.get(r) ?? [], lastPeriod: lastPeriod(r) });
     groups = [
       {
         id: "green",
-        title: `Completed week ${week.number}`,
+        title: `Completed period ${period.number}`,
         tone: "green",
-        empty: "No one has completed this week yet.",
+        empty: "No one has completed this period yet.",
         rows: green.sort(bySims).map(toStanding),
       },
       { id: "ontrack", title: "On track", tone: "blue", rows: onTrack.sort(byDays).map(toStanding) },
       { id: "atrisk", title: "At risk · behind pace", tone: "yellow", rows: atRisk.sort(byDays).map(toStanding) },
       {
         id: "red",
-        title: left ? "Very behind or breaking a rule" : `Missed week ${week.number}`,
+        title: left ? "Very behind or breaking a rule" : `Missed period ${period.number}`,
         tone: "red",
         rows: red.sort(byDays).map(toStanding),
       },
@@ -458,8 +447,8 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     groups,
     total: groups.reduce((n, g) => n + g.rows.length, 0),
     cutoff,
-    week,
-    weekDay,
+    period,
+    periodDay,
   };
 }
 

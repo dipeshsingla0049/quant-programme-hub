@@ -81,10 +81,10 @@ function Legend({ items }: { items: [Tone, string, string][] }) {
 /** Full page for one November milestone: window, reward, criteria and leaderboard. */
 export function MilestoneView({ id }: { id: MilestoneId }) {
   const m = getMilestone(id);
-  const windowText = m.end ? formatDayRange(m.start, m.end) : `From ${formatDay(m.start)}, every week`;
+  const windowText = m.end ? formatDayRange(m.start, m.end) : `From ${formatDay(m.start)}`;
   const winners = m.ranking?.winners;
   const s = getStandings(id);
-  const week = s.week;
+  const period = s.period;
   const prize = m.reward.replace(" each", "");
   const rules = trackedRules(m);
   const count = (g: string) => countOf(s, g);
@@ -123,7 +123,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
           {count("green")}
           {weekly && <span className="text-xl text-dim"> / {s.total}</span>}
         </p>
-        <p className="mt-1 text-sm text-muted">{weekly ? `completed week ${week?.number}` : `eligible for ${prize} so far`}</p>
+        <p className="mt-1 text-sm text-muted">{weekly ? `completed period ${period?.number}` : `eligible for ${prize} so far`}</p>
         <p className="mt-3 text-sm">
           <span className="font-medium text-sky">{count("ontrack")} on track</span>
           {weekly && (
@@ -137,9 +137,9 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
             {count("red")} {weekly ? "very behind or breaking a rule" : "not eligible right now"}
           </span>
         </p>
-        {weekly && week && (
+        {weekly && period && (
           <p className="mt-2 text-xs text-dim">
-            Week {week.number}: {formatDayRange(week.start, week.end)} · data up to day {s.weekDay} of 7
+            Period {period.number}: {formatDayRange(period.start, period.end)} · data up to day {s.periodDay} of {period.length}
           </p>
         )}
       </>
@@ -148,21 +148,21 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
 
   const ruleOf = (metric: string) => rules.find((r) => r.metric === metric);
   let legend: [Tone, string, string][] = [];
-  if (m.board === "weekly" && s.weekDay) {
-    const days = paceFor(ruleOf("weekSubmissionDays")!, s.weekDay - 1);
-    const sims = paceFor(ruleOf("weekSimulations")!, s.weekDay - 1);
+  if (m.board === "weekly" && s.periodDay) {
+    const days = paceFor(ruleOf("periodSubmissionDays")!, s.periodDay - 1, period!.length);
+    const sims = paceFor(ruleOf("periodSimulations")!, s.periodDay - 1, period!.length);
     legend = [
-      ["green", `Completed week ${week?.number}`, "Every rule met for this week."],
+      ["green", `Completed period ${period?.number}`, "Every rule met for this period."],
       [
         "blue",
         "On track",
-        `Keeping pace (day ${s.weekDay} of 7: at least ${days ? `${days} ${days === 1 ? "day" : "days"} and ` : ""}${sims.toLocaleString("en-US")} simulations so far), no rule broken.`,
+        `Keeping pace (day ${s.periodDay} of ${period!.length}: at least ${days ? `${days} ${days === 1 ? "day" : "days"} and ` : ""}${sims.toLocaleString("en-US")} simulations so far), no rule broken.`,
       ],
-      ["yellow", "At risk", "Behind pace, but 4 days are still reachable. Catch up this week."],
+      ["yellow", "At risk", "Behind pace, but 7 days are still reachable. Catch up before the period ends."],
       [
         "red",
         "Very behind or breaking a rule",
-        "No activity this week, can't reach 4 days, avg prod corr 0.8 or higher, or more than 4 data fields or 8 operators per alpha.",
+        "No activity this period, can't reach 7 days, avg prod corr 0.8 or higher, or more than 4 data fields or 8 operators per alpha.",
       ],
     ];
   } else if (m.board === "target") {
@@ -270,7 +270,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
           <>
             <p className="mt-2 mb-6 text-sm text-muted">
               {s.final ? "Final standings" : "Standings"} with data up to {formatDay(s.asOf, true)}.
-              {m.board === "weekly" && week && <> Week {week.number} ({formatDayRange(week.start, week.end)}) so far.</>}{" "}
+              {m.board === "weekly" && period && <> Period {period.number} ({formatDayRange(period.start, period.end)}) so far.</>}{" "}
               Search your name to see exactly what you still need.
             </p>
             <Legend items={legend} />
@@ -279,7 +279,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
               ranked={m.board === "ranked"}
               scoreLabel={m.ranking && !rankingIsRule ? (METRIC_LABEL[m.ranking.metric] ?? m.ranking.metric) : null}
               columns={rules.map(columnFor)}
-              lastWeekLabel={m.board === "weekly" && week && week.number > 1 ? `Week ${week.number - 1}` : null}
+              lastPeriodLabel={m.board === "weekly" && period && period.number > 1 ? `Period ${period.number - 1}` : null}
             />
           </>
         )}
