@@ -4,16 +4,46 @@
  * Dates are calendar days in IST, inclusive.
  */
 
-/** Daily reports are cumulative from this day. Weeks are counted from it too. */
+/** Daily reports are cumulative from this day. Baseline periods are counted from it too. */
 export const PROGRAMME_START = "2026-11-07";
+
+/**
+ * Baseline to Stay is checked per period. The first period runs 7–21 Nov
+ * (alongside the Low-Corr Sprint); after that every period is 14 days:
+ * 22 Nov–5 Dec, 6–19 Dec, and so on.
+ */
+export const FIRST_PERIOD_END = "2026-11-21";
+export const PERIOD_DAYS = 14;
+
+export interface Period {
+  number: number;
+  start: string;
+  end: string;
+  /** Days in the period, start and end included. */
+  length: number;
+}
+
+const DAY_MS = 86_400_000;
+const shift = (date: string, n: number) => new Date(Date.parse(`${date}T00:00:00Z`) + n * DAY_MS).toISOString().slice(0, 10);
+const gap = (a: string, b: string) => Math.round((Date.parse(b) - Date.parse(a)) / DAY_MS);
+
+/** The Baseline period a calendar day (YYYY-MM-DD, IST) falls in. */
+export function periodOf(date: string): Period {
+  if (date <= FIRST_PERIOD_END) {
+    return { number: 1, start: PROGRAMME_START, end: FIRST_PERIOD_END, length: gap(PROGRAMME_START, FIRST_PERIOD_END) + 1 };
+  }
+  const n = Math.floor(gap(shift(FIRST_PERIOD_END, 1), date) / PERIOD_DAYS);
+  const start = shift(FIRST_PERIOD_END, 1 + n * PERIOD_DAYS);
+  return { number: n + 2, start, end: shift(start, PERIOD_DAYS - 1), length: PERIOD_DAYS };
+}
 
 /** What a rule can measure for one researcher. See lib/standings.ts. */
 export type MetricId =
   | "submissions"
   | "simulations"
   | "submissionDays"
-  | "weekSubmissionDays"
-  | "weekSimulations"
+  | "periodSubmissionDays"
+  | "periodSimulations"
   | "avgProdCorr"
   | "avgSelfCorr"
   | "operatorsPerAlpha"
@@ -72,7 +102,7 @@ export interface Milestone {
     minAlphas: number;
   };
   /**
-   * weekly: everyone, green (completed this week) / yellow (on track) / red (at risk).
+   * weekly: everyone, per Baseline period: green (completed) / blue (on track) / yellow (at risk) / red.
    * target: green (eligible) / yellow (on track) / red (not eligible) / grey (not started).
    * ranked: everyone with minAlphas ranked, top places gold, then grey groups.
    */
@@ -110,9 +140,9 @@ export const MILESTONES: Milestone[] = [
     name: "Baseline to Stay",
     navLabel: "Baseline to Stay",
     badge: { text: "Important", tone: "rose" },
-    goal: "Meet the minimum every week, including average production correlation below 0.8, or your account is banned.",
+    goal: "Meet the minimum every two weeks, including average production correlation below 0.8, or your account is banned.",
     summary:
-      "The minimum every researcher must meet each week, checked individually within each of the four teams: 4 submission days, 1,500 simulations, at most 4 data fields and 8 operators per alpha, and average production correlation below 0.8. Weeks run Saturday to Friday, starting 7 November.",
+      "The minimum every researcher must meet each two-week period, checked individually within each of the four teams: 7 submission days, 2,500 simulations, at most 4 data fields and 8 operators per alpha, and average production correlation below 0.8. The first period runs 7 to 21 November, then every 14 days: 22 November to 5 December, and so on.",
     start: PROGRAMME_START,
     end: null,
     reward: "Keep your account",
@@ -120,19 +150,19 @@ export const MILESTONES: Milestone[] = [
     stakes: "Accounts that miss the baseline will be banned. The team mentor's decision is final.",
     rules: [
       {
-        metric: "weekSubmissionDays",
+        metric: "periodSubmissionDays",
         op: ">=",
-        value: 4,
-        label: "days with a submission each week",
+        value: 7,
+        label: "days with a submission each period",
         short: "Days",
         unit: "days",
         perDay: true,
       },
       {
-        metric: "weekSimulations",
+        metric: "periodSimulations",
         op: ">=",
-        value: 1500,
-        label: "simulations each week",
+        value: 2500,
+        label: "simulations each period",
         short: "Simulations",
         unit: "simulations",
       },
@@ -194,7 +224,7 @@ export const MILESTONES: Milestone[] = [
     badge: { text: "$50 Challenge", tone: "gold" },
     goal: "Lowest average production correlation, with at least 10 alphas.",
     summary:
-      "A two-week sprint for original ideas. Submit at least 10 alphas between 7 and 21 November, within the data field and operator limits. The 10 researchers with the lowest average production correlation win.",
+      "A two-period sprint for original ideas. Submit at least 10 alphas between 7 and 21 November, within the data field and operator limits. The 10 researchers with the lowest average production correlation win.",
     start: "2026-11-07",
     end: "2026-11-21",
     reward: "$50 each",

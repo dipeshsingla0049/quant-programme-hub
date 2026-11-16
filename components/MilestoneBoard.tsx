@@ -57,7 +57,7 @@ export function MilestoneBoard({
   ranked,
   scoreLabel,
   columns,
-  lastWeekLabel,
+  lastPeriodLabel,
 }: {
   groups: Group[];
   /** Show the # column. */
@@ -66,13 +66,13 @@ export function MilestoneBoard({
   scoreLabel: string | null;
   /** One per tracked rule, in rule order. */
   columns: BoardColumn[];
-  /** Header for the previous week's result column, when there is one. */
-  lastWeekLabel: string | null;
+  /** Header for the previous period's result column, when there is one. */
+  lastPeriodLabel: string | null;
 }) {
   const [query, setQuery] = useState("");
   const [opened, setOpened] = useState<Set<string>>(new Set());
   const q = query.trim().toLowerCase();
-  const hasLastWeek = !!lastWeekLabel;
+  const hasLastPeriod = !!lastPeriodLabel;
 
   const shownGroups = useMemo(
     () =>
@@ -85,7 +85,7 @@ export function MilestoneBoard({
     [groups, q],
   );
 
-  const colCount = (ranked ? 1 : 0) + 1 + (scoreLabel ? 1 : 0) + columns.length + (hasLastWeek ? 1 : 0) + 1;
+  const colCount = (ranked ? 1 : 0) + 1 + (scoreLabel ? 1 : 0) + columns.length + (hasLastPeriod ? 1 : 0) + 1;
   const shown = shownGroups.reduce((n, g) => n + g.rows.length, 0);
   const toggle = (id: string) =>
     setOpened((prev) => {
@@ -121,7 +121,7 @@ export function MilestoneBoard({
                   {c.target && <span className="block normal-case tracking-normal text-dim/80">{c.target}</span>}
                 </th>
               ))}
-              {hasLastWeek && <th scope="col" className="whitespace-nowrap px-4 py-3 font-medium">{lastWeekLabel}</th>}
+              {hasLastPeriod && <th scope="col" className="whitespace-nowrap px-4 py-3 font-medium">{lastPeriodLabel}</th>}
               <th scope="col" className="min-w-56 px-4 py-3 font-medium">What&apos;s needed</th>
             </tr>
           </thead>
@@ -227,11 +227,11 @@ export function MilestoneBoard({
                           </td>
                         );
                       })}
-                      {hasLastWeek && (
+                      {hasLastPeriod && (
                         <td className="whitespace-nowrap px-4 py-3 text-xs">
-                          {s.lastWeek === "met" ? (
+                          {s.lastPeriod === "met" ? (
                             <span className="text-teal">Met</span>
-                          ) : s.lastWeek === "missed" ? (
+                          ) : s.lastPeriod === "missed" ? (
                             <span className="font-medium text-rose">Missed</span>
                           ) : (
                             <span className="text-dim">—</span>
