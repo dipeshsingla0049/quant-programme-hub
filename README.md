@@ -20,7 +20,7 @@ npm run typecheck
 | Route | What it shows |
 | --- | --- |
 | `/` | November milestones (cards and timeline), other opportunities |
-| `/weekly-baseline` | **Baseline to Stay**: weekly minimum to keep your account (4 days, 1,500 simulations, ≤ 4 fields/alpha, avg prod corr < 0.8). Green completed this week, blue on track, yellow at risk, red very behind or breaking a rule |
+| `/weekly-baseline` | **Baseline to Stay**: minimum every two-week period to keep your account (7 days, 2,500 simulations, ≤ 4 fields and ≤ 8 operators per alpha, avg prod corr < 0.8). Period 1 is 7–21 Nov, then every 14 days. Green completed this period, blue on track, yellow at risk, red very behind or breaking a rule |
 | `/20-day-challenge` | **$120 Challenge**: submit on 20 different days by 31 Dec. Green eligible, blue on track, red not eligible right now, grey not started |
 | `/low-corr-sprint` | **Low-Corr Sprint ($50 Challenge)**: 7–21 Nov. Everyone with 2+ alphas ranked by lowest avg prod corr, top 10 in gold; 10 alphas needed to be eligible for $50 |
 | `/goa-trip` | Sponsored Goa Trip. "To be unlocked" until criteria are added |
@@ -44,8 +44,8 @@ with no date in the file name it's yesterday (IST). Importing a day again replac
 - Only the columns the site needs are stored. **Email addresses and BRAIN user IDs are dropped.**
 - To leave someone off the site, add their alias to `data/excluded.json` and re-import the
   latest report.
-- Submission days are BRAIN's `SubmissionDays` column (cumulative since 7 Nov); days in a week are
-  the count at the end minus the count before the week. Reports without it (the one covering 7–8
+- Submission days are BRAIN's `SubmissionDays` column (cumulative since 7 Nov); days in a Baseline
+  period are the count at the end minus the count before the period. Reports without it (the one covering 7–8
   Nov) fall back to an estimate from comparing consecutive reports.
 - `OperatorsPerAlpha` and `SubmissionDays` are optional, because older reports lack one or the
   other. A rule whose column is missing shows "—" and isn't judged. Set `tracked: false` on a rule
@@ -59,7 +59,7 @@ coloured groups; pages follow automatically.
 
 | Board | Groups, in order |
 | --- | --- |
-| Baseline to Stay | green completed this week · blue on track (keeping pace with one day of grace: by day N, (N − 1)/7 of each target) · yellow at risk (behind pace, 4 days still reachable) · red very behind or breaking a rule (no activity, 4 days out of reach, or a limit broken) |
+| Baseline to Stay | per period (7–21 Nov, then every 14 days; `FIRST_PERIOD_END` and `PERIOD_DAYS` in `lib/milestones.ts`): green completed this period · blue on track (keeping pace with one day of grace: by day N of an L-day period, (N − 1)/L of each target) · yellow at risk (behind pace, 7 days still reachable) · red very behind or breaking a rule (no activity, 7 days out of reach, or a limit broken) |
 | $120 Challenge | green eligible · blue on track · red not eligible right now (a limit broken or 20 days out of reach) · grey not started |
 | Low-Corr Sprint | gold top 10 of everyone with 2+ alphas and ≤ 4 fields/alpha · ranked 11 and below · red can't win (more than 4 fields/alpha, not ranked) · grey not ranked yet · grey not started |
 

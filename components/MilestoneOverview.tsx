@@ -16,7 +16,7 @@ function liveLine(m: Milestone): React.ReactNode {
   return (
     <>
       <span className="text-teal">
-        {green} {weekly ? `completed week ${s.week?.number}` : "eligible"}
+        {green} {weekly ? `completed period ${s.period?.number}` : "eligible"}
       </span>{" "}
       · <span className="text-sky">{onTrack} on track</span> ·{" "}
       {weekly && (
@@ -49,7 +49,7 @@ export function MilestoneCards() {
                 {m.name} <MilestoneBadge badge={m.badge} />
               </h3>
               <span className="rounded border border-line-2 bg-panel-2 px-2 py-0.5 text-[11px] tabular-nums text-muted">
-                {m.end ? formatDayRange(m.start, m.end) : `Weekly from ${formatDay(m.start)}`}
+                {m.end ? formatDayRange(m.start, m.end) : `Every two weeks from ${formatDay(m.start)}`}
               </span>
             </div>
 
@@ -131,7 +131,7 @@ export function MilestoneTimeline() {
                   style={{ left: `${left}%`, width: `${width}%` }}
                 >
                   <span className="truncate">
-                    {m.end ? formatDayRange(m.start, m.end) : "Checked every week, ongoing"}
+                    {m.end ? formatDayRange(m.start, m.end) : "Checked every two weeks, ongoing"}
                   </span>
                 </div>
                 <TodayMarker from={PROGRAMME_START} days={days} label={i === 0} />
