@@ -70,6 +70,11 @@ export interface Milestone {
     winners: number;
     /** Alphas needed to appear in the ranking (eligibility for the reward is a rule). */
     minAlphas: number;
+    /**
+     * Alphas needed to win. Everyone with this many is ranked above everyone
+     * without, whatever their score.
+     */
+    winAlphas: number;
   };
   /**
    * weekly: everyone, green (completed this week) / yellow (on track) / red (at risk).
@@ -192,9 +197,9 @@ export const MILESTONES: Milestone[] = [
     name: "Low-Corr Sprint",
     navLabel: "Low-Corr Sprint ($50)",
     badge: { text: "$50 Challenge", tone: "gold" },
-    goal: "Lowest average production correlation, with at least 10 alphas.",
+    goal: "Minimum 10 alphas to win. Lowest average production correlation among them takes the top 10.",
     summary:
-      "A two-week sprint for original ideas. Submit at least 10 alphas between 7 and 21 November, within the data field and operator limits. The 10 researchers with the lowest average production correlation win.",
+      "A two-week sprint for original ideas. Minimum 10 alphas to win: submit at least 10 alphas between 7 and 21 November, within the data field and operator limits. Among researchers with 10 or more alphas, the 10 with the lowest average production correlation win.",
     start: "2026-11-07",
     end: "2026-11-21",
     reward: "$50 each",
@@ -207,12 +212,12 @@ export const MILESTONES: Milestone[] = [
         label: "alphas submitted from 7 Nov",
         short: "Alphas",
         unit: "alphas",
-        note: "Everyone with 2 or more alphas within the data field and operator limits is ranked. You need 10 to be eligible for $50.",
+        note: "Minimum 10 alphas to win. Everyone with 10 or more is ranked first, lowest avg prod corr on top. Researchers with 2 to 9 alphas are listed below them and can't win until they reach 10.",
       },
       maxFields,
       maxOperators,
     ],
-    ranking: { metric: "avgProdCorr", order: "asc", winners: 10, minAlphas: 2 },
+    ranking: { metric: "avgProdCorr", order: "asc", winners: 10, minAlphas: 2, winAlphas: 10 },
     board: "ranked",
   },
 ];
