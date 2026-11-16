@@ -356,37 +356,58 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       ((score(a) ?? Infinity) - (score(b) ?? Infinity)) * dir || (b.m.simulations ?? 0) - (a.m.simulations ?? 0) || byName(a, b);
     // Breaking a limit (more than 4 data fields or 8 operators) rules you out of the ranking: you can't win.
     const ruledOut = everyone.filter((r) => r.m.submissions && r.a.broken.length > 0);
-    const ranked = everyone
-      .filter((r) => (r.m.submissions ?? 0) >= ranking.minAlphas && score(r) !== null && !r.a.broken.length)
-      .sort(byScore);
+    const canRank = (r: Row) => (r.m.submissions ?? 0) >= ranking.minAlphas && score(r) !== null && !r.a.broken.length;
+    // Minimum alphas to win: everyone with them comes first, lowest score on top; then everyone else by score.
+    const qualified = everyone.filter((r) => canRank(r) && (r.m.submissions ?? 0) >= ranking.winAlphas).sort(byScore);
+    const belowMin = everyone.filter((r) => canRank(r) && (r.m.submissions ?? 0) < ranking.winAlphas).sort(byScore);
+    const ranked = [...qualified, ...belowMin];
     const unranked = everyone.filter((r) => r.m.submissions && !ranked.includes(r) && !ruledOut.includes(r));
     const grey = everyone.filter((r) => !r.m.submissions);
+    const toMin = (r: Row) => {
+      const n = ranking.winAlphas - (r.m.submissions ?? 0);
+      return `${n} more ${n === 1 ? "alpha" : "alphas"} to reach the minimum of ${ranking.winAlphas}`;
+    };
     const toRanked = (r: Row, i: number) => {
-      const top = i < ranking.winners;
+      const isQualified = i < qualified.length;
+      const top = isQualified && i < ranking.winners;
       return standing(r.p, {
         position: i + 1,
         score: formatValue(score(r), decimals),
         checks: r.a.checks,
         good: r.a.done && top,
-        needed: r.a.done
-          ? top
-            ? `Potential ${prize} winner`
-            : `Eligible, outside the top ${ranking.winners}`
-          : `${sentence([r.a.needs && `complete ${r.a.needs}`, ...r.a.fixes])} to be eligible for ${prize}`,
+        needed: !isQualified
+          ? `${sentence([toMin(r), ...r.a.fixes])}. Can't win ${prize} until then`
+          : r.a.done
+            ? top
+              ? `Potential ${prize} winner`
+              : `Eligible, outside the top ${ranking.winners}`
+            : `${sentence([r.a.needs && `complete ${r.a.needs}`, ...r.a.fixes])} to be eligible for ${prize}`,
       });
     };
     const rows = ranked.map(toRanked);
-    cutoff = rows[ranking.winners - 1]?.score ?? rows.at(-1)?.score ?? null;
+    const qualifiedRows = rows.slice(0, qualified.length);
+    cutoff = qualifiedRows[ranking.winners - 1]?.score ?? qualifiedRows.at(-1)?.score ?? null;
     const plain = (r: Row, needed: string) => standing(r.p, { checks: r.a.checks, needed });
     groups = [
       {
         id: "top",
-        title: `Top ${ranking.winners} · lowest avg prod corr`,
+        title: `Top ${ranking.winners} · ${ranking.winAlphas}+ alphas · lowest avg prod corr`,
         tone: "gold",
-        empty: `No one has ${ranking.minAlphas} alphas yet.`,
-        rows: rows.slice(0, ranking.winners),
+        empty: `No one has ${ranking.winAlphas} alphas yet. Minimum ${ranking.winAlphas} alphas to win.`,
+        rows: qualifiedRows.slice(0, ranking.winners),
       },
-      { id: "rest", title: `Ranked ${ranking.winners + 1} and below`, tone: "plain", rows: rows.slice(ranking.winners) },
+      {
+        id: "rest",
+        title: `${ranking.winAlphas}+ alphas · ranked ${ranking.winners + 1} and below`,
+        tone: "plain",
+        rows: qualifiedRows.slice(ranking.winners),
+      },
+      {
+        id: "below-min",
+        title: `Under ${ranking.winAlphas} alphas · can't win yet · lowest avg prod corr`,
+        tone: "yellow",
+        rows: rows.slice(qualified.length),
+      },
       {
         id: "ruled-out",
         title: "Can't win right now · breaking a rule",

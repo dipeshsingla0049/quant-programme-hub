@@ -64,7 +64,7 @@ const SWATCH: Record<Tone, string> = {
 /** What each colour on the board means. */
 function Legend({ items }: { items: [Tone, string, string][] }) {
   return (
-    <ul className="mb-6 grid gap-2 text-sm sm:grid-cols-2 xl:grid-cols-4">
+    <ul className={`mb-6 grid gap-2 text-sm sm:grid-cols-2 ${items.length > 4 ? "xl:grid-cols-5" : "xl:grid-cols-4"}`}>
       {items.map(([tone, title, text]) => (
         <li key={title} className="flex gap-3 rounded-lg border border-line bg-panel/60 p-3">
           <span aria-hidden className={`mt-0.5 h-4 w-4 shrink-0 rounded border-2 ${SWATCH[tone]}`} />
@@ -107,8 +107,9 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
           </p>
         )}
         <p className="mt-1 text-sm text-muted">
-          {count("top") + count("rest")} ranked · {m.ranking!.minAlphas}+ alphas
+          {count("top") + count("rest")} with {m.ranking!.winAlphas}+ alphas · {count("below-min")} under {m.ranking!.winAlphas}
         </p>
+        <p className="mt-2 text-sm font-semibold text-gold">Minimum {m.ranking!.winAlphas} alphas to win</p>
         <a href="#standings" className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-gold hover:text-fg">
           Find yourself in the leaderboard <ArrowRight size={14} />
         </a>
@@ -176,9 +177,14 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
       [
         "gold",
         `Top ${winners}`,
-        `Lowest avg prod corr among everyone with ${m.ranking!.minAlphas}+ alphas, at most 4 data fields and 8 operators per alpha. A potential ${prize} winner once you have 10 alphas.`,
+        `Lowest avg prod corr among everyone with ${m.ranking!.winAlphas}+ alphas, at most 4 data fields and 8 operators per alpha. Potential ${prize} winners.`,
       ],
-      ["plain", `Ranked ${winners! + 1} and below`, `Within the rules, outside the top ${winners}.`],
+      ["plain", `${m.ranking!.winAlphas}+ alphas · ranked ${winners! + 1} and below`, `Within the rules, outside the top ${winners}.`],
+      [
+        "yellow",
+        `Under ${m.ranking!.winAlphas} alphas`,
+        `${m.ranking!.minAlphas}–${m.ranking!.winAlphas - 1} alphas, by lowest avg prod corr. Always below everyone with ${m.ranking!.winAlphas}+. Can't win until you reach ${m.ranking!.winAlphas}.`,
+      ],
       ["red", "Can't win right now", "More than 4 data fields or 8 operators per alpha. Not ranked until both are back within the limit."],
       ["grey", "Not ranked yet · Not started", `Fewer than ${m.ranking!.minAlphas} alphas, or none yet.`],
     ];
@@ -237,11 +243,19 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         sectionId="criteria"
       />
       {m.ranking?.metric === "avgProdCorr" && (
-        <p className="mt-3 text-sm text-muted">
-          Everyone with {m.ranking.minAlphas} or more alphas, at most 4 data fields and at most 8 operators per alpha
-          is ranked, lowest average production correlation first. Ties go to the researcher with more simulations.
-          More than 4 data fields or 8 operators means you can&apos;t win. To be eligible for {prize} you need at least 10 alphas.
-        </p>
+        <>
+          <p className="mt-4 rounded-xl border border-gold/50 bg-amber-bright/15 px-5 py-4 text-base font-semibold text-gold-deep">
+            🏆 Minimum {m.ranking.winAlphas} alphas to win. Only researchers with {m.ranking.winAlphas} or more alphas
+            can take a top {m.ranking.winners} place.
+          </p>
+          <p className="mt-3 text-sm text-muted">
+            Researchers with {m.ranking.winAlphas} or more alphas, at most 4 data fields and at most 8 operators per
+            alpha are ranked first, lowest average production correlation on top. Only after all of them come
+            researchers with {m.ranking.minAlphas}–{m.ranking.winAlphas - 1} alphas, also lowest average production
+            correlation first, however low their correlation is. Ties go to the researcher with more simulations. More
+            than 4 data fields or 8 operators means you can&apos;t win.
+          </p>
+        </>
       )}
 
       <section id="standings" aria-labelledby="standings-title" className="mt-16 scroll-mt-40 2xl:scroll-mt-24">
