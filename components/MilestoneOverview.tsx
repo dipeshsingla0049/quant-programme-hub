@@ -49,7 +49,7 @@ export function MilestoneCards() {
                 {m.name} <MilestoneBadge badge={m.badge} />
               </h3>
               <span className="rounded border border-line-2 bg-panel-2 px-2 py-0.5 text-[11px] tabular-nums text-muted">
-                {m.end ? formatDayRange(m.start, m.end) : `Every two weeks from ${formatDay(m.start)}`}
+                {m.end ? formatDayRange(m.start, m.end) : `From ${formatDay(m.start)}`}
               </span>
             </div>
 

@@ -81,7 +81,7 @@ function Legend({ items }: { items: [Tone, string, string][] }) {
 /** Full page for one November milestone: window, reward, criteria and leaderboard. */
 export function MilestoneView({ id }: { id: MilestoneId }) {
   const m = getMilestone(id);
-  const windowText = m.end ? formatDayRange(m.start, m.end) : `From ${formatDay(m.start)}, every two weeks`;
+  const windowText = m.end ? formatDayRange(m.start, m.end) : `From ${formatDay(m.start)}`;
   const winners = m.ranking?.winners;
   const s = getStandings(id);
   const period = s.period;
