@@ -7,6 +7,7 @@ import r20261112 from "./2026-11-12.json";
 import r20261113 from "./2026-11-13.json";
 import r20261114 from "./2026-11-14.json";
 import r20261115 from "./2026-11-15.json";
+import r20261116 from "./2026-11-16.json";
 
-const reports = [r20261108, r20261109, r20261111, r20261112, r20261113, r20261114, r20261115] as RawReport[];
+const reports = [r20261108, r20261109, r20261111, r20261112, r20261113, r20261114, r20261115, r20261116] as RawReport[];
 export default reports;
