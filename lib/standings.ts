@@ -66,9 +66,10 @@ export { periodOf, type Period } from "./milestones";
 
 type Metrics = Record<MetricId, number | null>;
 
-function metricsFor(alias: string, from: string, asOf: string): Metrics {
+/** `current` is the Baseline period to measure; by default the one `asOf` falls in. */
+function metricsFor(alias: string, from: string, asOf: string, current?: Period): Metrics {
   const row = reportOn(asOf)?.rows.get(alias);
-  const period = periodOf(asOf);
+  const period = current ?? periodOf(asOf);
   const beforePeriod = reportOn(addDays(period.start, -1))?.rows.get(alias);
   const days = daysUpTo(alias, asOf);
   const simulations = row?.simulations ?? 0;
@@ -167,7 +168,7 @@ export interface MilestoneStandings {
   cutoff: string | null;
   /** The programme period the standings fall in. */
   period: Period | null;
-  /** Day of that period the data reaches, 1 to period.length. */
+  /** Day of that period the data reaches, 0 (not started yet) to period.length. */
   periodDay: number | null;
 }
 
@@ -258,18 +259,21 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
   if (!asOf) return base;
 
   const rules = trackedRules(milestone);
+  // Baseline: once the data reaches a period's last day, that period is over. The board resets to the
+  // next period (everyone starts from zero) and the finished one shows in the last-period column.
+  const period = milestone.board === "weekly" && asOf === periodOf(asOf).end ? periodOf(addDays(asOf, 1)) : periodOf(asOf);
+  /** Day of the period the data reaches; 0 when the period starts after the latest report. */
+  const periodDay = Math.max(0, daysBetween(period.start, asOf) + 1);
   const everyone = own
     ? [...own.rows.values()].map((p) => {
         const m = metricsFromRow(p);
         return { p, m, a: assess(rules, m) };
       })
     : [...people.values()].map((p) => {
-        const m = metricsFor(p.alias, milestone.start, asOf);
+        const m = metricsFor(p.alias, milestone.start, asOf, period);
         return { p, m, a: assess(rules, m) };
       });
   type Row = (typeof everyone)[number];
-  const period = periodOf(asOf);
-  const periodDay = daysBetween(period.start, asOf) + 1;
   const prize = milestone.reward.replace(" each", "");
   let groups: Group[];
   let cutoff: string | null = null;
@@ -289,7 +293,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       }
       const progress = rules.filter((x) => x.op === ">=");
       const unreachable = progress.filter((x) => x.perDay && (r.m[x.metric] ?? 0) + left < x.value);
-      const slow = progress.filter((x) => (r.m[x.metric] ?? 0) < paceFor(x, periodDay - 1, period.length));
+      const slow = progress.filter((x) => (r.m[x.metric] ?? 0) < paceFor(x, Math.max(0, periodDay - 1), period.length));
       for (const x of [...unreachable, ...slow]) r.a.checks[rules.indexOf(x)].state = "fail";
       const idle = progress.every((x) => !r.m[x.metric]);
       if (!left) {
@@ -299,7 +303,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       } else if (unreachable.length || r.a.broken.length || (idle && slow.length)) {
         // Very behind or breaking a rule.
         flags.set(r, [
-          ...(idle ? ["No activity this period"] : unreachable.map((x) => `Can't reach ${num(x.value)} ${x.unit} this period`)),
+          ...(idle ? (periodDay ? ["No activity this period"] : []) : unreachable.map((x) => `Can't reach ${num(x.value)} ${x.unit} this period`)),
           ...r.a.brokenFlags,
         ]);
         red.push(r);

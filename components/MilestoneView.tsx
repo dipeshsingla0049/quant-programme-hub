@@ -139,7 +139,8 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         </p>
         {weekly && period && (
           <p className="mt-2 text-xs text-dim">
-            Period {period.number}: {formatDayRange(period.start, period.end)} · data up to day {s.periodDay} of {period.length}
+            Period {period.number}: {formatDayRange(period.start, period.end)} ·{" "}
+            {s.periodDay ? <>data up to day {s.periodDay} of {period.length}</> : <>new period, starts {formatDay(period.start)}</>}
           </p>
         )}
       </>
@@ -148,15 +149,17 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
 
   const ruleOf = (metric: string) => rules.find((r) => r.metric === metric);
   let legend: [Tone, string, string][] = [];
-  if (m.board === "weekly" && s.periodDay) {
-    const days = paceFor(ruleOf("periodSubmissionDays")!, s.periodDay - 1, period!.length);
-    const sims = paceFor(ruleOf("periodSimulations")!, s.periodDay - 1, period!.length);
+  if (m.board === "weekly" && period && s.periodDay !== null) {
+    const days = paceFor(ruleOf("periodSubmissionDays")!, Math.max(0, s.periodDay - 1), period.length);
+    const sims = paceFor(ruleOf("periodSimulations")!, Math.max(0, s.periodDay - 1), period.length);
     legend = [
       ["green", `Completed period ${period?.number}`, "Every rule met for this period."],
       [
         "blue",
         "On track",
-        `Keeping pace (day ${s.periodDay} of ${period!.length}: at least ${days ? `${days} ${days === 1 ? "day" : "days"} and ` : ""}${sims.toLocaleString("en-US")} simulations so far), no rule broken.`,
+        s.periodDay
+          ? `Keeping pace (day ${s.periodDay} of ${period.length}: at least ${days ? `${days} ${days === 1 ? "day" : "days"} and ` : ""}${sims.toLocaleString("en-US")} simulations so far), no rule broken.`
+          : `New period from ${formatDay(period.start)}: everyone starts from zero. No rule broken.`,
       ],
       ["yellow", "At risk", "Behind pace, but 7 days are still reachable. Catch up before the period ends."],
       [
