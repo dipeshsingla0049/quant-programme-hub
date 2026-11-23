@@ -20,7 +20,7 @@ npm run typecheck
 | Route | What it shows |
 | --- | --- |
 | `/` | November milestones (cards and timeline), other opportunities |
-| `/weekly-baseline` | **Baseline to Stay**: minimum every week to keep your account (4 days, 1,500 simulations, ≤ 4 fields and ≤ 8 operators per alpha, avg prod corr < 0.8, all on that week's alphas only). Period 1 was 7–21 Nov (7 days, 2,500 simulations), then weekly from 22 Nov. Green completed this period, blue on track, yellow at risk, red very behind or breaking a rule |
+| `/weekly-baseline` | **Baseline to Stay**: minimum every week to keep your account (4 days, 1,500 simulations, ≤ 4 fields and ≤ 8 operators per alpha, avg prod corr < 0.8, all on that week's alphas only). A fresh start from 22 Nov: week 1 is 22–28 Nov, then every 7 days. Green completed this period, blue on track, yellow at risk, red very behind or breaking a rule |
 | `/20-day-challenge` | **$120 Challenge**: submit on 20 different days by 31 Dec. Green eligible, blue on track, red not eligible right now, grey not started |
 | `/low-corr-sprint` | **Low-Corr Sprint ($50 Challenge)**: 7–21 Nov. Everyone with 2+ alphas ranked by lowest avg prod corr, top 10 in gold; 10 alphas needed to be eligible for $50 |
 | `/goa-trip` | Sponsored Goa Trip. "To be unlocked" until criteria are added |
@@ -59,7 +59,7 @@ coloured groups; pages follow automatically.
 
 | Board | Groups, in order |
 | --- | --- |
-| Baseline to Stay | per period (7–21 Nov, then every 7 days from 22 Nov; `FIRST_PERIOD_END`, `PERIOD_DAYS` and each rule's `firstPeriodValue` in `lib/milestones.ts`): green completed this period · blue on track (keeping pace with one day of grace: by day N of an L-day period, (N − 1)/L of each target) · yellow at risk (behind pace, the days target still reachable, or keeping pace but missed the previous period) · red very behind or breaking a rule (no activity, days target out of reach, a limit broken, or behind pace after missing the previous period) |
+| Baseline to Stay | per week (from 22 Nov, every 7 days; `BASELINE_START` and `PERIOD_DAYS` in `lib/milestones.ts`): green completed this period · blue on track (keeping pace with one day of grace: by day N of an L-day period, (N − 1)/L of each target) · yellow at risk (behind pace, the days target still reachable, or keeping pace but missed the previous period) · red very behind or breaking a rule (no activity, days target out of reach, a limit broken, or behind pace after missing the previous period) |
 | $120 Challenge | green eligible · blue on track · red not eligible right now (a limit broken or 20 days out of reach) · grey not started |
 | Low-Corr Sprint | gold top 10 of everyone with 2+ alphas and ≤ 4 fields/alpha · ranked 11 and below · red can't win (more than 4 fields/alpha, not ranked) · grey not ranked yet · grey not started |
 

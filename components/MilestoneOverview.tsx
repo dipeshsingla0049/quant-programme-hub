@@ -3,7 +3,7 @@ import { ArrowRight, Lock, Trophy } from "@/components/icons";
 import { MilestoneBadge } from "@/components/MilestoneBadge";
 import { TodayMarker } from "@/components/TodayMarker";
 import { formatDay, formatDayRange } from "@/lib/format";
-import { FIRST_PERIOD_END, MILESTONES, PERIOD_DAYS, PROGRAMME_START, type Milestone } from "@/lib/milestones";
+import { BASELINE_START, MILESTONES, PERIOD_DAYS, PROGRAMME_START, type Milestone } from "@/lib/milestones";
 import { addDays, countOf, getStandings, ruleTarget } from "@/lib/standings";
 
 /** One line on where things stand, for the milestone's card. */
@@ -16,7 +16,7 @@ function liveLine(m: Milestone): React.ReactNode {
   return (
     <>
       <span className="text-teal">
-        {green} {weekly ? `completed period ${s.period?.number}` : "eligible"}
+        {green} {weekly ? `completed week ${s.period?.number}` : "eligible"}
       </span>{" "}
       · <span className="text-sky">{onTrack} on track</span> ·{" "}
       {weekly && (
@@ -108,9 +108,9 @@ export function MilestoneTimeline() {
   const days = Math.round((Date.parse(last) - Date.parse(PROGRAMME_START)) / 86_400_000) + 1;
   const pct = (day: string) => ((Date.parse(day) - Date.parse(PROGRAMME_START)) / 86_400_000 / days) * 100;
   const ticks: string[] = [];
-  // Baseline period boundaries: 7 Nov, then every PERIOD_DAYS from the day after period 1.
+  // 7 Nov, then the Baseline weeks: every PERIOD_DAYS from 22 Nov.
   ticks.push(PROGRAMME_START);
-  for (let d = addDays(FIRST_PERIOD_END, 1); d <= last; d = addDays(d, PERIOD_DAYS)) ticks.push(d);
+  for (let d = BASELINE_START; d <= last; d = addDays(d, PERIOD_DAYS)) ticks.push(d);
 
   return (
     <div className="rounded-2xl border border-line bg-panel/60 p-5 sm:p-6">
@@ -133,7 +133,7 @@ export function MilestoneTimeline() {
                   style={{ left: `${left}%`, width: `${width}%` }}
                 >
                   <span className="truncate">
-                    {m.end ? formatDayRange(m.start, m.end) : "Checked every week from 22 Nov, ongoing"}
+                    {m.end ? formatDayRange(m.start, m.end) : "Checked every week, ongoing"}
                   </span>
                 </div>
                 <TodayMarker from={PROGRAMME_START} days={days} label={i === 0} />
