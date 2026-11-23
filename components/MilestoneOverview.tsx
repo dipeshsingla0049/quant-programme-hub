@@ -10,7 +10,7 @@ import { addDays, countOf, getStandings, ruleTarget } from "@/lib/standings";
 function liveLine(m: Milestone): React.ReactNode {
   const s = getStandings(m.id);
   if (!s.asOf) return "Standings from the first daily report";
-  if (m.ranking) return s.final ? <span className="text-gold">Ended · {countOf(s, "top")} winners named · see the results</span> : `Are you in the top ${m.ranking.winners}?`;
+  if (m.ranking) return s.final ? <span className="text-violet">Ended · {countOf(s, "top")} winners named · see the results</span> : `Are you in the top ${m.ranking.winners}?`;
   const [green, onTrack, atRisk, red] = ["green", "ontrack", "atrisk", "red"].map((g) => countOf(s, g));
   const weekly = m.board === "weekly";
   return (
@@ -36,12 +36,18 @@ export function MilestoneCards() {
     <div className="grid gap-4 lg:grid-cols-3">
       {MILESTONES.map((m) => {
         const stakes = !!m.stakes;
+        // The Low-Corr Sprint gets its own colour so it stands apart from the $120 card.
+        const accent = m.id === "low-corr-sprint" ? "violet" : "gold";
+        const tone = {
+          gold: { card: "border-gold/40 bg-gold/[0.05] hover:border-gold/70", text: "text-gold" },
+          violet: { card: "border-violet/40 bg-violet/[0.05] hover:border-violet/70", text: "text-violet" },
+        }[accent];
         return (
           <Link
             key={m.id}
             href={`/${m.id}`}
             className={`group flex flex-col rounded-2xl border p-6 transition sm:p-7 ${
-              stakes ? "border-rose/40 bg-rose/[0.03] hover:border-rose/70" : "border-gold/40 bg-gold/[0.05] hover:border-gold/70"
+              stakes ? "border-rose/40 bg-rose/[0.03] hover:border-rose/70" : tone.card
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -55,7 +61,7 @@ export function MilestoneCards() {
 
             <p
               className={`mt-5 flex items-center gap-2 font-semibold tracking-tight ${
-                stakes ? "text-2xl text-fg" : "text-4xl text-gold"
+                stakes ? "text-2xl text-fg" : `text-4xl ${tone.text}`
               }`}
             >
               {stakes ? <Lock size={20} className="text-rose" /> : <Trophy size={24} />}
@@ -74,7 +80,7 @@ export function MilestoneCards() {
             <ul className="mt-4 space-y-1.5 border-t border-line pt-4 text-sm">
               {m.rules.map((r) => (
                 <li key={r.metric} className="flex gap-3">
-                  <span className="w-16 shrink-0 tabular-nums text-gold">{ruleTarget(r)}</span>
+                  <span className={`w-16 shrink-0 tabular-nums ${tone.text}`}>{ruleTarget(r)}</span>
                   <span className="text-muted">
                     {r.label}
                     {r.note?.startsWith("New.") && (
@@ -91,7 +97,7 @@ export function MilestoneCards() {
             <p className={`mt-5 tabular-nums ${m.ranking ? "text-base font-semibold text-fg" : "text-xs font-medium"}`}>
               {liveLine(m)}
             </p>
-            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-gold">
+            <span className={`mt-3 inline-flex items-center gap-1 text-sm font-medium ${tone.text}`}>
               See the leaderboard
               <ArrowRight size={14} className="transition group-hover:translate-x-0.5" />
             </span>
@@ -128,7 +134,7 @@ export function MilestoneTimeline() {
               <div className="relative h-7 rounded bg-panel-2">
                 <div
                   className={`absolute inset-y-0 flex items-center overflow-hidden rounded px-2 text-[11px] font-medium ${
-                    m.stakes ? "bg-rose/15 text-rose" : "bg-gold/20 text-gold"
+                    m.stakes ? "bg-rose/15 text-rose" : m.id === "low-corr-sprint" ? "bg-violet/15 text-violet" : "bg-gold/20 text-gold"
                   } ${m.end ? "" : "rounded-r-none"}`}
                   style={{ left: `${left}%`, width: `${width}%` }}
                 >
