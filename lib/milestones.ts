@@ -76,7 +76,7 @@ export interface Milestone {
   /** Label in the site navigation. */
   navLabel: string;
   /** Small tag next to the name, e.g. "Important". */
-  badge?: { text: string; tone: "rose" | "gold" };
+  badge?: { text: string; tone: "rose" | "gold" | "violet" };
   /** One line: what you have to do. */
   goal: string;
   summary: string;
@@ -223,7 +223,7 @@ export const MILESTONES: Milestone[] = [
     id: "low-corr-sprint",
     name: "Low-Corr Sprint",
     navLabel: "Low-Corr Sprint ($50)",
-    badge: { text: "$50 Challenge", tone: "gold" },
+    badge: { text: "$50 Challenge", tone: "violet" },
     goal: "Minimum 10 alphas to win. Lowest average production correlation among them takes the top 10.",
     summary:
       "A two-week sprint for original ideas, 7 to 21 November, now ended. Minimum 10 alphas to win, within the data field and operator limits. Among researchers with 10 or more alphas, the 10 with the lowest average production correlation won $50 each.",
