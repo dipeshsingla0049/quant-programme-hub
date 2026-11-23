@@ -241,7 +241,7 @@ export const MILESTONES: Milestone[] = [
     badge: { text: "$50 Challenge", tone: "gold" },
     goal: "Minimum 10 alphas to win. Lowest average production correlation among them takes the top 10.",
     summary:
-      "A two-period sprint for original ideas. Minimum 10 alphas to win: submit at least 10 alphas between 7 and 21 November, within the data field and operator limits. Among researchers with 10 or more alphas, the 10 with the lowest average production correlation win.",
+      "A two-week sprint for original ideas, 7 to 21 November, now ended. Minimum 10 alphas to win, within the data field and operator limits. Among researchers with 10 or more alphas, the 10 with the lowest average production correlation won $50 each.",
     start: "2026-11-07",
     end: "2026-11-21",
     reward: "$50 each",

@@ -97,6 +97,24 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         Standings start with the first daily report, covering {formatDay(m.start)}.
       </p>
     );
+  } else if (m.board === "ranked" && s.final) {
+    const top = s.groups.find((g) => g.id === "top")?.rows ?? [];
+    now = (
+      <>
+        <p className="text-3xl font-semibold tracking-tight text-fg">Challenge ended</p>
+        <p className="mt-2 text-sm text-muted">
+          {top.length} winners · {m.reward} · closed {formatDay(m.end!)}
+        </p>
+        {top.length > 0 && (
+          <p className="mt-1 text-sm text-muted">
+            Winning avg prod corr: {top[0].score} to {top.at(-1)!.score}
+          </p>
+        )}
+        <a href="#winners" className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-gold hover:text-fg">
+          See the winners <ArrowRight size={14} />
+        </a>
+      </>
+    );
   } else if (m.board === "ranked") {
     now = (
       <>
@@ -195,11 +213,17 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         `Under ${m.ranking!.winAlphas} alphas`,
         `${m.ranking!.minAlphas}–${m.ranking!.winAlphas - 1} alphas, by lowest avg prod corr. Always below everyone with ${m.ranking!.winAlphas}+. Can't win until you reach ${m.ranking!.winAlphas}.`,
       ],
-      ["red", "Can't win right now", "More than 4 data fields or 8 operators per alpha. Not ranked until both are back within the limit."],
+      s.final
+        ? ["red", "Broke a rule", "More than 4 data fields or 8 operators per alpha. Not ranked."]
+        : ["red", "Can't win right now", "More than 4 data fields or 8 operators per alpha. Not ranked until both are back within the limit."],
       ["grey", "Not ranked yet · Not started", `Fewer than ${m.ranking!.minAlphas} alphas, or none yet.`],
     ];
   }
   const rankingIsRule = rules.some((r) => r.metric === m.ranking?.metric);
+  /** Named winners, once a ranked challenge has closed. */
+  const winnersList = m.board === "ranked" && s.final ? (s.groups.find((g) => g.id === "top")?.rows ?? []) : [];
+  const alphasCol = rules.findIndex((r) => r.metric === "submissions");
+  const alphasOf = (w: (typeof winnersList)[number]) => (alphasCol >= 0 ? w.checks[alphasCol]?.value : "—");
 
   return (
     <>
@@ -216,6 +240,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
 
       <JumpLinks
         links={[
+          ...(winnersList.length ? ([["#winners", "Winners"]] as [string, string][]) : []),
           ["#criteria", "Criteria"],
           ["#standings", "Leaderboard"],
         ]}
@@ -242,8 +267,46 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
             <p className="mt-2 text-sm text-fg">{m.rewardDetail}</p>
           </Fact>
         )}
-        <Fact label="Right now">{now}</Fact>
+        <Fact label={s.final && m.board === "ranked" ? "Result" : "Right now"}>{now}</Fact>
       </section>
+
+      {winnersList.length > 0 && (
+        <section id="winners" aria-labelledby="winners-title" className="mt-12 scroll-mt-40 rounded-2xl border border-gold/40 bg-gold/[0.05] p-6 sm:p-8 2xl:scroll-mt-24">
+          <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-gold">
+            <Trophy size={14} /> Final results · {windowText}
+          </p>
+          <h2 id="winners-title" className="mt-2 text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
+            <span className="text-gold">{prize}</span> Challenge winners
+          </h2>
+          <p className="mt-2 text-sm text-muted">
+            Congratulations to the top {winnersList.length}: the lowest average production correlation with{" "}
+            {m.ranking!.winAlphas}+ alphas, within the data field and operator limits. {m.reward}.
+          </p>
+          <ol className="mt-6 grid gap-2">
+            {winnersList.map((w) => (
+              <li
+                key={w.alias}
+                className={`flex items-center gap-4 rounded-lg border px-4 py-3 ${
+                  (w.position ?? 99) <= 3 ? "border-gold/50 bg-gold/[0.08]" : "border-line-2 bg-panel/60"
+                }`}
+              >
+                <span className={`w-7 shrink-0 text-lg font-semibold tabular-nums ${(w.position ?? 99) <= 3 ? "text-gold" : "text-dim"}`}>
+                  {String(w.position).padStart(2, "0")}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-semibold text-fg">{w.name}</span>
+                  <span className="block truncate text-xs text-dim">{w.university}</span>
+                </span>
+                <span className="hidden shrink-0 text-xs tabular-nums text-dim sm:block">{alphasOf(w)} alphas</span>
+                <span className="shrink-0 text-right text-lg font-semibold tabular-nums text-gold">
+                  {w.score}
+                  <span className="block text-[10px] font-normal uppercase tracking-[0.12em] text-dim">avg prod corr</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       <EligibilityCriteria
         id="criteria-title"
@@ -281,7 +344,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
             <p className="mt-2 mb-6 text-sm text-muted">
               {s.final ? "Final standings" : "Standings"} with data up to {formatDay(s.asOf, true)}.
               {m.board === "weekly" && period && <> Period {period.number} ({formatDayRange(period.start, period.end)}) so far.</>}{" "}
-              Search your name to see exactly what you still need.
+              {s.final ? "Search your name to find your final place." : "Search your name to see exactly what you still need."}
             </p>
             <Legend items={legend} />
             <MilestoneBoard

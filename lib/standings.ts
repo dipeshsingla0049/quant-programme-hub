@@ -502,7 +502,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       },
       {
         id: "ruled-out",
-        title: "Can't win right now · breaking a rule",
+        title: closed ? "Broke a rule · not ranked" : "Can't win right now · breaking a rule",
         tone: "red",
         rows: ruledOut.sort(byScore).map((r) => ({
           ...standing(r.p, {

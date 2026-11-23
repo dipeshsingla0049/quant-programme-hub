@@ -10,7 +10,7 @@ import { addDays, countOf, getStandings, ruleTarget } from "@/lib/standings";
 function liveLine(m: Milestone): React.ReactNode {
   const s = getStandings(m.id);
   if (!s.asOf) return "Standings from the first daily report";
-  if (m.ranking) return `Are you in the top ${m.ranking.winners}?`;
+  if (m.ranking) return s.final ? <span className="text-gold">Ended · {countOf(s, "top")} winners named · see the results</span> : `Are you in the top ${m.ranking.winners}?`;
   const [green, onTrack, atRisk, red] = ["green", "ontrack", "atrisk", "red"].map((g) => countOf(s, g));
   const weekly = m.board === "weekly";
   return (
