@@ -5,8 +5,9 @@
  *
  *   npm run import:report -- <file.csv | CSV URL> [YYYY-MM-DD] [--into=<folder>] [--only=<roster.csv>]
  *
- * --into=low-corr stores the report in data/low-corr/ instead, where only the
- * Low-Corr Sprint board reads it (Baseline and $120 keep using data/reports/).
+ * --into=low-corr or --into=20-day-challenge stores the report in that folder
+ * under data/ instead, where only the Low-Corr Sprint or the $120 Challenge
+ * board reads it (the other boards keep using data/reports/).
  * --only=<roster.csv> keeps just the researchers whose UserAlias appears in
  * that CSV, e.g. the 7 Nov report, so people who joined later are left out.
  *

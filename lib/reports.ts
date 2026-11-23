@@ -6,6 +6,7 @@
  */
 import raw from "@/data/reports";
 import rawLowCorr from "@/data/low-corr";
+import raw20Day from "@/data/20-day-challenge";
 import type { ReportRow, UserTier } from "./types";
 
 type Cell = string | number | null;
@@ -75,6 +76,9 @@ export const snapshots: Snapshot[] = raw.map(parse).sort((a, b) => a.date.locale
  * Baseline and $120 forward.
  */
 export const lowCorrSnapshots: Snapshot[] = rawLowCorr.map(parse).sort((a, b) => a.date.localeCompare(b.date));
+
+/** Reports only the $120 Challenge board reads (data/20-day-challenge), oldest first. Same idea as lowCorrSnapshots. */
+export const twentyDaySnapshots: Snapshot[] = raw20Day.map(parse).sort((a, b) => a.date.localeCompare(b.date));
 
 export const TIER_LABEL: Record<UserTier, string> = {
   CONSULTANT: "Consultant",
