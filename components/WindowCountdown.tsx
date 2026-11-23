@@ -12,7 +12,7 @@ const startMs = (day: string) => Date.parse(`${day}T00:00:00+05:30`);
 /**
  * "Starts in", "Ends in" or "Closed" for a milestone window, decided in the
  * browser so a page built days ago still shows the right phase. A window with
- * no end (Baseline to Stay) counts down to the end of the current Baseline period instead.
+ * no end (Baseline to Stay) counts down to the end of the current Baseline week instead.
  */
 export function WindowCountdown({ start, end }: { start: string; end: string | null }) {
   const [phase, setPhase] = useState<{ label: string; target: string } | "closed" | null>(null);
@@ -27,7 +27,7 @@ export function WindowCountdown({ start, end }: { start: string; end: string | n
     }
     const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date(now));
     const periodEnd = startMs(periodOf(today).end) + DAY;
-    setPhase({ label: "This period ends in", target: new Date(periodEnd).toISOString() });
+    setPhase({ label: "This week ends in", target: new Date(periodEnd).toISOString() });
   }, [start, end]);
 
   if (phase === "closed") return <p className="text-lg text-muted">Window closed</p>;

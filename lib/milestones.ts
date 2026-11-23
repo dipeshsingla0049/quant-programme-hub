@@ -4,23 +4,22 @@
  * Dates are calendar days in IST, inclusive.
  */
 
-/** Daily reports are cumulative from this day. Baseline periods are counted from it too. */
+/** Daily reports are cumulative from this day. */
 export const PROGRAMME_START = "2026-11-07";
 
 /**
- * Baseline to Stay is checked per period. The first period ran 7–21 Nov
- * (alongside the Low-Corr Sprint) with its own targets (a rule's
- * firstPeriodValue). From 22 Nov every period is one week: 22–28 Nov,
- * 29 Nov–5 Dec, and so on.
+ * Baseline to Stay starts fresh on 22 Nov and is checked every week:
+ * week 1 is 22–28 Nov, week 2 is 29 Nov–5 Dec, and so on.
  */
-export const FIRST_PERIOD_END = "2026-11-21";
+export const BASELINE_START = "2026-11-22";
 export const PERIOD_DAYS = 7;
 
+/** One Baseline week. */
 export interface Period {
   number: number;
   start: string;
   end: string;
-  /** Days in the period, start and end included. */
+  /** Days in the week, start and end included. */
   length: number;
 }
 
@@ -28,14 +27,11 @@ const DAY_MS = 86_400_000;
 const shift = (date: string, n: number) => new Date(Date.parse(`${date}T00:00:00Z`) + n * DAY_MS).toISOString().slice(0, 10);
 const gap = (a: string, b: string) => Math.round((Date.parse(b) - Date.parse(a)) / DAY_MS);
 
-/** The Baseline period a calendar day (YYYY-MM-DD, IST) falls in. */
+/** The Baseline week a calendar day (YYYY-MM-DD, IST) falls in; week 1 for any day before it starts. */
 export function periodOf(date: string): Period {
-  if (date <= FIRST_PERIOD_END) {
-    return { number: 1, start: PROGRAMME_START, end: FIRST_PERIOD_END, length: gap(PROGRAMME_START, FIRST_PERIOD_END) + 1 };
-  }
-  const n = Math.floor(gap(shift(FIRST_PERIOD_END, 1), date) / PERIOD_DAYS);
-  const start = shift(FIRST_PERIOD_END, 1 + n * PERIOD_DAYS);
-  return { number: n + 2, start, end: shift(start, PERIOD_DAYS - 1), length: PERIOD_DAYS };
+  const n = Math.max(0, Math.floor(gap(BASELINE_START, date) / PERIOD_DAYS));
+  const start = shift(BASELINE_START, n * PERIOD_DAYS);
+  return { number: n + 1, start, end: shift(start, PERIOD_DAYS - 1), length: PERIOD_DAYS };
 }
 
 /** What a rule can measure for one researcher. See lib/standings.ts. */
@@ -69,13 +65,6 @@ export interface Rule {
   perDay?: boolean;
   /** false: listed in the criteria but not checked on the site (no data for it). */
   tracked?: boolean;
-  /** Target for period 1 (7–21 Nov) when it differs from `value`, the weekly target from 22 Nov. */
-  firstPeriodValue?: number;
-}
-
-/** The rules with the targets that applied in a given Baseline period. */
-export function rulesForPeriod(rules: Rule[], period: Period): Rule[] {
-  return rules.map((r) => (period.number === 1 && r.firstPeriodValue !== undefined ? { ...r, value: r.firstPeriodValue } : r));
 }
 
 export type MilestoneId = "weekly-baseline" | "20-day-challenge" | "low-corr-sprint";
@@ -115,7 +104,7 @@ export interface Milestone {
     winAlphas: number;
   };
   /**
-   * weekly: everyone, per Baseline period: green (completed) / blue (on track) / yellow (at risk) / red.
+   * weekly: everyone, per Baseline week: green (completed) / blue (on track) / yellow (at risk) / red.
    * target: green (eligible) / yellow (on track) / red (not eligible) / grey (not started).
    * ranked: everyone with minAlphas ranked, top places gold, then grey groups.
    */
@@ -155,8 +144,8 @@ export const MILESTONES: Milestone[] = [
     badge: { text: "Important", tone: "rose" },
     goal: "Meet the minimum every week, including average production correlation below 0.8, or your account is banned.",
     summary:
-      "The minimum every researcher must meet each week, checked individually within each of the four teams: 4 submission days, 1,500 simulations, at most 4 data fields and 8 operators per alpha, and average production correlation below 0.8. Weekly from 22 November (22 to 28 November, 29 November to 5 December, and so on). The first period, 7 to 21 November, needed 7 days and 2,500 simulations.",
-    start: PROGRAMME_START,
+      "The minimum every researcher must meet each week, checked individually within each of the four teams: 4 submission days, 1,500 simulations, at most 4 data fields and 8 operators per alpha, and average production correlation below 0.8. A fresh start from 22 November: week 1 is 22 to 28 November, week 2 is 29 November to 5 December, and so on.",
+    start: BASELINE_START,
     end: null,
     reward: "Keep your account",
     rewardDetail: "Don't get banned",
@@ -166,22 +155,18 @@ export const MILESTONES: Milestone[] = [
         metric: "periodSubmissionDays",
         op: ">=",
         value: 4,
-        firstPeriodValue: 7,
         label: "days with a submission each week",
         short: "Days",
         unit: "days",
         perDay: true,
-        note: "Weekly from 22 Nov. Period 1 (7–21 Nov) needed 7 days.",
       },
       {
         metric: "periodSimulations",
         op: ">=",
         value: 1500,
-        firstPeriodValue: 2500,
         label: "simulations each week",
         short: "Simulations",
         unit: "simulations",
-        note: "Weekly from 22 Nov. Period 1 (7–21 Nov) needed 2,500.",
       },
       {
         metric: "avgProdCorr",

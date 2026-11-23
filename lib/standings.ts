@@ -12,7 +12,7 @@
  * number of days covered.
  */
 import { formatDay } from "./format";
-import { MILESTONES, PROGRAMME_START, periodOf, rulesForPeriod, type MetricId, type Milestone, type MilestoneId, type Period, type Rule } from "./milestones";
+import { MILESTONES, PROGRAMME_START, periodOf, type MetricId, type Milestone, type MilestoneId, type Period, type Rule } from "./milestones";
 import { lowCorrSnapshots, snapshots, twentyDaySnapshots, type Snapshot } from "./reports";
 import type { ReportRow, UserTier } from "./types";
 
@@ -295,8 +295,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
   const period = milestone.board === "weekly" && asOf === periodOf(asOf).end ? periodOf(addDays(asOf, 1)) : periodOf(asOf);
   /** Day of the period the data reaches; 0 when the period starts after the latest report. */
   const periodDay = Math.max(0, daysBetween(period.start, asOf) + 1);
-  // Baseline targets depend on the period (period 1 had its own); other boards use theirs as is.
-  const rules = rulesForPeriod(trackedRules(milestone), period);
+  const rules = trackedRules(milestone);
   const everyone = own
     ? [...own.rows.values()].map((p) => {
         const m = metricsFromRow(p);
@@ -320,10 +319,9 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     const red: Row[] = [];
     const flags = new Map<Row, string[]>();
     const metLast = new Map<Row, boolean>();
-    const prevRules = prev ? rulesForPeriod(trackedRules(milestone), periodOf(prev)) : rules;
-    if (prev) for (const r of everyone) metLast.set(r, assess(prevRules, metricsFor(r.p.alias, milestone.start, prev, undefined, true)).done);
+    if (prev) for (const r of everyone) metLast.set(r, assess(rules, metricsFor(r.p.alias, milestone.start, prev, undefined, true)).done);
     /** Missing the previous period moves you one zone down this period: blue to yellow, yellow to red. */
-    const missedFlag = prev ? `Missed period ${period.number - 1}` : "";
+    const missedFlag = prev ? `Missed week ${period.number - 1}` : "";
     for (const r of everyone) {
       if (r.a.done) {
         green.push(r);
@@ -337,12 +335,12 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       const idle = progress.every((x) => !r.m[x.metric]);
       if (!left) {
         // The period is over: completed or missed.
-        flags.set(r, [`Missed period ${period.number}`, ...r.a.brokenFlags]);
+        flags.set(r, [`Missed week ${period.number}`, ...r.a.brokenFlags]);
         red.push(r);
       } else if (unreachable.length || r.a.broken.length || (idle && slow.length)) {
         // Very behind or breaking a rule.
         flags.set(r, [
-          ...(idle ? (periodDay ? ["No activity this period"] : []) : unreachable.map((x) => `Can't reach ${num(x.value)} ${x.unit} this period`)),
+          ...(idle ? (periodDay ? ["No activity this week"] : []) : unreachable.map((x) => `Can't reach ${num(x.value)} ${x.unit} this week`)),
           ...r.a.brokenFlags,
           ...(missedLast ? [missedFlag] : []),
         ]);
@@ -361,7 +359,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     const byDays = (a: Row, b: Row) => (b.m.periodSubmissionDays ?? 0) - (a.m.periodSubmissionDays ?? 0) || bySims(a, b);
     const needed = (r: Row) =>
       r.a.done
-        ? `Done for period ${period.number}`
+        ? `Done for week ${period.number}`
         : sentence([r.a.needs && (left ? `needs ${r.a.needs} by ${formatDay(period.end)}` : `missed by ${r.a.needs}`), ...r.a.fixes]);
     const lastPeriod = (r: Row): Standing["lastPeriod"] => (prev ? (metLast.get(r) ? "met" : "missed") : null);
     const toStanding = (r: Row) =>
@@ -369,21 +367,21 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     groups = [
       {
         id: "green",
-        title: `Completed period ${period.number}`,
+        title: `Completed week ${period.number}`,
         tone: "green",
-        empty: "No one has completed this period yet.",
+        empty: "No one has completed this week yet.",
         rows: green.sort(bySims).map(toStanding),
       },
       { id: "ontrack", title: "On track", tone: "blue", rows: onTrack.sort(byDays).map(toStanding) },
       {
         id: "atrisk",
-        title: prev ? `At risk · behind pace or missed period ${period.number - 1}` : "At risk · behind pace",
+        title: prev ? `At risk · behind pace or missed week ${period.number - 1}` : "At risk · behind pace",
         tone: "yellow",
         rows: atRisk.sort(byDays).map(toStanding),
       },
       {
         id: "red",
-        title: left ? "Very behind or breaking a rule" : `Missed period ${period.number}`,
+        title: left ? "Very behind or breaking a rule" : `Missed week ${period.number}`,
         tone: "red",
         rows: red.sort(byDays).map(toStanding),
       },

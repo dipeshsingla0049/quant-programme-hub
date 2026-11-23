@@ -141,7 +141,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
           {count("green")}
           {weekly && <span className="text-xl text-dim"> / {s.total}</span>}
         </p>
-        <p className="mt-1 text-sm text-muted">{weekly ? `completed period ${period?.number}` : `eligible for ${prize} so far`}</p>
+        <p className="mt-1 text-sm text-muted">{weekly ? `completed week ${period?.number}` : `eligible for ${prize} so far`}</p>
         <p className="mt-3 text-sm">
           <span className="font-medium text-sky">{count("ontrack")} on track</span>
           {weekly && (
@@ -157,8 +157,8 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         </p>
         {weekly && period && (
           <p className="mt-2 text-xs text-dim">
-            Period {period.number}: {formatDayRange(period.start, period.end)} ·{" "}
-            {s.periodDay ? <>data up to day {s.periodDay} of {period.length}</> : <>new period, starts {formatDay(period.start)}</>}
+            Week {period.number}: {formatDayRange(period.start, period.end)} ·{" "}
+            {s.periodDay ? <>data up to day {s.periodDay} of {period.length}</> : <>new week, starts {formatDay(period.start)}</>}
           </p>
         )}
       </>
@@ -172,25 +172,25 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
     const sims = paceFor(ruleOf("periodSimulations")!, Math.max(0, s.periodDay - 1), period.length);
     const target = ruleOf("periodSubmissionDays")!.value;
     legend = [
-      ["green", `Completed period ${period?.number}`, "Every rule met for this period."],
+      ["green", `Completed week ${period?.number}`, "Every rule met for this week."],
       [
         "blue",
         "On track",
         s.periodDay
           ? `Keeping pace (day ${s.periodDay} of ${period.length}: at least ${days ? `${days} ${days === 1 ? "day" : "days"} and ` : ""}${sims.toLocaleString("en-US")} simulations so far), no rule broken.`
-          : `New period from ${formatDay(period.start)}: everyone starts from zero. No rule broken.`,
+          : `New week from ${formatDay(period.start)}: everyone starts from zero. No rule broken.`,
       ],
       [
         "yellow",
         "At risk",
         period.number > 1
-          ? `Behind pace with ${target} days still reachable, or keeping pace but missed period ${period.number - 1}. Catch up before the period ends.`
-          : `Behind pace, but ${target} days are still reachable. Catch up before the period ends.`,
+          ? `Behind pace with ${target} days still reachable, or keeping pace but missed week ${period.number - 1}. Catch up before the week ends.`
+          : `Behind pace, but ${target} days are still reachable. Catch up before the week ends.`,
       ],
       [
         "red",
         "Very behind or breaking a rule",
-        `No activity this period, can't reach ${target} days, avg prod corr 0.8 or higher, or more than 4 data fields or 8 operators per alpha.${period.number > 1 ? ` Also anyone behind pace who missed period ${period.number - 1}.` : ""}`,
+        `No activity this week, can't reach ${target} days, avg prod corr 0.8 or higher, or more than 4 data fields or 8 operators per alpha.${period.number > 1 ? ` Also anyone behind pace who missed week ${period.number - 1}.` : ""}`,
       ],
     ];
   } else if (m.board === "target") {
@@ -343,7 +343,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
           <>
             <p className="mt-2 mb-6 text-sm text-muted">
               {s.final ? "Final standings" : "Standings"} with data up to {formatDay(s.asOf, true)}.
-              {m.board === "weekly" && period && <> Period {period.number} ({formatDayRange(period.start, period.end)}) so far.</>}{" "}
+              {m.board === "weekly" && period && <> Week {period.number} ({formatDayRange(period.start, period.end)}) so far.</>}{" "}
               {s.final ? "Search your name to find your final place." : "Search your name to see exactly what you still need."}
             </p>
             <Legend items={legend} />
@@ -352,7 +352,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
               ranked={m.board === "ranked"}
               scoreLabel={m.ranking && !rankingIsRule ? (METRIC_LABEL[m.ranking.metric] ?? m.ranking.metric) : null}
               columns={rules.map(columnFor)}
-              lastPeriodLabel={m.board === "weekly" && period && period.number > 1 ? `Period ${period.number - 1}` : null}
+              lastPeriodLabel={m.board === "weekly" && period && period.number > 1 ? `Week ${period.number - 1}` : null}
             />
           </>
         )}
