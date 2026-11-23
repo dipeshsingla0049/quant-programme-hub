@@ -13,7 +13,7 @@
  */
 import { formatDay } from "./format";
 import { MILESTONES, PROGRAMME_START, periodOf, type MetricId, type Milestone, type MilestoneId, type Period, type Rule } from "./milestones";
-import { lowCorrSnapshots, snapshots, type Snapshot } from "./reports";
+import { lowCorrSnapshots, snapshots, twentyDaySnapshots, type Snapshot } from "./reports";
 import type { ReportRow, UserTier } from "./types";
 
 const DAY = 86_400_000;
@@ -233,9 +233,15 @@ function metricsFromRow(row: ReportRow): Metrics {
   };
 }
 
-/** A board's own report, if it has one: the Low-Corr Sprint reads data/low-corr when it holds a report. */
+/**
+ * A board's own report, if it has one: the Low-Corr Sprint reads data/low-corr
+ * and the $120 Challenge reads data/20-day-challenge when they hold a report.
+ * Baseline always uses the daily reports.
+ */
 function ownReport(id: MilestoneId): Snapshot | undefined {
-  return id === "low-corr-sprint" ? lowCorrSnapshots.at(-1) : undefined;
+  if (id === "low-corr-sprint") return lowCorrSnapshots.at(-1);
+  if (id === "20-day-challenge") return twentyDaySnapshots.at(-1);
+  return undefined;
 }
 
 export function getStandings(id: MilestoneId): MilestoneStandings {
