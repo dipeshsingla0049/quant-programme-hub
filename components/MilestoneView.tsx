@@ -152,6 +152,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
   if (m.board === "weekly" && period && s.periodDay !== null) {
     const days = paceFor(ruleOf("periodSubmissionDays")!, Math.max(0, s.periodDay - 1), period.length);
     const sims = paceFor(ruleOf("periodSimulations")!, Math.max(0, s.periodDay - 1), period.length);
+    const target = ruleOf("periodSubmissionDays")!.value;
     legend = [
       ["green", `Completed period ${period?.number}`, "Every rule met for this period."],
       [
@@ -165,13 +166,13 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
         "yellow",
         "At risk",
         period.number > 1
-          ? `Behind pace with 7 days still reachable, or keeping pace but missed period ${period.number - 1}. Catch up before the period ends.`
-          : "Behind pace, but 7 days are still reachable. Catch up before the period ends.",
+          ? `Behind pace with ${target} days still reachable, or keeping pace but missed period ${period.number - 1}. Catch up before the period ends.`
+          : `Behind pace, but ${target} days are still reachable. Catch up before the period ends.`,
       ],
       [
         "red",
         "Very behind or breaking a rule",
-        `No activity this period, can't reach 7 days, avg prod corr 0.8 or higher, or more than 4 data fields or 8 operators per alpha.${period.number > 1 ? ` Also anyone behind pace who missed period ${period.number - 1}.` : ""}`,
+        `No activity this period, can't reach ${target} days, avg prod corr 0.8 or higher, or more than 4 data fields or 8 operators per alpha.${period.number > 1 ? ` Also anyone behind pace who missed period ${period.number - 1}.` : ""}`,
       ],
     ];
   } else if (m.board === "target") {

@@ -12,7 +12,7 @@
  * number of days covered.
  */
 import { formatDay } from "./format";
-import { MILESTONES, PROGRAMME_START, periodOf, type MetricId, type Milestone, type MilestoneId, type Period, type Rule } from "./milestones";
+import { MILESTONES, PROGRAMME_START, periodOf, rulesForPeriod, type MetricId, type Milestone, type MilestoneId, type Period, type Rule } from "./milestones";
 import { lowCorrSnapshots, snapshots, twentyDaySnapshots, type Snapshot } from "./reports";
 import type { ReportRow, UserTier } from "./types";
 
@@ -85,7 +85,13 @@ function periodAverage(
   const vNow = now?.[key] ?? null;
   const vBefore = nBefore ? (before?.[key] ?? null) : 0;
   if (vNow === null || vBefore === null) return null;
-  return Math.max(0, Math.round(((vNow * nNow - vBefore * nBefore) / added) * 1e4) / 1e4);
+  let total = vNow * nNow - vBefore * nBefore;
+  // BRAIN rounds averages to 4 decimals, so the total is off by up to 0.00005 per alpha (≈ 0.003 at 70
+  // alphas): enough to show exactly 4 fields as 4.0025 and break the limit. Fields and operators are
+  // whole numbers per alpha, so their total is a whole number: snap to it when the gap is within that
+  // rounding (it isn't when BRAIN left an alpha out of the average; then keep the raw value).
+  if (key !== "avgProdCorr" && Math.abs(total - Math.round(total)) <= 0.00005 * (nNow + nBefore) + 1e-9) total = Math.round(total);
+  return Math.max(0, Math.round((total / added) * 1e4) / 1e4);
 }
 
 /**
@@ -284,12 +290,13 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
   const base = { milestone, asOf, final: false, groups: [], total: 0, cutoff: null, period: null, periodDay: null };
   if (!asOf) return base;
 
-  const rules = trackedRules(milestone);
   // Baseline: once the data reaches a period's last day, that period is over. The board resets to the
   // next period (everyone starts from zero) and the finished one shows in the last-period column.
   const period = milestone.board === "weekly" && asOf === periodOf(asOf).end ? periodOf(addDays(asOf, 1)) : periodOf(asOf);
   /** Day of the period the data reaches; 0 when the period starts after the latest report. */
   const periodDay = Math.max(0, daysBetween(period.start, asOf) + 1);
+  // Baseline targets depend on the period (period 1 had its own); other boards use theirs as is.
+  const rules = rulesForPeriod(trackedRules(milestone), period);
   const everyone = own
     ? [...own.rows.values()].map((p) => {
         const m = metricsFromRow(p);
@@ -313,7 +320,8 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     const red: Row[] = [];
     const flags = new Map<Row, string[]>();
     const metLast = new Map<Row, boolean>();
-    if (prev) for (const r of everyone) metLast.set(r, assess(rules, metricsFor(r.p.alias, milestone.start, prev, undefined, true)).done);
+    const prevRules = prev ? rulesForPeriod(trackedRules(milestone), periodOf(prev)) : rules;
+    if (prev) for (const r of everyone) metLast.set(r, assess(prevRules, metricsFor(r.p.alias, milestone.start, prev, undefined, true)).done);
     /** Missing the previous period moves you one zone down this period: blue to yellow, yellow to red. */
     const missedFlag = prev ? `Missed period ${period.number - 1}` : "";
     for (const r of everyone) {

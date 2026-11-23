@@ -8,12 +8,13 @@
 export const PROGRAMME_START = "2026-11-07";
 
 /**
- * Baseline to Stay is checked per period. The first period runs 7–21 Nov
- * (alongside the Low-Corr Sprint); after that every period is 14 days:
- * 22 Nov–5 Dec, 6–19 Dec, and so on.
+ * Baseline to Stay is checked per period. The first period ran 7–21 Nov
+ * (alongside the Low-Corr Sprint) with its own targets (a rule's
+ * firstPeriodValue). From 22 Nov every period is one week: 22–28 Nov,
+ * 29 Nov–5 Dec, and so on.
  */
 export const FIRST_PERIOD_END = "2026-11-21";
-export const PERIOD_DAYS = 14;
+export const PERIOD_DAYS = 7;
 
 export interface Period {
   number: number;
@@ -68,6 +69,13 @@ export interface Rule {
   perDay?: boolean;
   /** false: listed in the criteria but not checked on the site (no data for it). */
   tracked?: boolean;
+  /** Target for period 1 (7–21 Nov) when it differs from `value`, the weekly target from 22 Nov. */
+  firstPeriodValue?: number;
+}
+
+/** The rules with the targets that applied in a given Baseline period. */
+export function rulesForPeriod(rules: Rule[], period: Period): Rule[] {
+  return rules.map((r) => (period.number === 1 && r.firstPeriodValue !== undefined ? { ...r, value: r.firstPeriodValue } : r));
 }
 
 export type MilestoneId = "weekly-baseline" | "20-day-challenge" | "low-corr-sprint";
@@ -145,9 +153,9 @@ export const MILESTONES: Milestone[] = [
     name: "Baseline to Stay",
     navLabel: "Baseline to Stay",
     badge: { text: "Important", tone: "rose" },
-    goal: "Meet the minimum every two weeks, including average production correlation below 0.8, or your account is banned.",
+    goal: "Meet the minimum every week, including average production correlation below 0.8, or your account is banned.",
     summary:
-      "The minimum every researcher must meet each two-week period, checked individually within each of the four teams: 7 submission days, 2,500 simulations, at most 4 data fields and 8 operators per alpha, and average production correlation below 0.8. The first period runs 7 to 21 November, then every 14 days: 22 November to 5 December, and so on.",
+      "The minimum every researcher must meet each week, checked individually within each of the four teams: 4 submission days, 1,500 simulations, at most 4 data fields and 8 operators per alpha, and average production correlation below 0.8. Weekly from 22 November (22 to 28 November, 29 November to 5 December, and so on). The first period, 7 to 21 November, needed 7 days and 2,500 simulations.",
     start: PROGRAMME_START,
     end: null,
     reward: "Keep your account",
@@ -157,19 +165,23 @@ export const MILESTONES: Milestone[] = [
       {
         metric: "periodSubmissionDays",
         op: ">=",
-        value: 7,
-        label: "days with a submission each period",
+        value: 4,
+        firstPeriodValue: 7,
+        label: "days with a submission each week",
         short: "Days",
         unit: "days",
         perDay: true,
+        note: "Weekly from 22 Nov. Period 1 (7–21 Nov) needed 7 days.",
       },
       {
         metric: "periodSimulations",
         op: ">=",
-        value: 2500,
-        label: "simulations each period",
+        value: 1500,
+        firstPeriodValue: 2500,
+        label: "simulations each week",
         short: "Simulations",
         unit: "simulations",
+        note: "Weekly from 22 Nov. Period 1 (7–21 Nov) needed 2,500.",
       },
       {
         metric: "avgProdCorr",
@@ -179,10 +191,10 @@ export const MILESTONES: Milestone[] = [
         short: "Avg prod corr",
         decimals: 3,
         fix: "avg prod corr must be below 0.8",
-        note: "Across the alphas you submit in the current period only. Checked once you've submitted an alpha this period.",
+        note: "Across the alphas you submit in the current week only. Checked once you've submitted an alpha this week.",
       },
-      { ...maxFields, note: `Only alphas submitted in the current period count. ${AVERAGE_NOTE}` },
-      { ...maxOperators, note: `Only alphas submitted in the current period count. ${AVERAGE_NOTE}` },
+      { ...maxFields, note: `Only alphas submitted in the current week count. ${AVERAGE_NOTE}` },
+      { ...maxOperators, note: `Only alphas submitted in the current week count. ${AVERAGE_NOTE}` },
     ],
     board: "weekly",
   },
