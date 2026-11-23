@@ -201,7 +201,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
           </>
         }
         description={m.summary}
-        meta={s.asOf ? <>Standings with data up to {formatDay(s.asOf, true)}. Updated daily.</> : <>Standings update daily from 7 Nov.</>}
+        meta={s.asOf ? (s.final ? <>Final standings with data up to {formatDay(s.asOf, true)}.</> : <>Standings with data up to {formatDay(s.asOf, true)}. Updated daily.</>) : <>Standings update daily from 7 Nov.</>}
       />
 
       <JumpLinks

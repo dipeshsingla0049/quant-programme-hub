@@ -13,7 +13,7 @@
  */
 import { formatDay } from "./format";
 import { MILESTONES, PROGRAMME_START, periodOf, type MetricId, type Milestone, type MilestoneId, type Period, type Rule } from "./milestones";
-import { snapshots, type Snapshot } from "./reports";
+import { lowCorrSnapshots, snapshots, type Snapshot } from "./reports";
 import type { ReportRow, UserTier } from "./types";
 
 const DAY = 86_400_000;
@@ -218,22 +218,49 @@ function standing(p: ReportRow, fields: Partial<Standing> & Pick<Standing, "chec
   };
 }
 
+/** Metrics straight from one report row, for a board with its own report (no day-by-day history). */
+function metricsFromRow(row: ReportRow): Metrics {
+  return {
+    submissions: row.submissions,
+    simulations: row.simulations,
+    submissionDays: row.submissionDays,
+    periodSubmissionDays: null,
+    periodSimulations: null,
+    avgProdCorr: row.avgProdCorr,
+    avgSelfCorr: row.avgSelfCorr,
+    operatorsPerAlpha: row.operatorsPerAlpha,
+    datafieldsPerAlpha: row.datafieldsPerAlpha,
+  };
+}
+
+/** A board's own report, if it has one: the Low-Corr Sprint reads data/low-corr when it holds a report. */
+function ownReport(id: MilestoneId): Snapshot | undefined {
+  return id === "low-corr-sprint" ? lowCorrSnapshots.at(-1) : undefined;
+}
+
 export function getStandings(id: MilestoneId): MilestoneStandings {
   const milestone = MILESTONES.find((m) => m.id === id)!;
+  const own = ownReport(id);
+  const latest = own?.date ?? latestReportDate;
   const asOf =
-    latestReportDate && latestReportDate >= milestone.start
-      ? milestone.end && milestone.end < latestReportDate
+    latest && latest >= milestone.start
+      ? milestone.end && milestone.end < latest
         ? milestone.end
-        : latestReportDate
+        : latest
       : null;
   const base = { milestone, asOf, final: false, groups: [], total: 0, cutoff: null, period: null, periodDay: null };
   if (!asOf) return base;
 
   const rules = trackedRules(milestone);
-  const everyone = [...people.values()].map((p) => {
-    const m = metricsFor(p.alias, milestone.start, asOf);
-    return { p, m, a: assess(rules, m) };
-  });
+  const everyone = own
+    ? [...own.rows.values()].map((p) => {
+        const m = metricsFromRow(p);
+        return { p, m, a: assess(rules, m) };
+      })
+    : [...people.values()].map((p) => {
+        const m = metricsFor(p.alias, milestone.start, asOf);
+        return { p, m, a: assess(rules, m) };
+      });
   type Row = (typeof everyone)[number];
   const period = periodOf(asOf);
   const periodDay = daysBetween(period.start, asOf) + 1;
