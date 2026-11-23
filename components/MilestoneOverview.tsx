@@ -10,7 +10,7 @@ import { addDays, countOf, getStandings, ruleTarget } from "@/lib/standings";
 function liveLine(m: Milestone): React.ReactNode {
   const s = getStandings(m.id);
   if (!s.asOf) return "Standings from the first daily report";
-  if (m.ranking) return s.final ? <span className="text-violet">Ended · {countOf(s, "top")} winners named · see the results</span> : `Are you in the top ${m.ranking.winners}?`;
+  if (m.ranking) return s.final ? <span className="text-teal">Ended · {countOf(s, "top")} winners named · see the results</span> : `Are you in the top ${m.ranking.winners}?`;
   const [green, onTrack, atRisk, red] = ["green", "ontrack", "atrisk", "red"].map((g) => countOf(s, g));
   const weekly = m.board === "weekly";
   return (
@@ -36,11 +36,12 @@ export function MilestoneCards() {
     <div className="grid gap-4 lg:grid-cols-3">
       {MILESTONES.map((m) => {
         const stakes = !!m.stakes;
-        // The Low-Corr Sprint gets its own colour so it stands apart from the $120 card.
-        const accent = m.id === "low-corr-sprint" ? "violet" : "gold";
+        // A milestone that has ended turns teal, the site's colour for "completed".
+        const ended = getStandings(m.id).final;
+        const accent = ended ? "teal" : "gold";
         const tone = {
           gold: { card: "border-gold/40 bg-gold/[0.05] hover:border-gold/70", text: "text-gold" },
-          violet: { card: "border-violet/40 bg-violet/[0.05] hover:border-violet/70", text: "text-violet" },
+          teal: { card: "border-teal/40 bg-teal/[0.05] hover:border-teal/70", text: "text-teal" },
         }[accent];
         return (
           <Link
@@ -134,7 +135,7 @@ export function MilestoneTimeline() {
               <div className="relative h-7 rounded bg-panel-2">
                 <div
                   className={`absolute inset-y-0 flex items-center overflow-hidden rounded px-2 text-[11px] font-medium ${
-                    m.stakes ? "bg-rose/15 text-rose" : m.id === "low-corr-sprint" ? "bg-violet/15 text-violet" : "bg-gold/20 text-gold"
+                    m.stakes ? "bg-rose/15 text-rose" : getStandings(m.id).final ? "bg-teal/15 text-teal" : "bg-gold/20 text-gold"
                   } ${m.end ? "" : "rounded-r-none"}`}
                   style={{ left: `${left}%`, width: `${width}%` }}
                 >
