@@ -390,6 +390,8 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     const ranked = [...qualified, ...belowMin];
     const unranked = everyone.filter((r) => r.m.submissions && !ranked.includes(r) && !ruledOut.includes(r));
     const grey = everyone.filter((r) => !r.m.submissions);
+    // Once the window's last day is in the data, the result is final: winners are named, everyone else is closed.
+    const closed = !!milestone.end && asOf === milestone.end;
     const toMin = (r: Row) => {
       const n = ranking.winAlphas - (r.m.submissions ?? 0);
       return `${n} more ${n === 1 ? "alpha" : "alphas"} to reach the minimum of ${ranking.winAlphas}`;
@@ -402,8 +404,12 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         score: formatValue(score(r), decimals),
         checks: r.a.checks,
         good: r.a.done && top,
-        needed: !isQualified
-          ? `${sentence([toMin(r), ...r.a.fixes])}. Can't win ${prize} until then`
+        needed: closed
+          ? r.a.done && top
+            ? `${prize} winner`
+            : "Challenge closed"
+          : !isQualified
+            ? `${sentence([toMin(r), ...r.a.fixes])}. Can't win ${prize} until then`
           : r.a.done
             ? top
               ? `Potential ${prize} winner`
@@ -443,7 +449,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
           ...standing(r.p, {
             checks: r.a.checks,
             flags: r.a.brokenFlags,
-            needed: `${sentence(r.a.fixes)} to be ranked and win ${prize}`,
+            needed: closed ? "Challenge closed" : `${sentence(r.a.fixes)} to be ranked and win ${prize}`,
           }),
           score: formatValue(score(r), decimals),
         })),
@@ -455,7 +461,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         rows: unranked
           .sort(byScore)
           .map((r) => ({
-            ...plain(r, score(r) === null ? "No production correlation in the report yet" : "Submit more alphas to be ranked"),
+            ...plain(r, closed ? "Challenge closed" : score(r) === null ? "No production correlation in the report yet" : "Submit more alphas to be ranked"),
             score: formatValue(score(r), decimals),
           })),
       },
@@ -463,7 +469,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         id: "not-started",
         title: "Not started",
         tone: "grey",
-        rows: grey.sort(byName).map((r) => plain(r, "Submit your first alpha to start")),
+        rows: grey.sort(byName).map((r) => plain(r, closed ? "Challenge closed" : "Submit your first alpha to start")),
       },
     ];
   }

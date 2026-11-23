@@ -177,7 +177,7 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
       [
         "gold",
         `Top ${winners}`,
-        `Lowest avg prod corr among everyone with ${m.ranking!.winAlphas}+ alphas, at most 4 data fields and 8 operators per alpha. Potential ${prize} winners.`,
+        `Lowest avg prod corr among everyone with ${m.ranking!.winAlphas}+ alphas, at most 4 data fields and 8 operators per alpha. ${s.final ? `${prize} winners.` : `Potential ${prize} winners.`}`,
       ],
       ["plain", `${m.ranking!.winAlphas}+ alphas · ranked ${winners! + 1} and below`, `Within the rules, outside the top ${winners}.`],
       [
