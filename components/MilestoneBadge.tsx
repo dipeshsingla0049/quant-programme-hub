@@ -6,7 +6,7 @@ export function MilestoneBadge({ badge, size = "sm" }: { badge: Milestone["badge
   const tone = {
     rose: "border-rose/40 bg-rose/10 text-rose",
     gold: "border-gold/40 bg-gold/10 text-gold",
-    violet: "border-violet/40 bg-violet/10 text-violet",
+    teal: "border-teal/40 bg-teal/10 text-teal",
   }[badge.tone];
   const scale = size === "lg" ? "px-2.5 py-1 text-sm" : "px-2 py-0.5 text-[11px]";
   return (
