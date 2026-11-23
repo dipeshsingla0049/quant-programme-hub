@@ -286,11 +286,16 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     const atRisk: Row[] = [];
     const red: Row[] = [];
     const flags = new Map<Row, string[]>();
+    const metLast = new Map<Row, boolean>();
+    if (prev) for (const r of everyone) metLast.set(r, assess(rules, metricsFor(r.p.alias, milestone.start, prev)).done);
+    /** Missing the previous period moves you one zone down this period: blue to yellow, yellow to red. */
+    const missedFlag = prev ? `Missed period ${period.number - 1}` : "";
     for (const r of everyone) {
       if (r.a.done) {
         green.push(r);
         continue;
       }
+      const missedLast = !!prev && metLast.get(r) === false;
       const progress = rules.filter((x) => x.op === ">=");
       const unreachable = progress.filter((x) => x.perDay && (r.m[x.metric] ?? 0) + left < x.value);
       const slow = progress.filter((x) => (r.m[x.metric] ?? 0) < paceFor(x, Math.max(0, periodDay - 1), period.length));
@@ -305,10 +310,16 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         flags.set(r, [
           ...(idle ? (periodDay ? ["No activity this period"] : []) : unreachable.map((x) => `Can't reach ${num(x.value)} ${x.unit} this period`)),
           ...r.a.brokenFlags,
+          ...(missedLast ? [missedFlag] : []),
         ]);
         red.push(r);
       } else if (slow.length) {
-        flags.set(r, ["Behind pace"]);
+        // Behind pace: yellow, or red if they also missed the previous period.
+        flags.set(r, ["Behind pace", ...(missedLast ? [missedFlag] : [])]);
+        (missedLast ? red : atRisk).push(r);
+      } else if (missedLast) {
+        // Keeping pace, but missed the previous period: yellow instead of blue.
+        flags.set(r, [missedFlag]);
         atRisk.push(r);
       } else onTrack.push(r);
     }
@@ -318,8 +329,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       r.a.done
         ? `Done for period ${period.number}`
         : sentence([r.a.needs && (left ? `needs ${r.a.needs} by ${formatDay(period.end)}` : `missed by ${r.a.needs}`), ...r.a.fixes]);
-    const lastPeriod = (r: Row): Standing["lastPeriod"] =>
-      prev ? (assess(rules, metricsFor(r.p.alias, milestone.start, prev)).done ? "met" : "missed") : null;
+    const lastPeriod = (r: Row): Standing["lastPeriod"] => (prev ? (metLast.get(r) ? "met" : "missed") : null);
     const toStanding = (r: Row) =>
       standing(r.p, { checks: r.a.checks, needed: needed(r), good: r.a.done, flags: flags.get(r) ?? [], lastPeriod: lastPeriod(r) });
     groups = [
@@ -331,7 +341,12 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         rows: green.sort(bySims).map(toStanding),
       },
       { id: "ontrack", title: "On track", tone: "blue", rows: onTrack.sort(byDays).map(toStanding) },
-      { id: "atrisk", title: "At risk · behind pace", tone: "yellow", rows: atRisk.sort(byDays).map(toStanding) },
+      {
+        id: "atrisk",
+        title: prev ? `At risk · behind pace or missed period ${period.number - 1}` : "At risk · behind pace",
+        tone: "yellow",
+        rows: atRisk.sort(byDays).map(toStanding),
+      },
       {
         id: "red",
         title: left ? "Very behind or breaking a rule" : `Missed period ${period.number}`,
