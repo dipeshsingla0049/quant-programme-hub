@@ -66,8 +66,34 @@ export { periodOf, type Period } from "./milestones";
 
 type Metrics = Record<MetricId, number | null>;
 
-/** `current` is the Baseline period to measure; by default the one `asOf` falls in. */
-function metricsFor(alias: string, from: string, asOf: string, current?: Period): Metrics {
+/**
+ * Average of a per-alpha value over only the alphas submitted in a period.
+ * BRAIN reports a mean over every alpha since 7 Nov, and old alphas' values
+ * don't change between reports, so the period's mean is
+ * (avg_now × alphas_now − avg_before × alphas_before) ÷ (alphas_now − alphas_before).
+ * Null when no alpha was submitted in the period, or a value is missing.
+ */
+function periodAverage(
+  now: ReportRow | undefined,
+  before: ReportRow | undefined,
+  key: "avgProdCorr" | "datafieldsPerAlpha" | "operatorsPerAlpha",
+): number | null {
+  const nNow = now?.submissions ?? 0;
+  const nBefore = before?.submissions ?? 0;
+  const added = nNow - nBefore;
+  if (added <= 0) return null;
+  const vNow = now?.[key] ?? null;
+  const vBefore = nBefore ? (before?.[key] ?? null) : 0;
+  if (vNow === null || vBefore === null) return null;
+  return Math.max(0, Math.round(((vNow * nNow - vBefore * nBefore) / added) * 1e4) / 1e4);
+}
+
+/**
+ * `current` is the Baseline period to measure; by default the one `asOf` falls in.
+ * With `periodLimits`, avg prod corr, fields and operators per alpha count only
+ * the alphas submitted in that period (the Baseline); otherwise every alpha since 7 Nov.
+ */
+function metricsFor(alias: string, from: string, asOf: string, current?: Period, periodLimits = false): Metrics {
   const row = reportOn(asOf)?.rows.get(alias);
   const period = current ?? periodOf(asOf);
   const beforePeriod = reportOn(addDays(period.start, -1))?.rows.get(alias);
@@ -79,10 +105,10 @@ function metricsFor(alias: string, from: string, asOf: string, current?: Period)
     submissionDays: Math.max(0, days - daysUpTo(alias, addDays(from, -1))),
     periodSubmissionDays: Math.max(0, days - daysUpTo(alias, addDays(period.start, -1))),
     periodSimulations: Math.max(0, simulations - (beforePeriod?.simulations ?? 0)),
-    avgProdCorr: row?.avgProdCorr ?? null,
+    avgProdCorr: periodLimits ? periodAverage(row, beforePeriod, "avgProdCorr") : (row?.avgProdCorr ?? null),
     avgSelfCorr: row?.avgSelfCorr ?? null,
-    operatorsPerAlpha: row?.operatorsPerAlpha ?? null,
-    datafieldsPerAlpha: row?.datafieldsPerAlpha ?? null,
+    operatorsPerAlpha: periodLimits ? periodAverage(row, beforePeriod, "operatorsPerAlpha") : (row?.operatorsPerAlpha ?? null),
+    datafieldsPerAlpha: periodLimits ? periodAverage(row, beforePeriod, "datafieldsPerAlpha") : (row?.datafieldsPerAlpha ?? null),
   };
 }
 
@@ -270,7 +296,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         return { p, m, a: assess(rules, m) };
       })
     : [...people.values()].map((p) => {
-        const m = metricsFor(p.alias, milestone.start, asOf, period);
+        const m = metricsFor(p.alias, milestone.start, asOf, period, milestone.board === "weekly");
         return { p, m, a: assess(rules, m) };
       });
   type Row = (typeof everyone)[number];
@@ -286,11 +312,16 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
     const atRisk: Row[] = [];
     const red: Row[] = [];
     const flags = new Map<Row, string[]>();
+    const metLast = new Map<Row, boolean>();
+    if (prev) for (const r of everyone) metLast.set(r, assess(rules, metricsFor(r.p.alias, milestone.start, prev, undefined, true)).done);
+    /** Missing the previous period moves you one zone down this period: blue to yellow, yellow to red. */
+    const missedFlag = prev ? `Missed period ${period.number - 1}` : "";
     for (const r of everyone) {
       if (r.a.done) {
         green.push(r);
         continue;
       }
+      const missedLast = !!prev && metLast.get(r) === false;
       const progress = rules.filter((x) => x.op === ">=");
       const unreachable = progress.filter((x) => x.perDay && (r.m[x.metric] ?? 0) + left < x.value);
       const slow = progress.filter((x) => (r.m[x.metric] ?? 0) < paceFor(x, Math.max(0, periodDay - 1), period.length));
@@ -305,10 +336,16 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         flags.set(r, [
           ...(idle ? (periodDay ? ["No activity this period"] : []) : unreachable.map((x) => `Can't reach ${num(x.value)} ${x.unit} this period`)),
           ...r.a.brokenFlags,
+          ...(missedLast ? [missedFlag] : []),
         ]);
         red.push(r);
       } else if (slow.length) {
-        flags.set(r, ["Behind pace"]);
+        // Behind pace: yellow, or red if they also missed the previous period.
+        flags.set(r, ["Behind pace", ...(missedLast ? [missedFlag] : [])]);
+        (missedLast ? red : atRisk).push(r);
+      } else if (missedLast) {
+        // Keeping pace, but missed the previous period: yellow instead of blue.
+        flags.set(r, [missedFlag]);
         atRisk.push(r);
       } else onTrack.push(r);
     }
@@ -318,8 +355,7 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
       r.a.done
         ? `Done for period ${period.number}`
         : sentence([r.a.needs && (left ? `needs ${r.a.needs} by ${formatDay(period.end)}` : `missed by ${r.a.needs}`), ...r.a.fixes]);
-    const lastPeriod = (r: Row): Standing["lastPeriod"] =>
-      prev ? (assess(rules, metricsFor(r.p.alias, milestone.start, prev)).done ? "met" : "missed") : null;
+    const lastPeriod = (r: Row): Standing["lastPeriod"] => (prev ? (metLast.get(r) ? "met" : "missed") : null);
     const toStanding = (r: Row) =>
       standing(r.p, { checks: r.a.checks, needed: needed(r), good: r.a.done, flags: flags.get(r) ?? [], lastPeriod: lastPeriod(r) });
     groups = [
@@ -331,7 +367,12 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
         rows: green.sort(bySims).map(toStanding),
       },
       { id: "ontrack", title: "On track", tone: "blue", rows: onTrack.sort(byDays).map(toStanding) },
-      { id: "atrisk", title: "At risk · behind pace", tone: "yellow", rows: atRisk.sort(byDays).map(toStanding) },
+      {
+        id: "atrisk",
+        title: prev ? `At risk · behind pace or missed period ${period.number - 1}` : "At risk · behind pace",
+        tone: "yellow",
+        rows: atRisk.sort(byDays).map(toStanding),
+      },
       {
         id: "red",
         title: left ? "Very behind or breaking a rule" : `Missed period ${period.number}`,

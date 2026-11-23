@@ -161,11 +161,17 @@ export function MilestoneView({ id }: { id: MilestoneId }) {
           ? `Keeping pace (day ${s.periodDay} of ${period.length}: at least ${days ? `${days} ${days === 1 ? "day" : "days"} and ` : ""}${sims.toLocaleString("en-US")} simulations so far), no rule broken.`
           : `New period from ${formatDay(period.start)}: everyone starts from zero. No rule broken.`,
       ],
-      ["yellow", "At risk", "Behind pace, but 7 days are still reachable. Catch up before the period ends."],
+      [
+        "yellow",
+        "At risk",
+        period.number > 1
+          ? `Behind pace with 7 days still reachable, or keeping pace but missed period ${period.number - 1}. Catch up before the period ends.`
+          : "Behind pace, but 7 days are still reachable. Catch up before the period ends.",
+      ],
       [
         "red",
         "Very behind or breaking a rule",
-        "No activity this period, can't reach 7 days, avg prod corr 0.8 or higher, or more than 4 data fields or 8 operators per alpha.",
+        `No activity this period, can't reach 7 days, avg prod corr 0.8 or higher, or more than 4 data fields or 8 operators per alpha.${period.number > 1 ? ` Also anyone behind pace who missed period ${period.number - 1}.` : ""}`,
       ],
     ];
   } else if (m.board === "target") {
