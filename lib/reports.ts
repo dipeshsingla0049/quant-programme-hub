@@ -5,6 +5,7 @@
  * comparing consecutive days shows who submitted on which day.
  */
 import raw from "@/data/reports";
+import rawLowCorr from "@/data/low-corr";
 import type { ReportRow, UserTier } from "./types";
 
 type Cell = string | number | null;
@@ -66,6 +67,14 @@ function parse(report: RawReport): Snapshot {
 
 /** Every daily report, oldest first. */
 export const snapshots: Snapshot[] = raw.map(parse).sort((a, b) => a.date.localeCompare(b.date));
+
+/**
+ * Reports only the Low-Corr Sprint board reads (data/low-corr), oldest first.
+ * When there is one, that board uses the newest of them instead of the daily
+ * reports, so it can show final standings for its own roster without moving
+ * Baseline and $120 forward.
+ */
+export const lowCorrSnapshots: Snapshot[] = rawLowCorr.map(parse).sort((a, b) => a.date.localeCompare(b.date));
 
 export const TIER_LABEL: Record<UserTier, string> = {
   CONSULTANT: "Consultant",

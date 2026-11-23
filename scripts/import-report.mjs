@@ -3,7 +3,12 @@
  * Add one day's partnership report to data/reports/ and rebuild the index.
  * From 7 Nov 2026 every report is cumulative since 7 Nov.
  *
- *   npm run import:report -- <file.csv | CSV URL> [YYYY-MM-DD]
+ *   npm run import:report -- <file.csv | CSV URL> [YYYY-MM-DD] [--into=<folder>] [--only=<roster.csv>]
+ *
+ * --into=low-corr stores the report in data/low-corr/ instead, where only the
+ * Low-Corr Sprint board reads it (Baseline and $120 keep using data/reports/).
+ * --only=<roster.csv> keeps just the researchers whose UserAlias appears in
+ * that CSV, e.g. the 7 Nov report, so people who joined later are left out.
  *
  * The CSV can be a downloaded file or a Google Sheet published to the web as
  * CSV. A report is stored under the last day its data covers. BRAIN sends the
@@ -17,7 +22,7 @@
  * report; the site then doesn't judge that rule. Aliases listed in
  * data/excluded.json are dropped from every report.
  */
-import { readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -50,13 +55,18 @@ const TEXT = new Set(["UserAlias", "UserTypeLabel", "FirstName", "LastName", "Un
 const PROGRAMME_START = "2026-11-07";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const outDir = path.join(root, "data", "reports");
 
-const [source, dateArg] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const flag = (name) => args.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
+const [source, dateArg] = args.filter((a) => !a.startsWith("--"));
+const into = flag("into") ?? "reports";
+const only = flag("only");
 if (!source) {
-  console.error("Usage: npm run import:report -- <file.csv | CSV URL> [YYYY-MM-DD]");
+  console.error("Usage: npm run import:report -- <file.csv | CSV URL> [YYYY-MM-DD] [--into=<folder>] [--only=<roster.csv>]");
   process.exit(1);
 }
+if (!/^[a-z0-9-]+$/.test(into)) throw new Error(`--into must be a folder name under data/, got "${into}"`);
+const outDir = path.join(root, "data", into);
 
 /** RFC 4180: quoted fields, "" escapes, CRLF or LF line endings. */
 function parseCsv(text) {
@@ -128,14 +138,25 @@ const cell = (raw, key) => {
 };
 const excluded = new Set(Object.keys(JSON.parse(await readFile(path.join(root, "data", "excluded.json"), "utf8")).aliases));
 const all = body.map((r) => at.map((i, k) => cell(r[i], stored[k])));
-const rows = all.filter((r) => !excluded.has(r[0]));
+let rows = all.filter((r) => !excluded.has(r[0]));
 if (all.length > rows.length) console.log(`Left out ${all.length - rows.length} researcher(s) listed in data/excluded.json.`);
+if (only) {
+  if (!existsSync(only)) throw new Error(`Roster file not found: ${only}`);
+  const [rh, ...rb] = parseCsv((await readFile(only, "utf8")).replace(/^\uFEFF/, ""));
+  const ai = rh.map((h) => h.trim()).indexOf("UserAlias");
+  if (ai < 0) throw new Error(`The roster CSV has no UserAlias column: ${only}`);
+  const roster = new Set(rb.map((r) => (r[ai] ?? "").trim()));
+  const before = rows.length;
+  rows = rows.filter((r) => roster.has(r[0]));
+  console.log(`Kept ${rows.length} researcher(s) found in ${path.basename(only)}; left out ${before - rows.length} not in it.`);
+}
 
 const aliases = rows.map((r) => r[0]);
 const dupes = [...new Set(aliases.filter((a, i) => aliases.indexOf(a) !== i))];
 if (dupes.length) console.warn(`Warning: alias appears more than once: ${dupes.join(", ")} (the last row wins)`);
 if (aliases.some((a) => !a)) throw new Error("Some rows have no UserAlias.");
 
+await mkdir(outDir, { recursive: true });
 const file = `${date}.json`;
 const replacing = existsSync(path.join(outDir, file));
 const json = `{"date":${JSON.stringify(date)},"source":${JSON.stringify(isUrl ? source : path.basename(source))},"columns":${JSON.stringify(stored)},"rows":[\n${rows
@@ -159,4 +180,4 @@ await writeFile(
   ].join("\n"),
 );
 
-console.log(`${replacing ? "Replaced" : "Added"} data/reports/${file} (data up to ${date}): ${rows.length} researchers. ${files.length} daily report(s) in total.`);
+console.log(`${replacing ? "Replaced" : "Added"} data/${into}/${file} (data up to ${date}): ${rows.length} researchers. ${files.length} daily report(s) in total.`);
