@@ -135,7 +135,9 @@ const cell = (raw, key) => {
   if (v === "") return null;
   const n = Number(v);
   if (Number.isNaN(n)) throw new Error(`"${key}" should be a number, got "${v}"`);
-  return Number.isInteger(n) ? n : Math.round(n * 1e4) / 1e4;
+  // Keep BRAIN's full precision: the Baseline multiplies these averages by the number of alphas to get
+  // one week's average, and a value rounded to 4 decimals would be off by up to 0.00005 × alphas.
+  return n;
 };
 const excluded = new Set(Object.keys(JSON.parse(await readFile(path.join(root, "data", "excluded.json"), "utf8")).aliases));
 const all = body.map((r) => at.map((i, k) => cell(r[i], stored[k])));
