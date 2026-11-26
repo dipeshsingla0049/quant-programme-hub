@@ -542,5 +542,44 @@ export function getStandings(id: MilestoneId): MilestoneStandings {
   };
 }
 
+/** The campuses on the landing page's top-performers board, in display order. */
+export const CAMPUSES = [
+  { id: "ru", short: "NST-RU", name: "Rishihood University", match: /rishihood/i },
+  { id: "adypu", short: "NST-ADYPU", name: "Ajeenkya DY Patil University", match: /ajeenkya|dy patil/i },
+  { id: "svyasa", short: "NST-SVYASA", name: "S-VYASA Bangalore", match: /s-?vyasa/i },
+] as const;
+
+export interface CampusTop {
+  campus: (typeof CAMPUSES)[number];
+  /** Researchers who meet the limits, before taking the top few. */
+  eligible: number;
+  top: ReportRow[];
+}
+
+/**
+ * Top researchers per campus from the newest daily report: most alphas
+ * submitted since 7 Nov (ties: most simulations), counting only those whose
+ * averages are within the limits: avg prod corr below 0.8, at most 4 data
+ * fields and 8 operators per alpha. Missing averages count as not within them.
+ */
+export function topPerformersByCampus(n = 3): CampusTop[] {
+  const latest = series.at(-1);
+  const rows = latest ? [...latest.rows.values()] : [];
+  const within = (r: ReportRow) =>
+    r.submissions > 0 &&
+    r.avgProdCorr !== null &&
+    r.avgProdCorr < 0.8 &&
+    r.datafieldsPerAlpha !== null &&
+    r.datafieldsPerAlpha <= 4 &&
+    r.operatorsPerAlpha !== null &&
+    r.operatorsPerAlpha <= 8;
+  return CAMPUSES.map((campus) => {
+    const eligible = rows
+      .filter((r) => campus.match.test(r.university) && within(r))
+      .sort((a, b) => b.submissions - a.submissions || b.simulations - a.simulations || a.name.localeCompare(b.name));
+    return { campus, eligible: eligible.length, top: eligible.slice(0, n) };
+  });
+}
+
 /** Number of people in one group. */
 export const countOf = (s: MilestoneStandings, id: string) => s.groups.find((g) => g.id === id)?.rows.length ?? 0;

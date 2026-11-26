@@ -3,6 +3,7 @@ import { ArrowRight, Briefcase, MapPin, Trophy } from "@/components/icons";
 import { MilestoneCards, MilestoneTimeline } from "@/components/MilestoneOverview";
 import type { Opportunity } from "@/lib/types";
 import { SectionHeading } from "@/components/SectionHeading";
+import { TopPerformers } from "@/components/TopPerformers";
 import { getRewardsProgramme } from "@/lib/data";
 import { formatDay } from "@/lib/format";
 import { latestReportDate } from "@/lib/standings";
@@ -17,24 +18,43 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* November milestones: what to do, by when, for what */}
-      <section aria-labelledby="milestones-title" className="pb-20 pt-14 sm:pt-20">
+      {/* Top performers on each campus */}
+      <section aria-labelledby="top-title" className="pb-14 pt-10 sm:pb-20 sm:pt-20">
         <p className="text-[11px] uppercase tracking-[0.14em] text-gold">Quant Research Hub</p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 id="milestones-title" className="text-4xl font-semibold tracking-tight text-fg sm:text-5xl">
-              November milestones
+            <h1 id="top-title" className="text-4xl font-semibold tracking-tight text-fg sm:text-5xl">
+              Top performers
             </h1>
-            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted">
-              Three milestones run from 7 November. Each has its own window, rules and reward. Standings update
-              daily from the BRAIN partnership report.
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted sm:text-[15px]">
+              The top 3 on each campus by alphas submitted since 7 November, ties broken by simulations. Only
+              researchers within the limits count: average production correlation below 0.8, at most 4 data fields
+              and 8 operators per alpha.
             </p>
           </div>
           <span className="rounded border border-line-2 bg-panel-2 px-2 py-0.5 text-[11px] tabular-nums text-muted">
             {latestReportDate ? `Data up to ${formatDay(latestReportDate, true)}` : "First report: Nov 7"}
           </span>
         </div>
-        <div className="mt-8 space-y-4">
+        <div className="mt-6 sm:mt-8">
+          <TopPerformers />
+        </div>
+      </section>
+
+      {/* November milestones: what to do, by when, for what */}
+      <section aria-labelledby="milestones-title" className="border-t border-line pb-20 pt-14 sm:pt-20">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 id="milestones-title" className="text-2xl font-semibold tracking-tight text-fg sm:text-[28px]">
+              November milestones
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
+              Three milestones run from 7 November. Each has its own window, rules and reward. Standings update
+              daily from the BRAIN partnership report.
+            </p>
+          </div>
+        </div>
+        <div className="mt-6 space-y-4">
           <MilestoneCards />
           <MilestoneTimeline />
         </div>
