@@ -2,6 +2,7 @@
 import type { RawReport } from "@/lib/reports";
 import r20261121 from "./2026-11-21.json";
 import r20261123 from "./2026-11-23.json";
+import r20261125 from "./2026-11-25.json";
 
-const reports = [r20261121, r20261123] as RawReport[];
+const reports = [r20261121, r20261123, r20261125] as RawReport[];
 export default reports;
